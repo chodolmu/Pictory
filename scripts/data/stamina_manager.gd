@@ -4,7 +4,7 @@ extends Node
 
 @export var max_stamina: int = 30
 @export var recovery_interval: float = 300.0  # 5분 (초 단위)
-@export var debug_unlimited: bool = false
+@export var debug_unlimited: bool = true
 
 signal stamina_changed(current: int, max: int)
 signal stamina_depleted()

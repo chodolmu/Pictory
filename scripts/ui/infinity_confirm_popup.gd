@@ -20,11 +20,13 @@ func _ready() -> void:
 	_dim_overlay.gui_input.connect(_on_dim_input)
 	StaminaManager.stamina_changed.connect(_on_stamina_changed)
 	visible = false
+	_dim_overlay.mouse_filter = Control.MOUSE_FILTER_IGNORE
 
 func show_popup() -> void:
 	var high_score = SaveManager.get_infinity_high_score()
 	_high_score_label.text = "최고 기록: %s점" % _format_number(high_score)
 	_refresh_stamina_label()
+	_dim_overlay.mouse_filter = Control.MOUSE_FILTER_STOP
 	visible = true
 	_animate_show()
 
@@ -32,7 +34,10 @@ func hide_popup() -> void:
 	var tween = create_tween()
 	tween.tween_property(_dim_overlay, "modulate:a", 0.0, 0.15)
 	tween.parallel().tween_property(_panel, "scale", Vector2(0.8, 0.8), 0.15)
-	tween.tween_callback(func(): visible = false)
+	tween.tween_callback(func():
+		visible = false
+		_dim_overlay.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	)
 
 func _animate_show() -> void:
 	_dim_overlay.modulate.a = 0.0

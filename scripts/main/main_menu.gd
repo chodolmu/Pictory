@@ -14,9 +14,9 @@ var _options_popup = null
 var _confirm_quit_popup = null
 
 func _ready() -> void:
-	_infinity_confirm_popup = find_child("InfinityConfirmPopup", false, false)
-	_options_popup = find_child("OptionsPopup", false, false)
-	_confirm_quit_popup = find_child("ConfirmQuitPopup", false, false)
+	_infinity_confirm_popup = get_node_or_null("InfinityConfirmPopup")
+	_options_popup = get_node_or_null("OptionsPopup")
+	_confirm_quit_popup = get_node_or_null("ConfirmQuitPopup")
 	_stage_select_btn.pressed.connect(_on_stage_select)
 	_infinity_btn.pressed.connect(_on_infinity)
 	_settings_btn.pressed.connect(_on_settings)

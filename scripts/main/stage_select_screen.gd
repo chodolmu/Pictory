@@ -18,7 +18,7 @@ var _result_chapter: int = 1
 var _result_stage: int = 1
 
 func _ready() -> void:
-	_stage_confirm_popup = find_child("StageConfirmPopup", false, false)
+	_stage_confirm_popup = get_node_or_null("StageConfirmPopup")
 	_back_btn.pressed.connect(_on_back)
 	_unlock_btn.pressed.connect(_on_unlock_button_pressed)
 	if _stage_confirm_popup:

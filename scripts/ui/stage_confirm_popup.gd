@@ -28,6 +28,7 @@ func _ready() -> void:
 	_dim_overlay.gui_input.connect(_on_dim_input)
 	StaminaManager.stamina_changed.connect(_on_stamina_changed)
 	visible = false
+	_dim_overlay.mouse_filter = Control.MOUSE_FILTER_IGNORE
 
 func show_popup(config) -> void:
 	_current_config = config
@@ -46,6 +47,7 @@ func show_popup(config) -> void:
 		_party_select.visible = true
 		_party_select.setup("story")
 
+	_dim_overlay.mouse_filter = Control.MOUSE_FILTER_STOP
 	visible = true
 	_animate_show()
 
@@ -53,7 +55,10 @@ func hide_popup() -> void:
 	var tween = create_tween()
 	tween.tween_property(_dim_overlay, "modulate:a", 0.0, 0.15)
 	tween.parallel().tween_property(_panel, "scale", Vector2(0.8, 0.8), 0.15)
-	tween.tween_callback(func(): visible = false)
+	tween.tween_callback(func():
+		visible = false
+		_dim_overlay.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	)
 
 func _animate_show() -> void:
 	_dim_overlay.modulate.a = 0.0
