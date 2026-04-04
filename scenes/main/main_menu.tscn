@@ -1,0 +1,76 @@
+[gd_scene load_steps=5 format=3 uid="uid://main_menu"]
+
+[ext_resource type="Script" path="res://scripts/main/main_menu.gd" id="1_mm"]
+[ext_resource type="PackedScene" path="res://scenes/ui/infinity_confirm_popup.tscn" id="2_icp"]
+[ext_resource type="PackedScene" path="res://scenes/ui/options_popup.tscn" id="3_op"]
+[ext_resource type="PackedScene" path="res://scenes/ui/confirm_quit_popup.tscn" id="4_cqp"]
+
+[node name="MainMenu" type="Control"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+script = ExtResource("1_mm")
+
+[node name="BgRect" type="ColorRect" parent="."]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+color = Color(0.1, 0.1, 0.16, 1)
+
+[node name="VBox" type="VBoxContainer" parent="."]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+theme_override_constants/separation = 12
+
+[node name="Header" type="HBoxContainer" parent="VBox"]
+custom_minimum_size = Vector2(0, 48)
+
+[node name="PlayerInfoContainer" type="HBoxContainer" parent="VBox/Header"]
+size_flags_horizontal = 3
+
+[node name="NicknameLabel" type="Label" parent="VBox/Header/PlayerInfoContainer"]
+text = "플레이어"
+vertical_alignment = 1
+
+[node name="CurrencyLabel" type="Label" parent="VBox/Header"]
+text = "코인: 0"
+vertical_alignment = 1
+
+[node name="SettingsButton" type="Button" parent="VBox/Header"]
+text = "⚙"
+
+[node name="Spacer1" type="Control" parent="VBox"]
+custom_minimum_size = Vector2(0, 20)
+
+[node name="StageSelectButton" type="Button" parent="VBox"]
+custom_minimum_size = Vector2(0, 56)
+text = "스테이지 선택"
+
+[node name="InfinityModeButton" type="Button" parent="VBox"]
+custom_minimum_size = Vector2(0, 56)
+text = "인피니티 모드"
+
+[node name="HSeparator" type="HSeparator" parent="VBox"]
+
+[node name="BottomButtons" type="HBoxContainer" parent="VBox"]
+alignment = 1
+theme_override_constants/separation = 8
+
+[node name="AchievementsButton" type="Button" parent="VBox/BottomButtons"]
+text = "업적"
+
+[node name="CollectionButton" type="Button" parent="VBox/BottomButtons"]
+text = "컬렉션"
+
+[node name="ShopButton" type="Button" parent="VBox/BottomButtons"]
+text = "상점"
+
+[node name="InfinityConfirmPopup" parent="."]
+instance = ExtResource("2_icp")
+
+[node name="OptionsPopup" parent="."]
+instance = ExtResource("3_op")
+
+[node name="ConfirmQuitPopup" parent="."]
+instance = ExtResource("4_cqp")

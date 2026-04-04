@@ -39,15 +39,15 @@ alignment = 1
 
 [node name="Star1" type="ColorRect" parent="PanelContainer/VBox/StarsContainer"]
 custom_minimum_size = Vector2(36, 36)
-color = Color(0.4, 0.4, 0.4)
+color = Color(0.4, 0.4, 0.4, 1)
 
 [node name="Star2" type="ColorRect" parent="PanelContainer/VBox/StarsContainer"]
 custom_minimum_size = Vector2(36, 36)
-color = Color(0.4, 0.4, 0.4)
+color = Color(0.4, 0.4, 0.4, 1)
 
 [node name="Star3" type="ColorRect" parent="PanelContainer/VBox/StarsContainer"]
 custom_minimum_size = Vector2(36, 36)
-color = Color(0.4, 0.4, 0.4)
+color = Color(0.4, 0.4, 0.4, 1)
 
 [node name="ScoreLabel" type="Label" parent="PanelContainer/VBox"]
 text = "점수: 0"

@@ -1,0 +1,58 @@
+[gd_scene load_steps=3 format=3 uid="uid://stage_select"]
+
+[ext_resource type="Script" path="res://scripts/main/stage_select_screen.gd" id="1_ss"]
+[ext_resource type="PackedScene" path="res://scenes/ui/stage_confirm_popup.tscn" id="2_scp"]
+
+[node name="StageSelect" type="Control"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+script = ExtResource("1_ss")
+
+[node name="BgRect" type="ColorRect" parent="."]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+color = Color(0.12, 0.12, 0.18, 1)
+
+[node name="VBox" type="VBoxContainer" parent="."]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+theme_override_constants/separation = 8
+
+[node name="Header" type="HBoxContainer" parent="VBox"]
+custom_minimum_size = Vector2(0, 44)
+
+[node name="BackButton" type="Button" parent="VBox/Header"]
+text = "← 뒤로"
+
+[node name="TitleLabel" type="Label" parent="VBox/Header"]
+text = "스테이지 선택"
+size_flags_horizontal = 3
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="ChapterTabContainer" type="HBoxContainer" parent="VBox"]
+custom_minimum_size = Vector2(0, 36)
+
+[node name="ScrollContainer" type="ScrollContainer" parent="VBox"]
+size_flags_vertical = 3
+
+[node name="StageGrid" type="GridContainer" parent="VBox/ScrollContainer"]
+size_flags_horizontal = 3
+columns = 5
+theme_override_constants/h_separation = 8
+theme_override_constants/v_separation = 8
+
+[node name="UnlockInfoLabel" type="Label" parent="VBox"]
+text = ""
+visible = false
+horizontal_alignment = 1
+
+[node name="UnlockButton" type="Button" parent="VBox"]
+text = "챕터 해금"
+visible = false
+
+[node name="StageConfirmPopup" parent="."]
+instance = ExtResource("2_scp")

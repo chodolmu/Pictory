@@ -1,0 +1,32 @@
+[gd_scene load_steps=2 format=3 uid="uid://title_screen"]
+
+[ext_resource type="Script" path="res://scripts/main/title_screen.gd" id="1_ts"]
+
+[node name="TitleScreen" type="Control"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+script = ExtResource("1_ts")
+
+[node name="BgRect" type="ColorRect" parent="."]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+color = Color(0.08, 0.08, 0.15, 1)
+
+[node name="CenterContainer" type="CenterContainer" parent="."]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+
+[node name="VBox" type="VBoxContainer" parent="CenterContainer"]
+theme_override_constants/separation = 32
+
+[node name="GameTitleLabel" type="Label" parent="CenterContainer/VBox"]
+text = "PICTORY"
+horizontal_alignment = 1
+theme_override_font_sizes/font_size = 72
+
+[node name="StartButton" type="Button" parent="CenterContainer/VBox"]
+custom_minimum_size = Vector2(200, 56)
+text = "게임 시작"

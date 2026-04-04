@@ -1,0 +1,41 @@
+[gd_scene load_steps=2 format=3 uid="uid://nickname_input"]
+
+[ext_resource type="Script" path="res://scripts/main/nickname_input_screen.gd" id="1_ni"]
+
+[node name="NicknameInput" type="Control"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+script = ExtResource("1_ni")
+
+[node name="BgRect" type="ColorRect" parent="."]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+color = Color(0.1, 0.1, 0.16, 1)
+
+[node name="CenterContainer" type="CenterContainer" parent="."]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+
+[node name="VBox" type="VBoxContainer" parent="CenterContainer"]
+custom_minimum_size = Vector2(280, 0)
+theme_override_constants/separation = 14
+
+[node name="PromptLabel" type="Label" parent="CenterContainer/VBox"]
+text = "닉네임을 입력하세요"
+horizontal_alignment = 1
+
+[node name="NicknameLineEdit" type="LineEdit" parent="CenterContainer/VBox"]
+placeholder_text = "닉네임 (2~12자)"
+max_length = 12
+
+[node name="ValidationLabel" type="Label" parent="CenterContainer/VBox"]
+text = "2~12자로 입력해주세요"
+horizontal_alignment = 1
+
+[node name="ConfirmButton" type="Button" parent="CenterContainer/VBox"]
+custom_minimum_size = Vector2(0, 48)
+text = "확인"
+disabled = true

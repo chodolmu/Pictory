@@ -1,0 +1,25 @@
+[gd_scene load_steps=2 format=3 uid="uid://splash_screen"]
+
+[ext_resource type="Script" path="res://scripts/main/splash_screen.gd" id="1_sp"]
+
+[node name="SplashScreen" type="Control"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+script = ExtResource("1_sp")
+
+[node name="BgRect" type="ColorRect" parent="."]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+color = Color(0.05, 0.05, 0.1, 1)
+
+[node name="CenterContainer" type="CenterContainer" parent="."]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+
+[node name="LogoLabel" type="Label" parent="CenterContainer"]
+text = "PICTORY"
+horizontal_alignment = 1
+theme_override_font_sizes/font_size = 80
