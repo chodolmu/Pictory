@@ -23,6 +23,8 @@ LevelLoader="*res://scripts/data/level_loader.gd"
 Economy="*res://scripts/data/economy.gd"
 SceneManager="*res://scripts/ui/scene_manager.gd"
 StoryFlowController="*res://scripts/story/story_flow_controller.gd"
+ImagenDatabase="*res://scripts/companion/imagen_database.gd"
+PartyManager="*res://scripts/companion/party_manager.gd"
 
 [editor_plugins]
 

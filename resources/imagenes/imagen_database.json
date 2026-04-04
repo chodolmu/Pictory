@@ -1,0 +1,43 @@
+{
+  "imagenes": [
+    {
+      "id": "fire_bulkkot",
+      "display_name": "불꽃이",
+      "attribute": "fire",
+      "description": "열정적이고 활발한 불 속성 이마젠. 약간 덜렁거리지만 진심이 담긴 도움을 준다.",
+      "skill_id": "K1",
+      "cooldown": 4,
+      "unlock_condition": {
+        "type": "story_clear",
+        "chapter": 1,
+        "stage": 3
+      }
+    },
+    {
+      "id": "water_mulgyeol",
+      "display_name": "물결이",
+      "attribute": "water",
+      "description": "차분하고 지적인 물 속성 이마젠. 정확한 분석으로 퍼즐 해결을 돕는다.",
+      "skill_id": "K7",
+      "cooldown": 5,
+      "unlock_condition": {
+        "type": "story_clear",
+        "chapter": 1,
+        "stage": 6
+      }
+    },
+    {
+      "id": "grass_saessak",
+      "display_name": "새싹이",
+      "attribute": "grass",
+      "description": "호기심 많고 천진난만한 풀 속성 이마젠. 예상치 못한 방법으로 위기를 극복한다.",
+      "skill_id": "K8",
+      "cooldown": 6,
+      "unlock_condition": {
+        "type": "story_clear",
+        "chapter": 2,
+        "stage": 3
+      }
+    }
+  ]
+}

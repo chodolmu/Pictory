@@ -1,0 +1,99 @@
+[gd_scene load_steps=2 format=3 uid="uid://party_select"]
+
+[ext_resource type="Script" path="res://scripts/companion/party_select.gd" id="1_ps"]
+
+[node name="PartySelect" type="VBoxContainer"]
+script = ExtResource("1_ps")
+custom_minimum_size = Vector2(320, 200)
+
+[node name="Title" type="Label" parent="."]
+text = "이마젠 편성"
+horizontal_alignment = 1
+
+[node name="SlotContainer" type="HBoxContainer" parent="."]
+alignment = 1
+
+[node name="Slot0" type="PanelContainer" parent="SlotContainer"]
+custom_minimum_size = Vector2(100, 110)
+
+[node name="VBox" type="VBoxContainer" parent="SlotContainer/Slot0"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+
+[node name="ImagenIcon" type="Control" parent="SlotContainer/Slot0/VBox"]
+custom_minimum_size = Vector2(50, 50)
+size_flags_horizontal = 4
+
+[node name="BG" type="ColorRect" parent="SlotContainer/Slot0/VBox/ImagenIcon"]
+color = Color(0.5, 0.5, 0.5, 1.0)
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+
+[node name="NameLabel" type="Label" parent="SlotContainer/Slot0/VBox"]
+text = "비어있음"
+horizontal_alignment = 1
+
+[node name="SkillLabel" type="Label" parent="SlotContainer/Slot0/VBox"]
+text = ""
+horizontal_alignment = 1
+
+[node name="RemoveButton" type="Button" parent="SlotContainer/Slot0/VBox"]
+text = "×"
+visible = false
+
+[node name="Slot1" type="PanelContainer" parent="SlotContainer"]
+custom_minimum_size = Vector2(100, 110)
+
+[node name="VBox" type="VBoxContainer" parent="SlotContainer/Slot1"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+
+[node name="ImagenIcon" type="Control" parent="SlotContainer/Slot1/VBox"]
+custom_minimum_size = Vector2(50, 50)
+size_flags_horizontal = 4
+
+[node name="BG" type="ColorRect" parent="SlotContainer/Slot1/VBox/ImagenIcon"]
+color = Color(0.5, 0.5, 0.5, 1.0)
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+
+[node name="NameLabel" type="Label" parent="SlotContainer/Slot1/VBox"]
+text = "비어있음"
+horizontal_alignment = 1
+
+[node name="SkillLabel" type="Label" parent="SlotContainer/Slot1/VBox"]
+text = ""
+horizontal_alignment = 1
+
+[node name="RemoveButton" type="Button" parent="SlotContainer/Slot1/VBox"]
+text = "×"
+visible = false
+
+[node name="ListScroll" type="ScrollContainer" parent="."]
+custom_minimum_size = Vector2(0, 100)
+
+[node name="ImagenList" type="GridContainer" parent="ListScroll"]
+columns = 4
+
+[node name="InfoPanel" type="PanelContainer" parent="."]
+visible = false
+
+[node name="VBox" type="VBoxContainer" parent="InfoPanel"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+
+[node name="SkillName" type="Label" parent="InfoPanel/VBox"]
+text = ""
+
+[node name="SkillDescription" type="RichTextLabel" parent="InfoPanel/VBox"]
+bbcode_enabled = true
+text = ""
+fit_content = true
+
+[node name="CooldownInfo" type="Label" parent="InfoPanel/VBox"]
+text = ""

@@ -13,6 +13,8 @@ const StageConfigScript = preload("res://scripts/data/stage_config.gd")
 const StoryModeScript = preload("res://scripts/modes/story_mode.gd")
 const InfinityModeScript = preload("res://scripts/modes/infinity_mode.gd")
 const GimmickRegistryScript = preload("res://scripts/gimmick/gimmick_registry.gd")
+const SkillManagerScript = preload("res://scripts/companion/skill_manager.gd")
+const SkillHUDScene = preload("res://scenes/ui/skill_hud.tscn")
 
 signal game_cleared
 signal game_over
@@ -32,6 +34,16 @@ var _turn_manager: Object
 
 # Mode (Strategy)
 var _current_mode: Node = null
+
+# Skill system
+var _skill_manager: SkillManager = null
+var _skill_hud: SkillHUD = null
+var _is_target_selecting: bool = false
+var _target_skill_slot: int = -1
+
+# 스냅샷 시스템 (K6 되감기)
+var _board_snapshots: Array[Dictionary] = []
+const MAX_SNAPSHOTS := 10
 
 # UI
 @onready var _grid_view: GridView = $GridView
@@ -151,6 +163,40 @@ func _finish_init() -> void:
 	if _grid_view.cell_touched.is_connected(_on_cell_touched):
 		_grid_view.cell_touched.disconnect(_on_cell_touched)
 	_grid_view.cell_touched.connect(_on_cell_touched)
+	_init_skill_system()
+
+func _init_skill_system() -> void:
+	# 기존 SkillManager 정리
+	if _skill_manager != null:
+		_skill_manager.queue_free()
+		_skill_manager = null
+	if _skill_hud != null:
+		_skill_hud.queue_free()
+		_skill_hud = null
+
+	var party = PartyManager.get_party()
+	if party.is_empty():
+		return
+
+	_skill_manager = SkillManagerScript.new()
+	_skill_manager.name = "SkillManager"
+	add_child(_skill_manager)
+	_skill_manager.setup_context(_grid, _color_queue, _turn_manager, mode, self)
+	_skill_manager.setup_party(party)
+	_skill_manager.skill_result_ready.connect(_on_skill_result_ready)
+	_skill_manager.skill_requires_target.connect(_on_skill_requires_target)
+
+	_skill_hud = SkillHUDScene.instantiate()
+	_hud.add_child(_skill_hud)
+	_skill_hud.position = Vector2(0, -70)
+	_skill_hud.anchor_left = 0.5
+	_skill_hud.anchor_right = 0.5
+	_skill_hud.anchor_top = 1.0
+	_skill_hud.anchor_bottom = 1.0
+	_skill_hud.offset_top = -70.0
+	_skill_hud.offset_bottom = -10.0
+	_skill_hud.setup(_skill_manager)
+	_skill_hud.skill_button_pressed.connect(_on_skill_button_pressed)
 
 # ─────────────────────────────────────────
 # 입력 처리
@@ -158,6 +204,20 @@ func _finish_init() -> void:
 
 func _on_cell_touched(x: int, y: int) -> void:
 	if _processing or _game_ended or _current_mode == null:
+		return
+	if _is_target_selecting:
+		# 타겟 선택 모드: K2 셀 선택 처리
+		if _skill_manager and _target_skill_slot >= 0:
+			var info = _skill_manager.get_slot_info(_target_skill_slot)
+			var skill_id = info.get("skill_id", "")
+			if skill_id == "K2":
+				# 다음 단계: 색상 선택 (여기서는 간단히 active_color 사용)
+				var target = { "cx": x, "cy": y, "color": _color_queue.get_active_color() }
+				_skill_manager.execute_skill_with_target(_target_skill_slot, target)
+				_is_target_selecting = false
+				_target_skill_slot = -1
+		return
+	if _skill_manager and _skill_manager.is_activating():
 		return
 
 	var cell = _grid.get_cell(x, y)
@@ -204,8 +264,15 @@ func _on_cell_touched(x: int, y: int) -> void:
 	# 6. 모드에 위임
 	_current_mode.on_action_performed(effective, result.chain_count)
 
-	# 7. 턴 종료 처리 (번짐/퇴색 on_turn, 퇴색 후 라인 재판정)
+	# 7. 스냅샷 저장 (K6 되감기용)
+	save_snapshot()
+
+	# 8. 턴 종료 처리 (번짐/퇴색 on_turn, 퇴색 후 라인 재판정)
 	_on_turn_end()
+
+	# 9. 스킬 쿨타임 감소
+	if _skill_manager:
+		_skill_manager.on_turn_end()
 
 	_processing = false
 	if not _game_ended:
@@ -257,6 +324,123 @@ func _apply_gimmick_effects(effects: Array) -> void:
 				pass  # chain_combo에서 이미 처리됨
 			_:
 				pass
+
+# ─────────────────────────────────────────
+# 스냅샷 시스템 (K6 되감기)
+# ─────────────────────────────────────────
+
+func save_snapshot() -> void:
+	var snapshot = {
+		"grid_colors": _serialize_grid(),
+		"queue_state": _color_queue.peek_all().duplicate(),
+		"destroyed_count": _total_destroyed
+	}
+	# 스토리 모드: turns_remaining 포함
+	if _current_mode is StoryModeScript:
+		snapshot["turns_remaining"] = _current_mode.remaining_turns
+		snapshot["destroyed_story"] = _current_mode.destroyed_count
+
+	_board_snapshots.push_back(snapshot)
+	if _board_snapshots.size() > MAX_SNAPSHOTS:
+		_board_snapshots.pop_front()
+
+func restore_snapshot() -> bool:
+	if _board_snapshots.is_empty():
+		return false
+	var snap = _board_snapshots.pop_back()
+	_deserialize_grid(snap.get("grid_colors", {}))
+	# 큐 복원
+	var q_state = snap.get("queue_state", [])
+	if not q_state.is_empty():
+		_color_queue._queue = q_state.duplicate()
+	# 파괴 카운트 복원
+	_total_destroyed = snap.get("destroyed_count", _total_destroyed)
+	if _current_mode is StoryModeScript:
+		_current_mode.remaining_turns = snap.get("turns_remaining", _current_mode.remaining_turns)
+		_current_mode.destroyed_count = snap.get("destroyed_story", _current_mode.destroyed_count)
+	_grid_view.refresh()
+	_color_queue_ui.refresh()
+	return true
+
+func has_snapshot() -> bool:
+	return not _board_snapshots.is_empty()
+
+func _serialize_grid() -> Dictionary:
+	var data: Dictionary = {}
+	for y in range(_grid.grid_size):
+		for x in range(_grid.grid_size):
+			var cell = _grid.get_cell(x, y)
+			if cell:
+				data[Vector2i(x, y)] = cell.color
+	return data
+
+func _deserialize_grid(data: Dictionary) -> void:
+	for pos in data:
+		_grid.set_cell_color(pos.x, pos.y, data[pos])
+
+# ─────────────────────────────────────────
+# 스킬 시그널 핸들러
+# ─────────────────────────────────────────
+
+func _on_skill_button_pressed(slot: int) -> void:
+	var info = _skill_manager.get_slot_info(slot)
+	var skill_id = info.get("skill_id", "")
+	var target_type = _skill_manager._get_target_type(skill_id)
+
+	if target_type == SkillManager.TargetType.NONE:
+		_skill_manager.activate_skill(slot)
+		_apply_skill_aftermath()
+	elif target_type == SkillManager.TargetType.CELL_AND_COLOR:
+		_is_target_selecting = true
+		_target_skill_slot = slot
+	elif target_type == SkillManager.TargetType.COLOR or target_type == SkillManager.TargetType.COLOR_PAIR:
+		# 색상 선택은 색상 팔레트 팝업 (간단 구현: active_color 자동 사용)
+		# 실제 타겟 선택 UI는 SkillHUD에서 처리하나, 여기서는 fallback
+		_skill_manager.activate_skill(slot)
+		_apply_skill_aftermath()
+	elif target_type == SkillManager.TargetType.ROW_OR_COL:
+		# 행/열 선택 — 중앙 행을 기본으로
+		var target = { "is_row": true, "index": _grid.grid_size / 2 }
+		_skill_manager.execute_skill_with_target(slot, target)
+		_apply_skill_aftermath()
+
+func _on_skill_requires_target(skill_id: String, target_type: int) -> void:
+	# 기본 처리: K1/K3/K4는 색상 팔레트 필요하지만 여기서는 간단히 처리
+	# 실제 팔레트 UI는 추후 확장
+	pass
+
+func _on_skill_result_ready(actions: Array) -> void:
+	for action in actions:
+		match action.get("type", ""):
+			"destroy_done":
+				var count = action.get("count", 0)
+				if count > 0:
+					_total_destroyed += count
+					_current_mode.on_action_performed(count, 0)
+					Gravity.apply(_grid)
+					var result = ChainComboScript.execute(_grid)
+					_total_destroyed += result.total_destroyed
+					_hud.update_destroyed(count + result.total_destroyed)
+					_grid_view.refresh()
+					_color_queue_ui.refresh()
+			"undo_done":
+				_hud.update_destroyed(0)
+				_grid_view.refresh()
+				_color_queue_ui.refresh()
+			_:
+				_grid_view.refresh()
+				_color_queue_ui.refresh()
+
+func _apply_skill_aftermath() -> void:
+	## 스킬 실행 후 라인 재판정 + 렌더링
+	var result = ChainComboScript.execute(_grid)
+	if result.total_destroyed > 0:
+		var eff = result.effective_destroyed if result.effective_destroyed > 0 else result.total_destroyed
+		_total_destroyed += eff
+		_current_mode.on_action_performed(eff, result.chain_count)
+		_hud.update_destroyed(eff)
+	_grid_view.refresh()
+	_color_queue_ui.refresh()
 
 func _on_stage_cleared(stars: int, score: int, remaining_turns: int) -> void:
 	_game_ended = true

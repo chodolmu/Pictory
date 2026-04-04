@@ -26,6 +26,7 @@ var is_active: bool = false
 var elapsed_time: float = 0.0
 var current_scale_level: int = 0
 var _timer_paused: bool = false
+var _pause_remaining: float = 0.0
 
 # ─────────────────────────────────────────
 # 공개 API
@@ -66,11 +67,14 @@ func add_time(amount: float) -> void:
 	remaining_time = minf(remaining_time + amount, max_time)
 	bonus_time_added.emit(amount, "gimmick_bonus")
 
-func pause_timer() -> void:
+func pause_timer(duration: float = -1.0) -> void:
 	_timer_paused = true
+	if duration > 0:
+		_pause_remaining = duration
 
 func resume_timer() -> void:
 	_timer_paused = false
+	_pause_remaining = 0.0
 
 func get_time_ratio() -> float:
 	if max_time <= 0.0:
@@ -83,6 +87,15 @@ func get_time_ratio() -> float:
 
 func _process(delta: float) -> void:
 	if not is_active:
+		return
+
+	# 시간정지(K11) 처리
+	if _timer_paused:
+		if _pause_remaining > 0:
+			_pause_remaining -= delta
+			if _pause_remaining <= 0:
+				_timer_paused = false
+				_pause_remaining = 0.0
 		return
 
 	elapsed_time += delta

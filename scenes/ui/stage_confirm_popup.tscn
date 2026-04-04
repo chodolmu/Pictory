@@ -1,6 +1,7 @@
-[gd_scene load_steps=2 format=3 uid="uid://stage_confirm_popup"]
+[gd_scene load_steps=3 format=3 uid="uid://stage_confirm_popup"]
 
 [ext_resource type="Script" path="res://scripts/ui/stage_confirm_popup.gd" id="1_scp"]
+[ext_resource type="PackedScene" path="res://scenes/ui/party_select.tscn" id="2_ps"]
 
 [node name="StageConfirmPopup" type="CanvasLayer"]
 layer = 10
@@ -53,6 +54,8 @@ text = "턴 제한: 30"
 text = "최고 기록: ☆☆☆"
 
 [node name="HSeparator" type="HSeparator" parent="PanelContainer/VBox"]
+
+[node name="PartySelect" parent="PanelContainer/VBox" instance=ExtResource("2_ps")]
 
 [node name="StartButton" type="Button" parent="PanelContainer/VBox"]
 text = "시작하기"

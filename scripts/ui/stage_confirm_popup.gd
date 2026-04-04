@@ -14,6 +14,7 @@ signal start_requested(stage_config: Object)
 @onready var _start_btn: Button = $PanelContainer/VBox/StartButton
 @onready var _ad_btn: Button = $PanelContainer/VBox/AdBonusButton
 @onready var _close_btn: Button = $PanelContainer/VBox/CloseButton
+@onready var _party_select: PartySelect = $PanelContainer/VBox/PartySelect
 
 var _current_config = null
 
@@ -32,6 +33,15 @@ func show_popup(config) -> void:
 	_goal_label.text = "목표: %d블록 파괴" % config.goal_target_count
 	_turn_limit_label.text = "턴 제한: %d" % config.turn_limit
 	_update_best_stars(config.stage_id)
+
+	# 파티 편성 UI 초기화 (해금 이마젠이 없으면 숨김)
+	var unlocked = ImagenDatabase.get_unlocked_list()
+	if unlocked.is_empty():
+		_party_select.visible = false
+	else:
+		_party_select.visible = true
+		_party_select.setup("story")
+
 	visible = true
 	_animate_show()
 

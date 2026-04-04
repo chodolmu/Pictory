@@ -1,0 +1,83 @@
+[gd_scene load_steps=2 format=3 uid="uid://imagen_join_cutscene"]
+
+[ext_resource type="Script" path="res://scripts/story/imagen_join_cutscene.gd" id="1_ijc"]
+
+[node name="ImagenJoinCutscene" type="CanvasLayer"]
+layer = 30
+script = ExtResource("1_ijc")
+
+[node name="Background" type="ColorRect" parent="."]
+color = Color(0, 0, 0, 0.85)
+mouse_filter = 2
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+
+[node name="ParticleCenter" type="Control" parent="."]
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -10.0
+offset_top = -10.0
+offset_right = 10.0
+offset_bottom = 10.0
+
+[node name="ImagenDisplay" type="Control" parent="."]
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -60.0
+offset_top = -120.0
+offset_right = 60.0
+offset_bottom = 20.0
+
+[node name="Body" type="ColorRect" parent="ImagenDisplay"]
+color = Color(1, 0.3, 0.2, 1)
+scale = Vector2(0, 0)
+custom_minimum_size = Vector2(120, 120)
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -60.0
+offset_top = -60.0
+offset_right = 60.0
+offset_bottom = 60.0
+
+[node name="TextArea" type="VBoxContainer" parent="."]
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -200.0
+offset_top = 40.0
+offset_right = 200.0
+offset_bottom = 160.0
+alignment = 1
+
+[node name="ImagenName" type="Label" parent="TextArea"]
+text = "이마젠"
+horizontal_alignment = 1
+theme_override_font_sizes/font_size = 28
+
+[node name="JoinText" type="Label" parent="TextArea"]
+text = "동료가 되었다!"
+horizontal_alignment = 1
+theme_override_font_sizes/font_size = 20
+
+[node name="SkillName" type="Label" parent="TextArea"]
+text = "스킬: 단색폭풍"
+horizontal_alignment = 1
+theme_override_font_sizes/font_size = 16
+
+[node name="SkillDesc" type="Label" parent="TextArea"]
+text = ""
+horizontal_alignment = 1
+autowrap_mode = 3
+theme_override_font_sizes/font_size = 13

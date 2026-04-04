@@ -1,0 +1,8 @@
+[gd_scene load_steps=2 format=3 uid="uid://skill_hud"]
+
+[ext_resource type="Script" path="res://scripts/companion/skill_hud.gd" id="1_sh"]
+
+[node name="SkillHUD" type="HBoxContainer"]
+script = ExtResource("1_sh")
+alignment = 1
+theme_override_constants/separation = 8

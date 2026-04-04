@@ -81,8 +81,7 @@ func _on_event_triggered(event_name: String, event_args: Dictionary) -> void:
 		"bgm_change":
 			pass  # S14에서 구현
 		"imagen_join":
-			# 시그널은 이미 발행됨; 실제 합류는 S09에서
-			pass
+			await _do_imagen_join(event_args.get("imagen_id", ""))
 		"chapter_clear":
 			pass  # 챕터 클리어 연출은 후속 스프린트
 
@@ -101,6 +100,27 @@ func _do_flash(color: Color, duration: float) -> void:
 	var tween = create_tween()
 	tween.tween_property(_flash_rect, "modulate:a", 1.0, duration * 0.3)
 	tween.tween_property(_flash_rect, "modulate:a", 0.0, duration * 0.7)
+
+func _do_imagen_join(imagen_id: String) -> void:
+	if imagen_id.is_empty():
+		return
+	# 중복 해금 방지
+	if ImagenDatabase.is_unlocked(imagen_id):
+		return
+	ImagenDatabase.unlock(imagen_id)
+	var data = ImagenDatabase.get_imagen(imagen_id)
+	if data == null:
+		return
+	# 다이얼로그 일시 정지
+	_dialogue_ui.get_manager().set_process_mode(Node.PROCESS_MODE_DISABLED)
+	var cutscene_scene = preload("res://scenes/story/imagen_join_cutscene.tscn")
+	var cutscene = cutscene_scene.instantiate()
+	add_child(cutscene)
+	cutscene.setup(data)
+	cutscene.show_cutscene()
+	await cutscene.finished
+	cutscene.queue_free()
+	_dialogue_ui.get_manager().set_process_mode(Node.PROCESS_MODE_INHERIT)
 
 func _do_wait(seconds: float) -> void:
 	# DialogueManager 입력을 잠깐 블록. 간단히 타이머로 처리.

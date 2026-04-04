@@ -140,3 +140,27 @@ func _migrate_if_needed() -> void:
 func reset_all_data() -> void:
 	_data = _create_default_data()
 	_save()
+
+# ─── Imagen / Party ───────────────────────────────────────────────
+
+func get_unlocked_imagenes() -> Array[String]:
+	var raw = _data.get("unlocked_imagenes", [])
+	var result: Array[String] = []
+	for v in raw:
+		result.append(str(v))
+	return result
+
+func save_unlocked_imagenes(ids: Array[String]) -> void:
+	_data["unlocked_imagenes"] = ids.duplicate()
+	_save()
+
+func get_last_party() -> Array[String]:
+	var raw = _data.get("last_party", [])
+	var result: Array[String] = []
+	for v in raw:
+		result.append(str(v))
+	return result
+
+func save_last_party(ids: Array[String]) -> void:
+	_data["last_party"] = ids.duplicate()
+	_save()
