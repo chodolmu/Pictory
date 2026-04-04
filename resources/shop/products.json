@@ -1,0 +1,22 @@
+{
+	"currency_products": [
+		{"id": "currency_500", "amount": 500, "price_display": "₩1,100", "price_value": 1100},
+		{"id": "currency_1200", "amount": 1200, "price_display": "₩2,200", "price_value": 2200, "badge": "가성비"},
+		{"id": "currency_3000", "amount": 3000, "price_display": "₩4,400", "price_value": 4400, "badge": "최고 가성비"}
+	],
+	"stamina_products": [
+		{"id": "stamina_10", "amount": 10, "cost_currency": 100},
+		{"id": "stamina_30", "amount": 30, "cost_currency": 250, "label": "풀충전"}
+	],
+	"chapter_products": [
+		{"id": "chapter_2", "chapter": 2, "cost_currency": 500, "prerequisite": "chapter_1_clear"},
+		{"id": "chapter_3", "chapter": 3, "cost_currency": 800, "prerequisite": "chapter_2_clear"},
+		{"id": "chapter_4", "chapter": 4, "cost_currency": 1200, "prerequisite": "chapter_3_clear"},
+		{"id": "chapter_5", "chapter": 5, "cost_currency": 1600, "prerequisite": "chapter_4_clear"},
+		{"id": "chapter_6", "chapter": 6, "cost_currency": 2000, "prerequisite": "chapter_5_clear"},
+		{"id": "chapter_7", "chapter": 7, "cost_currency": 2500, "prerequisite": "chapter_6_clear"},
+		{"id": "chapter_8", "chapter": 8, "cost_currency": 3000, "prerequisite": "chapter_7_clear"},
+		{"id": "chapter_9", "chapter": 9, "cost_currency": 3500, "prerequisite": "chapter_8_clear"},
+		{"id": "chapter_10", "chapter": 10, "cost_currency": 4000, "prerequisite": "chapter_9_clear"}
+	]
+}

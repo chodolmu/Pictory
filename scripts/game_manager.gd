@@ -446,20 +446,24 @@ func _on_stage_cleared(stars: int, score: int, remaining_turns: int) -> void:
 	_game_ended = true
 	_stage_stars = stars
 	_grid_view.lock_input()
-	var currency = Economy.finalize_and_earn_currency()
-	print("Stage Clear! Stars: %d, Score: %d, Currency: +%d" % [stars, Economy.current_score, currency])
 
-	# 세이브
+	# 세이브 + 재화 계산
 	var params = SceneManager.get_params()
 	var stage_id = params.get("stage_id", "")
+	var is_first_clear = true
 	if stage_id != "":
+		is_first_clear = not SaveManager.is_stage_cleared(stage_id)
 		SaveManager.save_stage_result(stage_id, stars, Economy.current_score)
+	var currency = CurrencyConverter.calculate_story_reward(stars, is_first_clear)
+	SaveManager.add_currency(currency)
+	print("Stage Clear! Stars: %d, Score: %d, Currency: +%d" % [stars, Economy.current_score, currency])
 
 	if _flow_controlled:
 		var result = {
 			"is_clear": true,
 			"stars": stars,
 			"score": Economy.current_score,
+			"currency": currency,
 			"destroyed": _total_destroyed,
 			"stage_id": stage_id
 		}
@@ -492,5 +496,8 @@ func _on_time_updated(remaining: float, _max: float) -> void:
 func _on_infinity_game_over(final_score: int, total_dest: int) -> void:
 	_game_ended = true
 	_grid_view.lock_input()
-	print("Game Over (infinity) Score: %d, Destroyed: %d" % [final_score, total_dest])
+	var is_new_record = SaveManager.save_infinity_result(final_score)
+	var currency = CurrencyConverter.calculate_infinity_reward(final_score, is_new_record)
+	SaveManager.add_currency(currency)
+	print("Game Over (infinity) Score: %d, Destroyed: %d, Currency: +%d" % [final_score, total_dest, currency])
 	game_over.emit()

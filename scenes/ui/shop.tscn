@@ -1,0 +1,60 @@
+[gd_scene load_steps=2 format=3 uid="uid://shop_screen"]
+
+[ext_resource type="Script" path="res://scripts/ui/shop.gd" id="1_shop"]
+
+[node name="Shop" type="CanvasLayer"]
+script = ExtResource("1_shop")
+
+[node name="VBox" type="VBoxContainer" parent="."]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 16.0
+offset_top = 16.0
+offset_right = -16.0
+offset_bottom = -16.0
+
+[node name="TitleLabel" type="Label" parent="VBox"]
+text = "상점"
+horizontal_alignment = 1
+
+[node name="TopBar" type="HBoxContainer" parent="VBox"]
+layout_mode = 2
+
+[node name="CurrencyLabel" type="Label" parent="VBox/TopBar"]
+text = "💰 0"
+size_flags_horizontal = 3
+
+[node name="StaminaLabel" type="Label" parent="VBox/TopBar"]
+text = "⚡ 30/30"
+
+[node name="TabBar" type="HBoxContainer" parent="VBox"]
+layout_mode = 2
+
+[node name="CurrencyTabButton" type="Button" parent="VBox/TabBar"]
+text = "재화"
+size_flags_horizontal = 3
+
+[node name="StaminaTabButton" type="Button" parent="VBox/TabBar"]
+text = "행동력"
+size_flags_horizontal = 3
+
+[node name="ChapterTabButton" type="Button" parent="VBox/TabBar"]
+text = "챕터"
+size_flags_horizontal = 3
+
+[node name="MsgLabel" type="Label" parent="VBox"]
+visible = false
+text = ""
+horizontal_alignment = 1
+
+[node name="ScrollContainer" type="ScrollContainer" parent="VBox"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="ItemList" type="VBoxContainer" parent="VBox/ScrollContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="BackButton" type="Button" parent="VBox"]
+text = "뒤로"

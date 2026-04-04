@@ -27,6 +27,8 @@ ImagenDatabase="*res://scripts/companion/imagen_database.gd"
 PartyManager="*res://scripts/companion/party_manager.gd"
 CollectionManager="*res://scripts/collection/collection_manager.gd"
 AchievementManager="*res://scripts/collection/achievement_manager.gd"
+StaminaManager="*res://scripts/data/stamina_manager.gd"
+AdManager="*res://scripts/data/ad_manager.gd"
 
 [editor_plugins]
 

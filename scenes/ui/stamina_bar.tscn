@@ -1,0 +1,16 @@
+[gd_scene load_steps=2 format=3 uid="uid://stamina_bar"]
+
+[ext_resource type="Script" path="res://scripts/ui/stamina_bar.gd" id="1_stamina_bar"]
+
+[node name="StaminaBar" type="HBoxContainer"]
+script = ExtResource("1_stamina_bar")
+
+[node name="IconLabel" type="Label" parent="."]
+text = "⚡"
+
+[node name="StaminaLabel" type="Label" parent="."]
+text = "30/30"
+
+[node name="TimerLabel" type="Label" parent="."]
+text = "충전 완료"
+modulate = Color(0.8, 0.8, 0.8, 1)

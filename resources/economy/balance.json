@@ -1,0 +1,9 @@
+{
+	"story_clear_base": 50,
+	"story_star_bonus": [0, 25, 50],
+	"story_replay_base": 25,
+	"infinity_score_ratio": 0.1,
+	"infinity_min_reward": 10,
+	"infinity_max_reward": 1000,
+	"infinity_new_highscore_bonus": 100
+}

@@ -141,6 +141,33 @@ func reset_all_data() -> void:
 	_data = _create_default_data()
 	_save()
 
+# ─── Stamina ──────────────────────────────────────────────
+
+func get_stamina_data() -> Dictionary:
+	return _data.get("stamina", {})
+
+func save_stamina_data(data: Dictionary) -> void:
+	_data["stamina"] = data.duplicate()
+	_save()
+
+# ─── Ad ───────────────────────────────────────────────────
+
+func get_ad_data() -> Dictionary:
+	return _data.get("ad", {})
+
+func save_ad_data(data: Dictionary) -> void:
+	_data["ad"] = data.duplicate()
+	_save()
+
+# ─── Shop History ─────────────────────────────────────────
+
+func get_shop_history() -> Dictionary:
+	return _data.get("shop_history", {})
+
+func save_shop_history(data: Dictionary) -> void:
+	_data["shop_history"] = data.duplicate(true)
+	_save()
+
 # ─── Imagen / Party ───────────────────────────────────────────────
 
 func get_unlocked_imagenes() -> Array[String]:
