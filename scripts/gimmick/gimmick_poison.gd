@@ -1,22 +1,16 @@
-class_name GimmickRainbow
+class_name GimmickPoison
 extends GimmickBase
 
-## M4 무지개 칸: BFS 와일드카드. 리컬러 시 기믹 소멸하여 일반 셀로 전환.
-
-const RAINBOW_COLOR: int = -2
+## S5 독 칸: 존재 동안 액션당 시간 감소 가속. 무한 모드 전용.
 
 func can_recolor(cell, new_color: int) -> bool:
 	return true
-
-func on_recolor(cell, old_color: int, new_color: int, source: String = "bfs") -> void:
-	cell.color = new_color
-	cell.clear_gimmick()  # 무지개 소멸 → 일반 셀
 
 func can_bfs_traverse(cell, from_cell) -> bool:
 	return true
 
 func is_bfs_wildcard(cell) -> bool:
-	return true  # 모든 색과 매칭
+	return false
 
 func can_destroy(cell) -> bool:
 	return true
@@ -29,4 +23,4 @@ func on_gravity(cell, grid) -> bool:
 	return true
 
 func get_visual_config(cell) -> Dictionary:
-	return {"type": "rainbow"}
+	return {"type": "poison", "color": Color(0.6, 0.2, 0.8, 0.5)}

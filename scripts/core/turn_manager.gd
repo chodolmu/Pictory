@@ -25,6 +25,13 @@ func is_game_over() -> bool:
 		return turns_remaining <= 0
 	return false
 
+func add_turns(amount: int) -> void:
+	## 보너스 턴 추가 (별 칸 등).
+	if mode != "story":
+		return
+	turns_used = max(0, turns_used - amount)
+	turn_changed.emit(turns_used, turns_remaining)
+
 func reset() -> void:
 	turns_used = 0
 	turn_changed.emit(turns_used, turns_remaining)

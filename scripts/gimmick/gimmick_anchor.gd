@@ -1,22 +1,16 @@
-class_name GimmickRainbow
+class_name GimmickAnchor
 extends GimmickBase
 
-## M4 무지개 칸: BFS 와일드카드. 리컬러 시 기믹 소멸하여 일반 셀로 전환.
-
-const RAINBOW_COLOR: int = -2
+## M5 앵커 칸: 중력 무시(고정). 리컬러/BFS/파괴 모두 정상.
 
 func can_recolor(cell, new_color: int) -> bool:
 	return true
-
-func on_recolor(cell, old_color: int, new_color: int, source: String = "bfs") -> void:
-	cell.color = new_color
-	cell.clear_gimmick()  # 무지개 소멸 → 일반 셀
 
 func can_bfs_traverse(cell, from_cell) -> bool:
 	return true
 
 func is_bfs_wildcard(cell) -> bool:
-	return true  # 모든 색과 매칭
+	return false
 
 func can_destroy(cell) -> bool:
 	return true
@@ -26,7 +20,7 @@ func on_destroy(cell) -> Dictionary:
 	return {"destroyed": true, "rewards": {}, "effects": []}
 
 func on_gravity(cell, grid) -> bool:
-	return true
+	return false  # 고정 — 세그먼트 분할 경계
 
 func get_visual_config(cell) -> Dictionary:
-	return {"type": "rainbow"}
+	return {"type": "icon", "icon": "anchor", "color": Color(0.2, 0.2, 0.2, 0.7)}

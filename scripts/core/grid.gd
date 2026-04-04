@@ -91,6 +91,19 @@ func get_all_main_cells() -> Array:
 				result.append(cell)
 	return result
 
+func get_cells_with_gimmick(gimmick_type: int) -> Array:
+	## 특정 기믹 타입을 가진 main area 셀 목록 반환.
+	var result: Array = []
+	for y in range(grid_size):
+		for x in range(grid_size):
+			var cell = get_cell(x, y)
+			if cell and cell.gimmick_type == gimmick_type:
+				result.append(cell)
+	return result
+
+func count_gimmick(gimmick_type: int) -> int:
+	return get_cells_with_gimmick(gimmick_type).size()
+
 # ─────────────────────────────────────────
 # 완성 라인 방지
 # ─────────────────────────────────────────

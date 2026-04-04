@@ -40,6 +40,12 @@ func initialize() -> void:
 	is_active = true
 	_timer_paused = false
 
+## 독 칸 시간 가속 처리 (grid 참조 필요, GameManager에서 주입)
+var _grid_ref = null
+
+func set_grid(grid) -> void:
+	_grid_ref = grid
+
 func on_action_performed(destroyed_blocks: int, combo_level: int) -> void:
 	if not is_active:
 		return
@@ -50,6 +56,15 @@ func on_action_performed(destroyed_blocks: int, combo_level: int) -> void:
 		var bonus = _calculate_bonus_time(destroyed_blocks, combo_level)
 		remaining_time = minf(remaining_time + bonus, max_time)
 		bonus_time_added.emit(bonus, "destroy_%d_combo_%d" % [destroyed_blocks, combo_level])
+
+	# 독 칸 시간 가속 처리
+	if _grid_ref != null:
+		_apply_poison_penalty()
+
+func add_time(amount: float) -> void:
+	## 시간 칸 등의 보너스 시간 추가.
+	remaining_time = minf(remaining_time + amount, max_time)
+	bonus_time_added.emit(amount, "gimmick_bonus")
 
 func pause_timer() -> void:
 	_timer_paused = true
@@ -88,6 +103,18 @@ func _process(delta: float) -> void:
 # ─────────────────────────────────────────
 # 내부 계산
 # ─────────────────────────────────────────
+
+func _apply_poison_penalty() -> void:
+	## 독 칸 존재 시 액션당 추가 시간 차감.
+	const BASE_TIME_COST: float = 0.5
+	var poison_cells = _grid_ref.get_cells_with_gimmick(GimmickBase.GimmickType.POISON)
+	if poison_cells.is_empty():
+		return
+	var extra_multiplier = 0.0
+	for cell in poison_cells:
+		extra_multiplier += cell.gimmick_data.get("speed_multiplier", 1.5) - 1.0
+	var penalty = BASE_TIME_COST * extra_multiplier
+	remaining_time = maxf(0.0, remaining_time - penalty)
 
 func _calculate_bonus_time(destroyed_blocks: int, combo_level: int) -> float:
 	var excess = destroyed_blocks - bonus_threshold + 1

@@ -40,6 +40,13 @@ func convert_score_to_currency(score: int) -> int:
 func get_total_currency_earned() -> int:
 	return _total_currency_earned
 
+func add_rewards(rewards: Dictionary) -> void:
+	## 기믹 파괴 보상(코인 등)을 처리한다.
+	if rewards.has("coins"):
+		var coin_score = rewards["coins"]
+		current_score += coin_score
+		score_changed.emit(current_score)
+
 func finalize_and_earn_currency() -> int:
 	## 스테이지/게임 종료 시 현재 점수를 재화로 변환하여 누적.
 	var earned = convert_score_to_currency(current_score)

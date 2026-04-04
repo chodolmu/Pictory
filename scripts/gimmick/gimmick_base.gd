@@ -33,7 +33,8 @@ func can_recolor(cell, new_color: int) -> bool:
 	return true
 
 ## 리컬러 완료 직후 호출.
-func on_recolor(cell, old_color: int, new_color: int) -> void:
+## source: "bfs"=BFS 리컬러, "paint"=페인트통 전파, "spread"=번짐 감염
+func on_recolor(cell, old_color: int, new_color: int, source: String = "bfs") -> void:
 	pass
 
 ## BFS 탐색 시 해당 셀로 진입 가능 여부.

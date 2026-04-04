@@ -1,0 +1,25 @@
+{
+  "stage_id": "test_gimmick_infinity",
+  "chapter": 0,
+  "stage_number": 0,
+  "grid_size": 7,
+  "num_colors": 4,
+  "turn_limit": 999,
+  "goal": { "type": "destroy_blocks", "target_count": 9999 },
+  "star_thresholds": [100, 200, 300],
+  "color_queue_config": { "stride": 3, "random_offset": 1 },
+  "gimmick_placements": [
+    {"x": 0, "y": 0, "type": "stone"},
+    {"x": 1, "y": 1, "type": "locked", "durability": 1},
+    {"x": 2, "y": 2, "type": "ice", "durability": 2},
+    {"x": 3, "y": 3, "type": "rainbow"},
+    {"x": 4, "y": 4, "type": "anchor"},
+    {"x": 5, "y": 5, "type": "paint_bucket", "data": {"direction": "row"}},
+    {"x": 6, "y": 0, "type": "coin", "data": {"coin_value": 15}},
+    {"x": 0, "y": 6, "type": "chain_mult"},
+    {"x": 3, "y": 0, "type": "time", "data": {"bonus_seconds": 5.0}},
+    {"x": 3, "y": 6, "type": "poison", "data": {"speed_multiplier": 1.5}}
+  ],
+  "buffer_rows": 7,
+  "metadata": { "name_ko": "기믹 통합 테스트 (무한)", "description": "S07 무한 모드 기믹 검증용" }
+}
