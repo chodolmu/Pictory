@@ -179,7 +179,30 @@ func _center_on_viewport() -> void:
 	var total_width = gs * (cell_size + cell_gap) - cell_gap
 	var total_height = (gs * 2) * (cell_size + cell_gap) - cell_gap + buffer_gap
 	var vp_size = get_viewport_rect().size
-	position = (vp_size - Vector2(total_width, total_height)) / 2.0
+
+	# HUD TopBar: 상단 60px, BottomBar: 하단 108px 확보
+	const TOP_RESERVED: float = 60.0
+	const BOTTOM_RESERVED: float = 108.0
+	var usable_height = vp_size.y - TOP_RESERVED - BOTTOM_RESERVED
+	var usable_top = TOP_RESERVED
+
+	# 그리드가 usable 영역보다 크면 cell_size를 줄임
+	if total_height > usable_height or total_width > vp_size.x - 24.0:
+		var scale_h = usable_height / total_height
+		var scale_w = (vp_size.x - 24.0) / total_width
+		var scale = minf(scale_h, scale_w)
+		cell_size = int(float(cell_size) * scale)
+		cell_size = maxi(cell_size, 20)
+		# 재계산
+		total_width = gs * (cell_size + cell_gap) - cell_gap
+		total_height = (gs * 2) * (cell_size + cell_gap) - cell_gap + buffer_gap
+		# cell_rect 재빌드
+		_clear_rects()
+		_build_rects()
+
+	var cx = (vp_size.x - total_width) / 2.0
+	var cy = usable_top + (usable_height - total_height) / 2.0
+	position = Vector2(cx, cy)
 
 # ─────────────────────────────────────────
 # 입력 처리

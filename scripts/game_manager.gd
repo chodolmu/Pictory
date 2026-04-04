@@ -47,7 +47,7 @@ const MAX_SNAPSHOTS := 10
 
 # UI
 @onready var _grid_view: GridView = $GridView
-@onready var _color_queue_ui = $ColorQueueUI
+@onready var _color_queue_ui = $HUD/BottomBar/ColorQueueUI
 @onready var _hud = $HUD
 
 # State
@@ -188,13 +188,14 @@ func _init_skill_system() -> void:
 
 	_skill_hud = SkillHUDScene.instantiate()
 	_hud.add_child(_skill_hud)
-	_skill_hud.position = Vector2(0, -70)
-	_skill_hud.anchor_left = 0.5
-	_skill_hud.anchor_right = 0.5
+	_skill_hud.anchor_left = 0.0
+	_skill_hud.anchor_right = 1.0
 	_skill_hud.anchor_top = 1.0
 	_skill_hud.anchor_bottom = 1.0
-	_skill_hud.offset_top = -70.0
-	_skill_hud.offset_bottom = -10.0
+	_skill_hud.offset_left = 0.0
+	_skill_hud.offset_top = -180.0
+	_skill_hud.offset_right = 0.0
+	_skill_hud.offset_bottom = -108.0
 	_skill_hud.setup(_skill_manager)
 	_skill_hud.skill_button_pressed.connect(_on_skill_button_pressed)
 

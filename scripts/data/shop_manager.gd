@@ -4,6 +4,7 @@ extends RefCounted
 ## IAP는 스텁으로 즉시 재화 지급.
 
 const PRODUCTS_PATH := "res://resources/shop/products.json"
+const ChapterUnlockScript = preload("res://scripts/data/chapter_unlock.gd")
 
 static func get_products() -> Dictionary:
 	var file = FileAccess.open(PRODUCTS_PATH, FileAccess.READ)
@@ -44,10 +45,10 @@ static func buy_currency(product_id: String) -> Dictionary:
 
 ## 챕터 해금 구매
 static func buy_chapter_unlock(chapter: int) -> Dictionary:
-	var result = ChapterUnlock.can_unlock(chapter)
+	var result = ChapterUnlockScript.can_unlock(chapter)
 	if not result["can_unlock"]:
 		return {"success": false, "reason": result["reason"]}
-	var ok = ChapterUnlock.try_unlock(chapter)
+	var ok = ChapterUnlockScript.try_unlock(chapter)
 	if ok:
 		_record_purchase("chapter_%d" % chapter)
 		return {"success": true}

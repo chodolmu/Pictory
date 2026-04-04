@@ -1,9 +1,11 @@
-[gd_scene load_steps=5 format=3 uid="uid://main_menu"]
+[gd_scene load_steps=7 format=3 uid="uid://main_menu"]
 
 [ext_resource type="Script" path="res://scripts/main/main_menu.gd" id="1_mm"]
 [ext_resource type="PackedScene" path="res://scenes/ui/infinity_confirm_popup.tscn" id="2_icp"]
 [ext_resource type="PackedScene" path="res://scenes/ui/options_popup.tscn" id="3_op"]
 [ext_resource type="PackedScene" path="res://scenes/ui/confirm_quit_popup.tscn" id="4_cqp"]
+[ext_resource type="PackedScene" path="res://scenes/ui/achievement_popup.tscn" id="5_ap"]
+[ext_resource type="PackedScene" path="res://scenes/ui/stamina_bar.tscn" id="6_sb"]
 
 [node name="MainMenu" type="Control"]
 anchors_preset = 15
@@ -15,55 +17,92 @@ script = ExtResource("1_mm")
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-color = Color(0.1, 0.1, 0.16, 1)
+color = Color(0.08, 0.08, 0.14, 1)
 
-[node name="VBox" type="VBoxContainer" parent="."]
+[node name="MarginContainer" type="MarginContainer" parent="."]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+theme_override_constants/margin_left = 20
+theme_override_constants/margin_right = 20
+theme_override_constants/margin_top = 16
+theme_override_constants/margin_bottom = 20
+
+[node name="VBox" type="VBoxContainer" parent="MarginContainer"]
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 theme_override_constants/separation = 12
 
-[node name="Header" type="HBoxContainer" parent="VBox"]
-custom_minimum_size = Vector2(0, 48)
+[node name="Header" type="HBoxContainer" parent="MarginContainer/VBox"]
+custom_minimum_size = Vector2(0, 52)
+theme_override_constants/separation = 8
 
-[node name="PlayerInfoContainer" type="HBoxContainer" parent="VBox/Header"]
+[node name="PlayerInfoContainer" type="HBoxContainer" parent="MarginContainer/VBox/Header"]
 size_flags_horizontal = 3
+theme_override_constants/separation = 6
 
-[node name="NicknameLabel" type="Label" parent="VBox/Header/PlayerInfoContainer"]
+[node name="NicknameLabel" type="Label" parent="MarginContainer/VBox/Header/PlayerInfoContainer"]
 text = "플레이어"
 vertical_alignment = 1
+theme_override_font_sizes/font_size = 18
 
-[node name="CurrencyLabel" type="Label" parent="VBox/Header"]
-text = "코인: 0"
+[node name="CurrencyLabel" type="Label" parent="MarginContainer/VBox/Header"]
+text = "💰 0"
 vertical_alignment = 1
+theme_override_font_sizes/font_size = 16
 
-[node name="SettingsButton" type="Button" parent="VBox/Header"]
+[node name="SettingsButton" type="Button" parent="MarginContainer/VBox/Header"]
+custom_minimum_size = Vector2(48, 48)
 text = "⚙"
 
-[node name="Spacer1" type="Control" parent="VBox"]
-custom_minimum_size = Vector2(0, 20)
+[node name="StaminaBarNode" parent="MarginContainer/VBox" instance=ExtResource("6_sb")]
 
-[node name="StageSelectButton" type="Button" parent="VBox"]
-custom_minimum_size = Vector2(0, 56)
+[node name="Spacer1" type="Control" parent="MarginContainer/VBox"]
+custom_minimum_size = Vector2(0, 24)
+size_flags_vertical = 3
+
+[node name="LogoLabel" type="Label" parent="MarginContainer/VBox"]
+text = "PICTORY"
+horizontal_alignment = 1
+theme_override_font_sizes/font_size = 48
+
+[node name="Spacer2" type="Control" parent="MarginContainer/VBox"]
+custom_minimum_size = Vector2(0, 16)
+
+[node name="StageSelectButton" type="Button" parent="MarginContainer/VBox"]
+custom_minimum_size = Vector2(0, 64)
 text = "스테이지 선택"
+theme_override_font_sizes/font_size = 20
 
-[node name="InfinityModeButton" type="Button" parent="VBox"]
-custom_minimum_size = Vector2(0, 56)
+[node name="InfinityModeButton" type="Button" parent="MarginContainer/VBox"]
+custom_minimum_size = Vector2(0, 64)
 text = "인피니티 모드"
+theme_override_font_sizes/font_size = 20
 
-[node name="HSeparator" type="HSeparator" parent="VBox"]
+[node name="Spacer3" type="Control" parent="MarginContainer/VBox"]
+size_flags_vertical = 3
 
-[node name="BottomButtons" type="HBoxContainer" parent="VBox"]
+[node name="HSeparator" type="HSeparator" parent="MarginContainer/VBox"]
+
+[node name="BottomButtons" type="HBoxContainer" parent="MarginContainer/VBox"]
+custom_minimum_size = Vector2(0, 56)
 alignment = 1
 theme_override_constants/separation = 8
 
-[node name="AchievementsButton" type="Button" parent="VBox/BottomButtons"]
+[node name="AchievementsButton" type="Button" parent="MarginContainer/VBox/BottomButtons"]
+size_flags_horizontal = 3
+custom_minimum_size = Vector2(0, 52)
 text = "업적"
 
-[node name="CollectionButton" type="Button" parent="VBox/BottomButtons"]
+[node name="CollectionButton" type="Button" parent="MarginContainer/VBox/BottomButtons"]
+size_flags_horizontal = 3
+custom_minimum_size = Vector2(0, 52)
 text = "컬렉션"
 
-[node name="ShopButton" type="Button" parent="VBox/BottomButtons"]
+[node name="ShopButton" type="Button" parent="MarginContainer/VBox/BottomButtons"]
+size_flags_horizontal = 3
+custom_minimum_size = Vector2(0, 52)
 text = "상점"
 
 [node name="InfinityConfirmPopup" parent="."]
@@ -74,3 +113,6 @@ instance = ExtResource("3_op")
 
 [node name="ConfirmQuitPopup" parent="."]
 instance = ExtResource("4_cqp")
+
+[node name="AchievementPopup" parent="."]
+instance = ExtResource("5_ap")

@@ -1,7 +1,8 @@
-[gd_scene load_steps=3 format=3 uid="uid://stage_select"]
+[gd_scene load_steps=4 format=3 uid="uid://stage_select"]
 
 [ext_resource type="Script" path="res://scripts/main/stage_select_screen.gd" id="1_ss"]
 [ext_resource type="PackedScene" path="res://scenes/ui/stage_confirm_popup.tscn" id="2_scp"]
+[ext_resource type="PackedScene" path="res://scenes/ui/stamina_bar.tscn" id="3_sb"]
 
 [node name="StageSelect" type="Control"]
 anchors_preset = 15
@@ -13,51 +14,73 @@ script = ExtResource("1_ss")
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-color = Color(0.12, 0.12, 0.18, 1)
+color = Color(0.08, 0.08, 0.14, 1)
 
 [node name="FillRect" type="ColorRect" parent="."]
 anchor_left = 0.0
 anchor_top = 1.0
 anchor_right = 1.0
 anchor_bottom = 1.0
-color = Color(0.18, 0.38, 0.28, 1)
+color = Color(0.18, 0.38, 0.28, 0.4)
 
-[node name="VBox" type="VBoxContainer" parent="."]
+[node name="MarginContainer" type="MarginContainer" parent="."]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+theme_override_constants/margin_left = 12
+theme_override_constants/margin_right = 12
+theme_override_constants/margin_top = 8
+theme_override_constants/margin_bottom = 12
+
+[node name="VBox" type="VBoxContainer" parent="MarginContainer"]
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 theme_override_constants/separation = 8
 
-[node name="Header" type="HBoxContainer" parent="VBox"]
-custom_minimum_size = Vector2(0, 44)
+[node name="Header" type="HBoxContainer" parent="MarginContainer/VBox"]
+custom_minimum_size = Vector2(0, 52)
+theme_override_constants/separation = 8
 
-[node name="BackButton" type="Button" parent="VBox/Header"]
+[node name="BackButton" type="Button" parent="MarginContainer/VBox/Header"]
+custom_minimum_size = Vector2(80, 48)
 text = "← 뒤로"
 
-[node name="TitleLabel" type="Label" parent="VBox/Header"]
-text = "스테이지 선택"
+[node name="TitleLabel" type="Label" parent="MarginContainer/VBox/Header"]
 size_flags_horizontal = 3
 horizontal_alignment = 1
 vertical_alignment = 1
+text = "스테이지 선택"
+theme_override_font_sizes/font_size = 20
 
-[node name="ChapterTabContainer" type="HBoxContainer" parent="VBox"]
-custom_minimum_size = Vector2(0, 36)
+[node name="StaminaBarNode" parent="MarginContainer/VBox" instance=ExtResource("3_sb")]
 
-[node name="ScrollContainer" type="ScrollContainer" parent="VBox"]
+[node name="ChapterScrollContainer" type="ScrollContainer" parent="MarginContainer/VBox"]
+custom_minimum_size = Vector2(0, 48)
+horizontal_scroll_mode = 1
+vertical_scroll_mode = 0
+
+[node name="ChapterTabContainer" type="HBoxContainer" parent="MarginContainer/VBox/ChapterScrollContainer"]
+custom_minimum_size = Vector2(0, 44)
+theme_override_constants/separation = 6
+
+[node name="ScrollContainer" type="ScrollContainer" parent="MarginContainer/VBox"]
 size_flags_vertical = 3
 
-[node name="StageGrid" type="GridContainer" parent="VBox/ScrollContainer"]
+[node name="StageGrid" type="GridContainer" parent="MarginContainer/VBox/ScrollContainer"]
 size_flags_horizontal = 3
 columns = 5
 theme_override_constants/h_separation = 8
 theme_override_constants/v_separation = 8
 
-[node name="UnlockInfoLabel" type="Label" parent="VBox"]
+[node name="UnlockInfoLabel" type="Label" parent="MarginContainer/VBox"]
 text = ""
 visible = false
 horizontal_alignment = 1
+autowrap_mode = 3
 
-[node name="UnlockButton" type="Button" parent="VBox"]
+[node name="UnlockButton" type="Button" parent="MarginContainer/VBox"]
+custom_minimum_size = Vector2(0, 48)
 text = "챕터 해금"
 visible = false
 

@@ -3,6 +3,7 @@ extends CanvasLayer
 ## 상점 화면.
 
 const ITEM_CARD_SCENE := "res://scenes/ui/shop_item_card.tscn"
+const ChapterUnlockScript = preload("res://scripts/data/chapter_unlock.gd")
 
 @onready var _currency_label: Label = $VBox/TopBar/CurrencyLabel
 @onready var _stamina_label: Label = $VBox/TopBar/StaminaLabel
@@ -77,7 +78,7 @@ func _build_chapter_tab() -> void:
 		var ch = p["chapter"]
 		var cost = p["cost_currency"]
 		var is_unlocked = SaveManager.is_chapter_unlocked(ch)
-		var check = ChapterUnlock.can_unlock(ch)
+		var check = ChapterUnlockScript.can_unlock(ch)
 		var card = _make_card()
 		if is_unlocked:
 			card.setup(p["id"], "📖", "챕터 %d" % ch, "해금됨", false)

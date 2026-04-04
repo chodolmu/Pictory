@@ -12,7 +12,6 @@ const IMAGEN_TAB = preload("res://scenes/ui/collection_tab_imagen.tscn")
 const ICON_TAB = preload("res://scenes/ui/collection_tab_icon.tscn")
 
 var _current_tab: int = -1
-var _tab_instances: Array = [null, null, null]
 
 func _ready() -> void:
 	_back_btn.pressed.connect(_on_back)
@@ -36,12 +35,11 @@ func _update_tab_buttons() -> void:
 func _show_tab_content(index: int) -> void:
 	for child in _content_container.get_children():
 		child.queue_free()
-	if _tab_instances[index] == null:
-		match index:
-			0: _tab_instances[index] = HUNYA_TAB.instantiate()
-			1: _tab_instances[index] = IMAGEN_TAB.instantiate()
-			2: _tab_instances[index] = ICON_TAB.instantiate()
-	var tab = _tab_instances[index]
+	var tab
+	match index:
+		0: tab = HUNYA_TAB.instantiate()
+		1: tab = IMAGEN_TAB.instantiate()
+		2: tab = ICON_TAB.instantiate()
 	_content_container.add_child(tab)
 
 func _on_back() -> void:

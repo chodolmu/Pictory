@@ -5,12 +5,12 @@ const StageButtonScene = preload("res://scenes/ui/stage_button.tscn")
 const ChapterUnlockScript = preload("res://scripts/data/chapter_unlock.gd")
 const ResultPopupScene = preload("res://scenes/ui/result_popup.tscn")
 
-@onready var _back_btn: Button = $VBox/Header/BackButton
-@onready var _chapter_tabs: HBoxContainer = $VBox/ChapterTabContainer
-@onready var _stage_grid: GridContainer = $VBox/ScrollContainer/StageGrid
-@onready var _unlock_info_label: Label = $VBox/UnlockInfoLabel
-@onready var _unlock_btn: Button = $VBox/UnlockButton
-@onready var _stage_confirm_popup = $StageConfirmPopup
+@onready var _back_btn: Button = $MarginContainer/VBox/Header/BackButton
+@onready var _chapter_tabs: HBoxContainer = $MarginContainer/VBox/ChapterScrollContainer/ChapterTabContainer
+@onready var _stage_grid: GridContainer = $MarginContainer/VBox/ScrollContainer/StageGrid
+@onready var _unlock_info_label: Label = $MarginContainer/VBox/UnlockInfoLabel
+@onready var _unlock_btn: Button = $MarginContainer/VBox/UnlockButton
+var _stage_confirm_popup = null
 @onready var _fill_rect: ColorRect = $FillRect
 
 var current_chapter: int = 1
@@ -18,9 +18,11 @@ var _result_chapter: int = 1
 var _result_stage: int = 1
 
 func _ready() -> void:
+	_stage_confirm_popup = find_child("StageConfirmPopup", false, false)
 	_back_btn.pressed.connect(_on_back)
 	_unlock_btn.pressed.connect(_on_unlock_button_pressed)
-	_stage_confirm_popup.start_requested.connect(_on_start_stage)
+	if _stage_confirm_popup:
+		_stage_confirm_popup.start_requested.connect(_on_start_stage)
 
 	var params = SceneManager.get_params()
 	var ch = params.get("chapter", 1)
@@ -45,7 +47,8 @@ func _show_result_popup(result: Dictionary) -> void:
 	if is_clear:
 		var max_stages = 10
 		var has_next = _result_stage < max_stages
-		popup.show_clear(stars, score, 0, has_next)
+		var currency: int = result.get("currency", 0)
+		popup.show_clear(stars, score, currency, has_next)
 		popup.next_stage_requested.connect(_on_result_next_stage)
 	else:
 		popup.show_game_over(score, {})
@@ -78,9 +81,9 @@ func _load_chapter(chapter: int) -> void:
 		var save = SaveManager.get_stage_data(config.stage_id)
 		var s_stars = save.get("stars", 0) if not save.is_empty() else 0
 		var locked = _is_stage_locked(config)
-		btn.setup(config.stage_id, config.stage_number, s_stars, locked)
-		btn.stage_selected.connect(_on_stage_selected)
 		_stage_grid.add_child(btn)
+		btn.stage_selected.connect(_on_stage_selected)
+		btn.setup(config.stage_id, config.stage_number, s_stars, locked)
 
 	_update_chapter_tabs()
 	_update_unlock_info()
@@ -130,7 +133,7 @@ func _update_unlock_info() -> void:
 
 func _on_stage_selected(s_id: String) -> void:
 	var config = LevelLoader.load_stage(s_id)
-	if config:
+	if config and _stage_confirm_popup:
 		_stage_confirm_popup.show_popup(config)
 
 func _on_start_stage(config) -> void:

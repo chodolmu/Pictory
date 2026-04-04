@@ -5,11 +5,12 @@ extends Control
 
 @onready var stage_label: Label = $TopBar/StageLabel
 @onready var turn_label: Label = $TopBar/TurnLabel
-@onready var destroyed_label: Label = $BottomBar/DestroyedLabel
-@onready var goal_label: Label = $BottomBar/GoalLabel
+@onready var destroyed_label: Label = $BottomBar/InfoRow/DestroyedLabel
+@onready var goal_label: Label = $BottomBar/InfoRow/GoalLabel
 @onready var chain_label: Label = $ChainLabel
-@onready var progress_bar: ProgressBar = $ProgressBar
-@onready var progress_label: Label = $ProgressBar/ProgressLabel
+@onready var progress_bar: ProgressBar = $BottomBar/ProgressBar
+@onready var progress_label: Label = $BottomBar/ProgressBar/ProgressLabel
+@onready var _back_btn: Button = $TopBar/BackButton
 
 var _mode: String = "story"
 var _total_destroyed: int = 0
@@ -18,6 +19,9 @@ var _goal: int = 100
 # ─────────────────────────────────────────
 # 초기화
 # ─────────────────────────────────────────
+
+func _ready() -> void:
+	_back_btn.pressed.connect(_on_back_pressed)
 
 func setup(mode: String, stage: int = 1, goal: int = 100, max_turns: int = 30) -> void:
 	_mode = mode
@@ -34,7 +38,7 @@ func setup(mode: String, stage: int = 1, goal: int = 100, max_turns: int = 30) -
 	else:
 		stage_label.text = "Infinity"
 		goal_label.text = ""
-		turn_label.text = "Turns: 0"
+		turn_label.text = "Time: --"
 		progress_bar.max_value = 1.0
 		progress_bar.value = 1.0
 		progress_label.text = ""
@@ -68,6 +72,7 @@ func setup_infinity_timer(time_limit: float) -> void:
 
 func update_timer(remaining: float) -> void:
 	progress_bar.value = remaining
+	turn_label.text = "Time: %ds" % int(remaining)
 	progress_label.text = "%d s" % int(remaining)
 	_update_bar_color()
 
@@ -105,3 +110,6 @@ func _update_bar_color() -> void:
 	if style is StyleBoxFlat:
 		style.bg_color = color
 		progress_bar.add_theme_stylebox_override("fill", style)
+
+func _on_back_pressed() -> void:
+	SceneManager.change_scene("res://scenes/main/stage_select.tscn")
