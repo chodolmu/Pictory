@@ -1,0 +1,35 @@
+{
+  "stage_id": "ch02_s09",
+  "chapter": 2,
+  "stage_number": 9,
+  "grid_size": 5,
+  "num_colors": 3,
+  "turn_limit": 21,
+  "goal": {
+    "type": "destroy_blocks",
+    "target_count": 26
+  },
+  "star_thresholds": [
+    1,
+    4,
+    7
+  ],
+  "color_queue_config": {
+    "stride": 3,
+    "random_offset": 1
+  },
+  "gimmick_placements": [
+    {
+      "type": "ice",
+      "x": 1,
+      "y": 1,
+      "durability": 1,
+      "data": {}
+    }
+  ],
+  "buffer_rows": 5,
+  "metadata": {
+    "name_ko": "마지막 관문",
+    "story_preview_key": "ch02_s09_preview"
+  }
+}

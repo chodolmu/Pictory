@@ -1,0 +1,23 @@
+{
+  "chapter": 6,
+  "stage": 10,
+  "type": "post",
+  "lines": [
+    {
+      "speaker": "hunya",
+      "name_display": "후냐",
+      "text": "페인트를 역이용했어! 색을 바꿔서 오히려 더 많이 지웠다고.",
+      "position": "left",
+      "expression": "happy",
+      "event": null
+    },
+    {
+      "speaker": "narrator",
+      "name_display": "",
+      "text": "페인트 구역을 벗어나자, 묵직한 쇠사슬 소리가 들려왔다. 앵커가 블록들을 붙잡고 있었다.",
+      "position": "center",
+      "expression": null,
+      "event": null
+    }
+  ]
+}

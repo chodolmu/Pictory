@@ -11,6 +11,7 @@ const ResultPopupScene = preload("res://scenes/ui/result_popup.tscn")
 @onready var _unlock_info_label: Label = $VBox/UnlockInfoLabel
 @onready var _unlock_btn: Button = $VBox/UnlockButton
 @onready var _stage_confirm_popup = $StageConfirmPopup
+@onready var _fill_rect: ColorRect = $FillRect
 
 var current_chapter: int = 1
 var _result_chapter: int = 1
@@ -83,6 +84,7 @@ func _load_chapter(chapter: int) -> void:
 
 	_update_chapter_tabs()
 	_update_unlock_info()
+	_update_fill_bg(chapter)
 
 func _is_stage_locked(config) -> bool:
 	if config.stage_number == 1:
@@ -133,6 +135,21 @@ func _on_stage_selected(s_id: String) -> void:
 
 func _on_start_stage(config) -> void:
 	StoryFlowController.start_stage(config.chapter, config.stage_number)
+
+func _update_fill_bg(chapter: int) -> void:
+	# 클리어된 스테이지 수에 따라 아래에서 위로 배경 채움
+	var total_stages := 10
+	var cleared := 0
+	for s in range(1, total_stages + 1):
+		var sid = "ch%02d_s%02d" % [chapter, s]
+		var save = SaveManager.get_stage_data(sid)
+		if not save.is_empty() and save.get("stars", 0) > 0:
+			cleared += 1
+
+	var ratio := float(cleared) / float(total_stages)
+	# anchor_top을 조절해서 아래에서 위로 채워지게
+	_fill_rect.anchor_top = 1.0 - ratio
+	_fill_rect.anchor_bottom = 1.0
 
 func _on_back() -> void:
 	SceneManager.change_scene("res://scenes/main/main_menu.tscn")

@@ -1,0 +1,23 @@
+{
+  "chapter": 5,
+  "stage": 10,
+  "type": "post",
+  "lines": [
+    {
+      "speaker": "hunya",
+      "name_display": "후냐",
+      "text": "돌을 피해서 길을 만드는 방법을 찾았어! 장애물도 전략이 될 수 있구나.",
+      "position": "left",
+      "expression": "happy",
+      "event": null
+    },
+    {
+      "speaker": "narrator",
+      "name_display": "",
+      "text": "돌 너머로 이상한 냄새가 풍겨왔다. 페인트 통들이 굴러다니고 있었다.",
+      "position": "center",
+      "expression": null,
+      "event": null
+    }
+  ]
+}

@@ -1,0 +1,31 @@
+{
+  "chapter": 2,
+  "stage": 1,
+  "type": "pre",
+  "lines": [
+    {
+      "speaker": "narrator",
+      "name_display": "",
+      "text": "색깔의 세계를 벗어나자, 차가운 바람이 후냐를 맞이했다.",
+      "position": "center",
+      "expression": null,
+      "event": null
+    },
+    {
+      "speaker": "hunya",
+      "name_display": "후냐",
+      "text": "으, 추워! 블록들이 얼어붙어 있어!",
+      "position": "left",
+      "expression": "surprised",
+      "event": null
+    },
+    {
+      "speaker": "hunya",
+      "name_display": "후냐",
+      "text": "얼어붙은 블록은... 여러 번 맞춰야 깨지는 건가? 해볼게.",
+      "position": "left",
+      "expression": "normal",
+      "event": null
+    }
+  ]
+}

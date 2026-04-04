@@ -1,0 +1,31 @@
+{
+  "chapter": 5,
+  "stage": 1,
+  "type": "pre",
+  "lines": [
+    {
+      "speaker": "narrator",
+      "name_display": "",
+      "text": "대지의 구역. 단단한 돌 블록이 길을 가로막고 있었다.",
+      "position": "center",
+      "expression": null,
+      "event": null
+    },
+    {
+      "speaker": "hunya",
+      "name_display": "후냐",
+      "text": "이건 색깔도 없고... 아예 부술 수가 없잖아!",
+      "position": "left",
+      "expression": "frustrated",
+      "event": null
+    },
+    {
+      "speaker": "hunya",
+      "name_display": "후냐",
+      "text": "돌 블록은 그냥 피해서 가야 하나? 어떻게 하면 되는 건지 생각해 봐야겠어.",
+      "position": "left",
+      "expression": "thinking",
+      "event": null
+    }
+  ]
+}

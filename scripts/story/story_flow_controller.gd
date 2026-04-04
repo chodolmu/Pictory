@@ -62,9 +62,12 @@ func _show_chapter_title() -> void:
 
 func _show_pre_dialogue() -> void:
 	current_state = FlowState.PRE_DIALOGUE
-	var story_path = "res://resources/story/chapter_%02d/stage_%02d_pre.json" % [chapter, stage]
+	# 챕터 첫 스테이지에서만 pre 대화 트리거
+	if stage != 1:
+		_start_game()
+		return
+	var story_path = "res://resources/story/chapter_%02d/chapter_%02d_pre.json" % [chapter, chapter]
 	if not FileAccess.file_exists(story_path):
-		# pre 다이얼로그 없음 → 즉시 게임
 		_start_game()
 		return
 	SceneManager.change_scene("res://scenes/story/story_screen.tscn", {
@@ -89,7 +92,11 @@ func _start_game() -> void:
 
 func _show_post_dialogue() -> void:
 	current_state = FlowState.POST_DIALOGUE
-	var story_path = "res://resources/story/chapter_%02d/stage_%02d_post.json" % [chapter, stage]
+	# 챕터 마지막 스테이지(10)에서만 post 대화 트리거
+	if stage != 10:
+		_show_result(_last_game_result)
+		return
+	var story_path = "res://resources/story/chapter_%02d/chapter_%02d_post.json" % [chapter, chapter]
 	if not FileAccess.file_exists(story_path):
 		_show_result(_last_game_result)
 		return

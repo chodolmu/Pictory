@@ -1,0 +1,49 @@
+{
+  "stage_id": "ch04_s06",
+  "chapter": 4,
+  "stage_number": 6,
+  "grid_size": 6,
+  "num_colors": 4,
+  "turn_limit": 22,
+  "goal": {
+    "type": "destroy_blocks",
+    "target_count": 26
+  },
+  "star_thresholds": [
+    1,
+    4,
+    7
+  ],
+  "color_queue_config": {
+    "stride": 3,
+    "random_offset": 1
+  },
+  "gimmick_placements": [
+    {
+      "type": "ice",
+      "x": 1,
+      "y": 1,
+      "durability": 1,
+      "data": {}
+    },
+    {
+      "type": "locked",
+      "x": 4,
+      "y": 4,
+      "durability": 1,
+      "data": {}
+    },
+    {
+      "type": "rainbow",
+      "x": 0,
+      "y": 2,
+      "durability": 0,
+      "data": {}
+    }
+  ],
+  "buffer_rows": 6,
+  "metadata": {
+    "name_ko": "뒤엉킨 블록",
+    "story_preview_key": "ch04_s06_preview"
+  }
+}

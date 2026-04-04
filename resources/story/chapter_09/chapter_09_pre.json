@@ -1,0 +1,31 @@
+{
+  "chapter": 9,
+  "stage": 1,
+  "type": "pre",
+  "lines": [
+    {
+      "speaker": "narrator",
+      "name_display": "",
+      "text": "퇴색의 구역. 블록들이 시간이 지날수록 색을 잃어가고 있었다.",
+      "position": "center",
+      "expression": null,
+      "event": null
+    },
+    {
+      "speaker": "hunya",
+      "name_display": "후냐",
+      "text": "블록 색이 점점 옅어지고 있어... 완전히 사라지기 전에 처리해야 해.",
+      "position": "left",
+      "expression": "worried",
+      "event": null
+    },
+    {
+      "speaker": "hunya",
+      "name_display": "후냐",
+      "text": "우선순위를 잘 정해야 할 것 같아. 먼저 사라질 블록부터!",
+      "position": "left",
+      "expression": "determined",
+      "event": null
+    }
+  ]
+}

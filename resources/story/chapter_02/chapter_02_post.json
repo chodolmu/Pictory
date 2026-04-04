@@ -1,0 +1,23 @@
+{
+  "chapter": 2,
+  "stage": 10,
+  "type": "post",
+  "lines": [
+    {
+      "speaker": "hunya",
+      "name_display": "후냐",
+      "text": "마지막 얼음까지 다 깼어! 따뜻해지는 느낌이야.",
+      "position": "left",
+      "expression": "happy",
+      "event": null
+    },
+    {
+      "speaker": "narrator",
+      "name_display": "",
+      "text": "얼음이 녹으며 길이 열렸다. 하지만 저 너머엔 더 단단한 무언가가 기다리고 있었다.",
+      "position": "center",
+      "expression": null,
+      "event": null
+    }
+  ]
+}

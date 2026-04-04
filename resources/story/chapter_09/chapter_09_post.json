@@ -1,0 +1,31 @@
+{
+  "chapter": 9,
+  "stage": 10,
+  "type": "post",
+  "lines": [
+    {
+      "speaker": "hunya",
+      "name_display": "후냐",
+      "text": "사라지기 전에 전부 해결했어! 아슬아슬했지만 해냈다.",
+      "position": "left",
+      "expression": "relieved",
+      "event": null
+    },
+    {
+      "speaker": "narrator",
+      "name_display": "",
+      "text": "퇴색의 구역이 빛을 되찾았다. 그리고 저 끝에서 이 세계의 심장부가 보이기 시작했다.",
+      "position": "center",
+      "expression": null,
+      "event": null
+    },
+    {
+      "speaker": "hunya",
+      "name_display": "후냐",
+      "text": "마지막이야. 지금까지 배운 모든 걸 쏟아부을 때야.",
+      "position": "left",
+      "expression": "determined",
+      "event": null
+    }
+  ]
+}

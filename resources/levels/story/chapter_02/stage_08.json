@@ -1,0 +1,35 @@
+{
+  "stage_id": "ch02_s08",
+  "chapter": 2,
+  "stage_number": 8,
+  "grid_size": 5,
+  "num_colors": 3,
+  "turn_limit": 20,
+  "goal": {
+    "type": "destroy_blocks",
+    "target_count": 24
+  },
+  "star_thresholds": [
+    1,
+    4,
+    6
+  ],
+  "color_queue_config": {
+    "stride": 3,
+    "random_offset": 1
+  },
+  "gimmick_placements": [
+    {
+      "type": "ice",
+      "x": 1,
+      "y": 1,
+      "durability": 1,
+      "data": {}
+    }
+  ],
+  "buffer_rows": 5,
+  "metadata": {
+    "name_ko": "막판 승부",
+    "story_preview_key": "ch02_s08_preview"
+  }
+}

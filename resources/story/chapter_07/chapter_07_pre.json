@@ -1,0 +1,31 @@
+{
+  "chapter": 7,
+  "stage": 1,
+  "type": "pre",
+  "lines": [
+    {
+      "speaker": "narrator",
+      "name_display": "",
+      "text": "쇠사슬 구역. 앵커 블록이 주변 블록들을 제자리에 단단히 묶고 있었다.",
+      "position": "center",
+      "expression": null,
+      "event": null
+    },
+    {
+      "speaker": "hunya",
+      "name_display": "후냐",
+      "text": "이 블록들이 아래로 안 떨어지네! 앵커가 붙잡고 있는 거야?",
+      "position": "left",
+      "expression": "surprised",
+      "event": null
+    },
+    {
+      "speaker": "hunya",
+      "name_display": "후냐",
+      "text": "앵커를 먼저 없애야 나머지도 자유로워지겠어.",
+      "position": "left",
+      "expression": "determined",
+      "event": null
+    }
+  ]
+}

@@ -1,0 +1,42 @@
+{
+  "stage_id": "ch07_s02",
+  "chapter": 7,
+  "stage_number": 2,
+  "grid_size": 7,
+  "num_colors": 5,
+  "turn_limit": 24,
+  "goal": {
+    "type": "destroy_blocks",
+    "target_count": 27
+  },
+  "star_thresholds": [
+    1,
+    4,
+    8
+  ],
+  "color_queue_config": {
+    "stride": 3,
+    "random_offset": 1
+  },
+  "gimmick_placements": [
+    {
+      "type": "ice",
+      "x": 1,
+      "y": 1,
+      "durability": 1,
+      "data": {}
+    },
+    {
+      "type": "locked",
+      "x": 5,
+      "y": 5,
+      "durability": 1,
+      "data": {}
+    }
+  ],
+  "buffer_rows": 7,
+  "metadata": {
+    "name_ko": "두 번째 도전",
+    "story_preview_key": "ch07_s02_preview"
+  }
+}

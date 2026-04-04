@@ -1,0 +1,31 @@
+{
+  "chapter": 4,
+  "stage": 1,
+  "type": "pre",
+  "lines": [
+    {
+      "speaker": "narrator",
+      "name_display": "",
+      "text": "눈부신 빛의 지대. 무지개 빛깔 블록이 세상을 가득 채우고 있었다.",
+      "position": "center",
+      "expression": null,
+      "event": null
+    },
+    {
+      "speaker": "hunya",
+      "name_display": "후냐",
+      "text": "와, 예쁘다! 근데 이 블록은 색이 없네... 아무 색으로나 쓸 수 있는 건가?",
+      "position": "left",
+      "expression": "surprised",
+      "event": null
+    },
+    {
+      "speaker": "hunya",
+      "name_display": "후냐",
+      "text": "잘 쓰면 엄청 강력할 것 같아. 신중하게 골라야겠어.",
+      "position": "left",
+      "expression": "thinking",
+      "event": null
+    }
+  ]
+}

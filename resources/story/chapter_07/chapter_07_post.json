@@ -1,0 +1,23 @@
+{
+  "chapter": 7,
+  "stage": 10,
+  "type": "post",
+  "lines": [
+    {
+      "speaker": "hunya",
+      "name_display": "후냐",
+      "text": "모든 앵커를 끊어냈어! 블록들이 자유롭게 떨어지기 시작했다.",
+      "position": "left",
+      "expression": "happy",
+      "event": null
+    },
+    {
+      "speaker": "narrator",
+      "name_display": "",
+      "text": "자유로워진 블록들 사이로 새로운 기운이 스며들었다. 색깔이 주변으로 번지기 시작했다.",
+      "position": "center",
+      "expression": null,
+      "event": null
+    }
+  ]
+}

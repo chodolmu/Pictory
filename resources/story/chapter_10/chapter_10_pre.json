@@ -1,0 +1,31 @@
+{
+  "chapter": 10,
+  "stage": 1,
+  "type": "pre",
+  "lines": [
+    {
+      "speaker": "narrator",
+      "name_display": "",
+      "text": "이 세계의 심장부. 모든 기믹이 한데 어우러진 마지막 구역이었다.",
+      "position": "center",
+      "expression": null,
+      "event": { "type": "flash_white", "args": { "duration": 0.5 } }
+    },
+    {
+      "speaker": "hunya",
+      "name_display": "후냐",
+      "text": "얼음, 잠금, 무지개, 돌, 페인트통, 앵커, 번짐, 퇴색... 전부 다 있어!",
+      "position": "left",
+      "expression": "surprised",
+      "event": null
+    },
+    {
+      "speaker": "hunya",
+      "name_display": "후냐",
+      "text": "지금까지 배운 것들을 전부 써야 해. 여기가 진짜 마지막이야.",
+      "position": "left",
+      "expression": "determined",
+      "event": null
+    }
+  ]
+}

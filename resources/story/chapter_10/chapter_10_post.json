@@ -1,0 +1,39 @@
+{
+  "chapter": 10,
+  "stage": 10,
+  "type": "post",
+  "lines": [
+    {
+      "speaker": "hunya",
+      "name_display": "후냐",
+      "text": "해냈어... 진짜로 해냈어!",
+      "position": "left",
+      "expression": "happy",
+      "event": null
+    },
+    {
+      "speaker": "narrator",
+      "name_display": "",
+      "text": "마지막 블록이 사라지자 세계 전체가 눈부신 빛으로 물들었다.",
+      "position": "center",
+      "expression": null,
+      "event": { "type": "flash_white", "args": { "duration": 1.5 } }
+    },
+    {
+      "speaker": "hunya",
+      "name_display": "후냐",
+      "text": "이 세계가... 다시 색깔을 찾았어. 내가 해낸 거야.",
+      "position": "left",
+      "expression": "happy",
+      "event": null
+    },
+    {
+      "speaker": "narrator",
+      "name_display": "",
+      "text": "후냐는 색깔의 세계를 되살렸다. 그리고 이마젠들과 함께 새로운 이야기를 시작했다.",
+      "position": "center",
+      "expression": null,
+      "event": null
+    }
+  ]
+}

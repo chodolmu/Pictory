@@ -1,0 +1,31 @@
+{
+  "chapter": 1,
+  "stage": 10,
+  "type": "post",
+  "lines": [
+    {
+      "speaker": "hunya",
+      "name_display": "후냐",
+      "text": "해냈어! 같은 색끼리 줄을 맞추면 사라지는 거구나!",
+      "position": "left",
+      "expression": "happy",
+      "event": null
+    },
+    {
+      "speaker": "hunya",
+      "name_display": "후냐",
+      "text": "이 세계의 규칙... 이제 제대로 파악한 것 같아.",
+      "position": "left",
+      "expression": "normal",
+      "event": null
+    },
+    {
+      "speaker": "narrator",
+      "name_display": "",
+      "text": "그 순간, 세계의 깊은 곳에서 새로운 기운이 흘러나오기 시작했다.",
+      "position": "center",
+      "expression": null,
+      "event": null
+    }
+  ]
+}

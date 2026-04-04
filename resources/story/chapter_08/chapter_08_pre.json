@@ -1,0 +1,31 @@
+{
+  "chapter": 8,
+  "stage": 1,
+  "type": "pre",
+  "lines": [
+    {
+      "speaker": "narrator",
+      "name_display": "",
+      "text": "번짐의 구역. 블록들이 살아있는 듯 색깔을 주변으로 퍼뜨리고 있었다.",
+      "position": "center",
+      "expression": null,
+      "event": null
+    },
+    {
+      "speaker": "hunya",
+      "name_display": "후냐",
+      "text": "블록이 스스로 색을 번지게 한다고? 내가 손도 안 댔는데!",
+      "position": "left",
+      "expression": "surprised",
+      "event": null
+    },
+    {
+      "speaker": "hunya",
+      "name_display": "후냐",
+      "text": "퍼지기 전에 빨리 처리해야 해. 서두르자!",
+      "position": "left",
+      "expression": "determined",
+      "event": null
+    }
+  ]
+}

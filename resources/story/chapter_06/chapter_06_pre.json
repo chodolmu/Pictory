@@ -1,0 +1,31 @@
+{
+  "chapter": 6,
+  "stage": 1,
+  "type": "pre",
+  "lines": [
+    {
+      "speaker": "narrator",
+      "name_display": "",
+      "text": "페인트 냄새가 진동하는 구역. 페인트 통들이 곳곳에 자리잡고 있었다.",
+      "position": "center",
+      "expression": null,
+      "event": null
+    },
+    {
+      "speaker": "hunya",
+      "name_display": "후냐",
+      "text": "페인트 통이야! 건드리면... 주변 색깔이 바뀌는 건가?",
+      "position": "left",
+      "expression": "curious",
+      "event": null
+    },
+    {
+      "speaker": "hunya",
+      "name_display": "후냐",
+      "text": "독이 될 수도 있고 약이 될 수도 있겠는데. 잘 계산해야 해.",
+      "position": "left",
+      "expression": "thinking",
+      "event": null
+    }
+  ]
+}

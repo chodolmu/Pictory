@@ -1,0 +1,72 @@
+{
+  "stage_id": "ch07_s10",
+  "chapter": 7,
+  "stage_number": 10,
+  "grid_size": 7,
+  "num_colors": 5,
+  "turn_limit": 32,
+  "goal": {
+    "type": "destroy_blocks",
+    "target_count": 43
+  },
+  "star_thresholds": [
+    1,
+    6,
+    10
+  ],
+  "color_queue_config": {
+    "stride": 3,
+    "random_offset": 1
+  },
+  "gimmick_placements": [
+    {
+      "type": "ice",
+      "x": 1,
+      "y": 1,
+      "durability": 1,
+      "data": {}
+    },
+    {
+      "type": "locked",
+      "x": 5,
+      "y": 5,
+      "durability": 1,
+      "data": {}
+    },
+    {
+      "type": "rainbow",
+      "x": 0,
+      "y": 3,
+      "durability": 0,
+      "data": {}
+    },
+    {
+      "type": "stone",
+      "x": 6,
+      "y": 3,
+      "durability": 0,
+      "data": {}
+    },
+    {
+      "type": "paint_bucket",
+      "x": 3,
+      "y": 0,
+      "durability": 0,
+      "data": {
+        "paint_color": 2
+      }
+    },
+    {
+      "type": "anchor",
+      "x": 3,
+      "y": 6,
+      "durability": 0,
+      "data": {}
+    }
+  ],
+  "buffer_rows": 7,
+  "metadata": {
+    "name_ko": "최후의 결전",
+    "story_preview_key": "ch07_s10_preview"
+  }
+}

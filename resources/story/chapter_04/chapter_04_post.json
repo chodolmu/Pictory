@@ -1,0 +1,23 @@
+{
+  "chapter": 4,
+  "stage": 10,
+  "type": "post",
+  "lines": [
+    {
+      "speaker": "hunya",
+      "name_display": "후냐",
+      "text": "무지개 블록 덕분에 한 번에 해결했어! 색깔을 자유자재로 쓸 수 있다니.",
+      "position": "left",
+      "expression": "happy",
+      "event": null
+    },
+    {
+      "speaker": "narrator",
+      "name_display": "",
+      "text": "빛이 사라지며 대지가 드러났다. 단단한 돌들이 길을 막고 서 있었다.",
+      "position": "center",
+      "expression": null,
+      "event": null
+    }
+  ]
+}

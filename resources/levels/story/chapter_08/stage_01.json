@@ -1,0 +1,35 @@
+{
+  "stage_id": "ch08_s01",
+  "chapter": 8,
+  "stage_number": 1,
+  "grid_size": 7,
+  "num_colors": 6,
+  "turn_limit": 25,
+  "goal": {
+    "type": "destroy_blocks",
+    "target_count": 28
+  },
+  "star_thresholds": [
+    1,
+    5,
+    8
+  ],
+  "color_queue_config": {
+    "stride": 3,
+    "random_offset": 1
+  },
+  "gimmick_placements": [
+    {
+      "type": "ice",
+      "x": 1,
+      "y": 1,
+      "durability": 1,
+      "data": {}
+    }
+  ],
+  "buffer_rows": 7,
+  "metadata": {
+    "name_ko": "첫 발걸음",
+    "story_preview_key": "ch08_s01_preview"
+  }
+}

@@ -1,0 +1,42 @@
+{
+  "stage_id": "ch03_s09",
+  "chapter": 3,
+  "stage_number": 9,
+  "grid_size": 5,
+  "num_colors": 4,
+  "turn_limit": 23,
+  "goal": {
+    "type": "destroy_blocks",
+    "target_count": 29
+  },
+  "star_thresholds": [
+    1,
+    4,
+    7
+  ],
+  "color_queue_config": {
+    "stride": 3,
+    "random_offset": 1
+  },
+  "gimmick_placements": [
+    {
+      "type": "ice",
+      "x": 1,
+      "y": 1,
+      "durability": 1,
+      "data": {}
+    },
+    {
+      "type": "locked",
+      "x": 3,
+      "y": 3,
+      "durability": 1,
+      "data": {}
+    }
+  ],
+  "buffer_rows": 5,
+  "metadata": {
+    "name_ko": "마지막 관문",
+    "story_preview_key": "ch03_s09_preview"
+  }
+}
