@@ -1,0 +1,1078 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Pictory Puzzle Prototype v2</title>
+<style>
+:root {
+  --cell-size: min(12vw, 50px);
+  --cell-gap: 2px;
+  --grid-width: calc(var(--cell-size) * 7 + var(--cell-gap) * 6);
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html, body { width: 100%; height: 100%; overflow: hidden; }
+body {
+  font-family: 'Segoe UI', sans-serif;
+  background: #1a1a2e;
+  color: #fff;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
+#game-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  max-width: 420px;
+  height: 100vh;
+  height: 100dvh;
+  padding: 12px 8px;
+  gap: 10px;
+}
+
+/* ── MAIN MENU ────────────────────────────────── */
+#main-menu {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 32px;
+  height: 100%;
+  width: 100%;
+}
+#main-menu h1 {
+  font-size: 42px;
+  background: linear-gradient(135deg, #ff6b6b, #feca57, #48dbfb, #ff9ff3);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+#main-menu .subtitle { color: #aaa; font-size: 13px; margin-top: -20px; }
+.mode-buttons { display: flex; flex-direction: column; gap: 14px; width: 80%; max-width: 280px; }
+.mode-btn {
+  padding: 18px 16px;
+  border-radius: 14px;
+  border: 2px solid rgba(255,255,255,0.15);
+  background: rgba(255,255,255,0.06);
+  color: #fff;
+  cursor: pointer;
+  transition: all 0.15s;
+  text-align: left;
+}
+.mode-btn:active { transform: scale(0.97); background: rgba(255,255,255,0.12); }
+.mode-btn .mode-title { font-size: 18px; font-weight: bold; margin-bottom: 4px; }
+.mode-btn .mode-desc { font-size: 12px; color: #aaa; }
+.mode-btn.story-mode { border-color: rgba(72,219,251,0.3); }
+.mode-btn.time-mode { border-color: rgba(255,107,107,0.3); }
+
+/* ── STAGE SELECT ─────────────────────────────── */
+#stage-select {
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 24px;
+  height: 100%;
+  width: 100%;
+}
+#stage-select h2 { font-size: 24px; color: #48dbfb; }
+#stage-select p { color: #aaa; font-size: 13px; }
+#stage-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 10px;
+}
+.stage-btn {
+  width: 56px;
+  height: 56px;
+  border-radius: 12px;
+  border: 2px solid rgba(255,255,255,0.2);
+  background: rgba(255,255,255,0.08);
+  color: #fff;
+  font-size: 18px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.stage-btn:active { background: rgba(255,255,255,0.2); transform: scale(0.95); }
+.stage-btn.cleared { background: rgba(72,219,251,0.2); border-color: #48dbfb; }
+#stage-back-btn {
+  margin-top: 8px;
+  padding: 10px 28px;
+  border-radius: 10px;
+  border: none;
+  background: rgba(255,255,255,0.1);
+  color: #aaa;
+  font-size: 14px;
+  cursor: pointer;
+}
+#stage-back-btn:active { background: rgba(255,255,255,0.2); }
+
+.time-high { font-size: 11px; color: #feca57; margin-top: 4px; }
+
+/* ── HUD ──────────────────────────────────────── */
+#hud {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: var(--grid-width);
+  max-width: 100%;
+  padding: 8px 14px;
+  background: rgba(255,255,255,0.08);
+  border-radius: 12px;
+  font-size: 13px;
+  flex-shrink: 0;
+}
+#hud .hud-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1px;
+}
+#hud .hud-label { font-size: 10px; color: #aaa; letter-spacing: 0.5px; }
+#hud .hud-value { font-size: 18px; font-weight: bold; }
+
+/* ── GRID ─────────────────────────────────────── */
+#grid-wrapper {
+  position: relative;
+  overflow: hidden;
+  border-radius: 12px;
+  background: rgba(255,255,255,0.05);
+  padding: 5px;
+  flex-shrink: 0;
+}
+#grid {
+  display: grid;
+  grid-template-columns: repeat(7, var(--cell-size));
+  grid-template-rows: repeat(7, var(--cell-size));
+  gap: var(--cell-gap);
+}
+.cell {
+  width: var(--cell-size);
+  height: var(--cell-size);
+  border-radius: 7px;
+  cursor: pointer;
+  transition: transform 0.1s, opacity 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+.cell:active { transform: scale(0.92); }
+.cell.destroying { animation: destroyAnim 0.4s ease-out forwards; }
+@keyframes destroyAnim {
+  0% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.3); opacity: 0.7; }
+  100% { transform: scale(0); opacity: 0; }
+}
+.cell.falling { animation: fallAnim 0.3s ease-in; }
+@keyframes fallAnim {
+  from { transform: translateY(calc(var(--cell-size) * -1 - var(--cell-gap))); opacity: 0.5; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+/* ── COLOR QUEUE ──────────────────────────────── */
+#color-queue {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 20px;
+  background: rgba(255,255,255,0.08);
+  border-radius: 12px;
+  flex-shrink: 0;
+}
+#color-queue .queue-label {
+  font-size: 10px;
+  color: #aaa;
+  letter-spacing: 0.5px;
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+}
+#color-queue .active-color {
+  width: calc(var(--cell-size) * 1.2);
+  height: calc(var(--cell-size) * 1.2);
+  border-radius: 50%;
+  border: 3px solid #fff;
+  box-shadow: 0 0 14px rgba(255,255,255,0.5);
+  flex-shrink: 0;
+}
+#color-queue .queue-separator {
+  width: 2px;
+  height: 36px;
+  background: rgba(255,255,255,0.15);
+  border-radius: 1px;
+  flex-shrink: 0;
+}
+#color-queue .queue-next {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+#color-queue .queue-item {
+  width: calc(var(--cell-size) * 0.8);
+  height: calc(var(--cell-size) * 0.8);
+  border-radius: 50%;
+  border: 2px solid rgba(255,255,255,0.2);
+  opacity: 0.7;
+  flex-shrink: 0;
+}
+#color-queue .queue-item:first-child { opacity: 0.85; }
+#color-queue .queue-item:last-child { opacity: 0.5; }
+
+/* ── PROGRESS BAR ─────────────────────────────── */
+#progress-bar-wrapper {
+  width: var(--grid-width);
+  max-width: 100%;
+  height: 18px;
+  background: rgba(255,255,255,0.08);
+  border-radius: 9px;
+  overflow: hidden;
+  position: relative;
+  flex-shrink: 0;
+}
+#progress-bar {
+  height: 100%;
+  background: linear-gradient(90deg, #48dbfb, #a29bfe);
+  border-radius: 9px;
+  transition: width 0.4s ease;
+  min-width: 0;
+}
+#progress-text {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  font-weight: bold;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+}
+
+/* ── TIMER BAR (Time Attack) ──────────────────── */
+#timer-bar-wrapper {
+  display: none;
+  width: var(--grid-width);
+  max-width: 100%;
+  height: 22px;
+  background: rgba(255,255,255,0.08);
+  border-radius: 11px;
+  overflow: hidden;
+  position: relative;
+  flex-shrink: 0;
+}
+#timer-bar {
+  height: 100%;
+  background: linear-gradient(90deg, #ff6b6b, #feca57);
+  border-radius: 11px;
+  transition: width 0.1s linear;
+  width: 100%;
+}
+#timer-text {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: bold;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+}
+
+/* ── RESULT OVERLAY ───────────────────────────── */
+#overlay {
+  display: none;
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.7);
+  justify-content: center;
+  align-items: center;
+  z-index: 100;
+}
+#overlay.show { display: flex; }
+#result-panel {
+  background: #16213e;
+  border-radius: 20px;
+  padding: 32px 28px;
+  text-align: center;
+  width: 85%;
+  max-width: 320px;
+}
+#result-panel h2 { font-size: 26px; margin-bottom: 6px; }
+#result-panel .result-info { font-size: 14px; color: #aaa; margin-bottom: 6px; }
+#result-panel .result-sub { font-size: 12px; color: #feca57; margin-bottom: 16px; }
+#result-panel .btn-row {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+}
+#result-panel button {
+  padding: 10px 22px;
+  border-radius: 10px;
+  border: none;
+  font-size: 15px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.15s;
+  flex: 1;
+  max-width: 120px;
+}
+#result-panel button:active { transform: scale(0.95); }
+#btn-retry { background: #ee5a24; color: #fff; }
+#btn-next { background: #48dbfb; color: #1a1a2e; }
+#btn-back { background: rgba(255,255,255,0.15); color: #fff; }
+
+/* ── CHAIN COMBO ──────────────────────────────── */
+#chain-display {
+  position: fixed;
+  top: 45%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 42px;
+  font-weight: bold;
+  pointer-events: none;
+  opacity: 0;
+  z-index: 50;
+  text-shadow: 0 0 20px rgba(255,255,255,0.5);
+}
+#chain-display.show { animation: chainPop 0.8s ease-out forwards; }
+@keyframes chainPop {
+  0% { opacity: 0; transform: translate(-50%, -50%) scale(0.5); }
+  30% { opacity: 1; transform: translate(-50%, -50%) scale(1.3); }
+  100% { opacity: 0; transform: translate(-50%, -60%) scale(1); }
+}
+
+/* ── BACK BUTTON ──────────────────────────────── */
+#btn-ingame-back {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  background: rgba(255,255,255,0.1);
+  border: none;
+  color: #aaa;
+  font-size: 20px;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+}
+#btn-ingame-back:active { background: rgba(255,255,255,0.2); }
+
+/* ── GAME SCREEN ──────────────────────────────── */
+#game-screen {
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  height: 100%;
+  width: 100%;
+  position: relative;
+}
+</style>
+</head>
+<body>
+
+<div id="game-container">
+
+  <!-- ══ MAIN MENU ══ -->
+  <div id="main-menu">
+    <h1>PICTORY</h1>
+    <p class="subtitle">컬러 퍼즐 v2</p>
+    <div class="mode-buttons">
+      <div class="mode-btn story-mode" onclick="showStageSelect()">
+        <div class="mode-title">&#x1F4D6; 스토리 모드</div>
+        <div class="mode-desc">제한된 턴 안에 목표 블록을 파괴하세요</div>
+      </div>
+      <div class="mode-btn time-mode" onclick="startTimeAttack(60)">
+        <div class="mode-title">&#x267E; 무한 모드 (60초)</div>
+        <div class="mode-desc">60초 안에 최대한 많이 파괴하세요</div>
+        <div class="time-high" id="high-main"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ STAGE SELECT (Story) ══ -->
+  <div id="stage-select">
+    <h2>&#x1F4D6; 스토리 모드</h2>
+    <p>스테이지를 선택하세요</p>
+    <div id="stage-grid"></div>
+    <button id="stage-back-btn" onclick="showMainMenu()">&#x2190; 뒤로</button>
+  </div>
+
+
+  <!-- ══ IN-GAME ══ -->
+  <div id="game-screen">
+    <button id="btn-ingame-back" onclick="exitToMenu()">&#x2190;</button>
+    <div id="hud">
+      <div class="hud-item">
+        <span class="hud-label" id="hud-label-1">STAGE</span>
+        <span class="hud-value" id="hud-val-1">1</span>
+      </div>
+      <div class="hud-item">
+        <span class="hud-label" id="hud-label-2">TURNS</span>
+        <span class="hud-value" id="hud-val-2">15</span>
+      </div>
+      <div class="hud-item">
+        <span class="hud-label" id="hud-label-3">GOAL</span>
+        <span class="hud-value" id="hud-val-3">100</span>
+      </div>
+    </div>
+    <!-- Story: progress bar -->
+    <div id="progress-bar-wrapper">
+      <div id="progress-bar" style="width:0%"></div>
+      <div id="progress-text">0 / 100</div>
+    </div>
+    <!-- Time Attack: timer bar -->
+    <div id="timer-bar-wrapper">
+      <div id="timer-bar"></div>
+      <div id="timer-text">60s</div>
+    </div>
+    <div id="grid-wrapper">
+      <div id="grid"></div>
+    </div>
+    <!-- Color Queue (replaces palette) -->
+    <div id="color-queue">
+      <div class="active-color" id="queue-active"></div>
+      <div class="queue-separator"></div>
+      <div class="queue-next" id="queue-next"></div>
+      <div class="queue-label">NEXT</div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ OVERLAY ══ -->
+<div id="overlay">
+  <div id="result-panel">
+    <h2 id="result-title">CLEAR!</h2>
+    <p class="result-info" id="result-info"></p>
+    <p class="result-sub" id="result-sub"></p>
+    <div class="btn-row">
+      <button id="btn-back" onclick="exitToMenu()">목록</button>
+      <button id="btn-retry" onclick="retryGame()">재도전</button>
+      <button id="btn-next" onclick="nextStage()">다음</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ CHAIN ══ -->
+<div id="chain-display"></div>
+
+<script>
+// ══════════════════════════════════════════════════════════════════════
+// CONFIG
+// ══════════════════════════════════════════════════════════════════════
+const COLS = 7, ROWS = 7, BUFFER_ROWS = 7;
+
+const COLORS_3 = ['#ff6b6b', '#48dbfb', '#feca57'];
+const COLORS_4 = ['#ff6b6b', '#48dbfb', '#feca57', '#a29bfe'];
+
+const STAGES = [
+  { turns: 15, goal: 100, colorCount: 3 },
+  { turns: 15, goal: 110, colorCount: 3 },
+  { turns: 14, goal: 120, colorCount: 3 },
+  { turns: 14, goal: 130, colorCount: 3 },
+  { turns: 15, goal: 120, colorCount: 4 },
+  { turns: 14, goal: 135, colorCount: 4 },
+  { turns: 13, goal: 150, colorCount: 4 },
+  { turns: 13, goal: 160, colorCount: 4 },
+  { turns: 12, goal: 175, colorCount: 4 },
+  { turns: 12, goal: 190, colorCount: 4 },
+];
+
+// ══════════════════════════════════════════════════════════════════════
+// STATE
+// ══════════════════════════════════════════════════════════════════════
+let grid = [];
+let currentStage = 0;
+let turns = 0;
+let destroyed = 0;
+let goal = 0;
+let colors = COLORS_3;
+let clearedStages = new Set();
+let isAnimating = false;
+
+// Color Queue
+let colorQueue = [];  // [0] = active, [1..3] = next
+const QUEUE_SIZE = 4; // 1 active + 3 next
+
+// Mode: 'story' | 'time'
+let gameMode = 'story';
+let timeLimit = 0;
+let timeRemaining = 0;
+let timerInterval = null;
+let highScores = { 60: 0 };
+
+// Load high scores
+try {
+  const saved = JSON.parse(localStorage.getItem('pictory_highscores_v2'));
+  if (saved) highScores = saved;
+} catch(e) {}
+
+// ══════════════════════════════════════════════════════════════════════
+// COLOR QUEUE
+// ══════════════════════════════════════════════════════════════════════
+function randomQueueColor() {
+  return colors[Math.floor(Math.random() * colors.length)];
+}
+
+function initQueue() {
+  colorQueue = [];
+  for (let i = 0; i < QUEUE_SIZE; i++) {
+    colorQueue.push(randomQueueColor());
+  }
+  renderQueue();
+}
+
+function advanceQueue() {
+  colorQueue.shift();
+  colorQueue.push(randomQueueColor());
+  renderQueue();
+}
+
+function getActiveColor() {
+  return colorQueue[0];
+}
+
+function renderQueue() {
+  // Active color
+  const activeEl = document.getElementById('queue-active');
+  activeEl.style.background = colorQueue[0];
+
+  // Next colors
+  const nextContainer = document.getElementById('queue-next');
+  nextContainer.innerHTML = '';
+  for (let i = 1; i < QUEUE_SIZE; i++) {
+    const item = document.createElement('div');
+    item.className = 'queue-item';
+    item.style.background = colorQueue[i];
+    nextContainer.appendChild(item);
+  }
+}
+
+// ══════════════════════════════════════════════════════════════════════
+// SCREEN MANAGEMENT
+// ══════════════════════════════════════════════════════════════════════
+function hideAll() {
+  document.getElementById('main-menu').style.display = 'none';
+  document.getElementById('stage-select').style.display = 'none';
+  document.getElementById('game-screen').style.display = 'none';
+  document.getElementById('overlay').className = '';
+  stopTimer();
+}
+
+function showMainMenu() {
+  hideAll();
+  document.getElementById('main-menu').style.display = 'flex';
+  updateHighScoreDisplay();
+}
+
+function showStageSelect() {
+  hideAll();
+  document.getElementById('stage-select').style.display = 'flex';
+  buildStageSelect();
+}
+
+function exitToMenu() {
+  stopTimer();
+  showMainMenu();
+}
+
+// ══════════════════════════════════════════════════════════════════════
+// STAGE SELECT (Story)
+// ══════════════════════════════════════════════════════════════════════
+function buildStageSelect() {
+  const container = document.getElementById('stage-grid');
+  container.innerHTML = '';
+  for (let i = 0; i < 10; i++) {
+    const btn = document.createElement('button');
+    btn.className = 'stage-btn' + (clearedStages.has(i) ? ' cleared' : '');
+    btn.textContent = i + 1;
+    btn.onclick = () => startStoryStage(i);
+    container.appendChild(btn);
+  }
+}
+
+// ══════════════════════════════════════════════════════════════════════
+// HIGH SCORE DISPLAY
+// ══════════════════════════════════════════════════════════════════════
+function updateHighScoreDisplay() {
+  const el = document.getElementById('high-main');
+  if (el) {
+    el.textContent = highScores[60] > 0 ? `Best: ${highScores[60]}개` : '';
+  }
+}
+
+// ══════════════════════════════════════════════════════════════════════
+// GAME INIT — STORY MODE
+// ══════════════════════════════════════════════════════════════════════
+function startStoryStage(stageIdx) {
+  gameMode = 'story';
+  currentStage = stageIdx;
+  const cfg = STAGES[stageIdx];
+  turns = cfg.turns;
+  goal = cfg.goal;
+  destroyed = 0;
+  colors = cfg.colorCount === 3 ? COLORS_3 : COLORS_4;
+  isAnimating = false;
+
+  initGrid();
+  initQueue();
+
+  // HUD setup for story
+  document.getElementById('hud-label-1').textContent = 'STAGE';
+  document.getElementById('hud-val-1').textContent = stageIdx + 1;
+  document.getElementById('hud-label-2').textContent = 'TURNS';
+  document.getElementById('hud-val-2').textContent = turns;
+  document.getElementById('hud-label-3').textContent = 'GOAL';
+  document.getElementById('hud-val-3').textContent = goal;
+
+  document.getElementById('progress-bar-wrapper').style.display = 'block';
+  document.getElementById('timer-bar-wrapper').style.display = 'none';
+  updateStoryHUD();
+
+  hideAll();
+  document.getElementById('game-screen').style.display = 'flex';
+}
+
+// ══════════════════════════════════════════════════════════════════════
+// GAME INIT — TIME ATTACK (무한 모드)
+// ══════════════════════════════════════════════════════════════════════
+function startTimeAttack(seconds) {
+  gameMode = 'time';
+  timeLimit = seconds;
+  timeRemaining = seconds;
+  destroyed = 0;
+  turns = 0;
+  colors = COLORS_4;
+  isAnimating = false;
+
+  initGrid();
+  initQueue();
+
+  // HUD setup for time attack
+  document.getElementById('hud-label-1').textContent = 'TIME';
+  document.getElementById('hud-val-1').textContent = formatTime(timeRemaining);
+  document.getElementById('hud-label-2').textContent = 'DESTROYED';
+  document.getElementById('hud-val-2').textContent = '0';
+  document.getElementById('hud-label-3').textContent = 'TURNS';
+  document.getElementById('hud-val-3').textContent = '0';
+
+  document.getElementById('progress-bar-wrapper').style.display = 'none';
+  document.getElementById('timer-bar-wrapper').style.display = 'block';
+  updateTimeHUD();
+
+  hideAll();
+  document.getElementById('game-screen').style.display = 'flex';
+
+  startTimer();
+}
+
+// ══════════════════════════════════════════════════════════════════════
+// TIMER
+// ══════════════════════════════════════════════════════════════════════
+function startTimer() {
+  stopTimer();
+  const startTime = Date.now();
+
+  timerInterval = setInterval(() => {
+    const elapsed = Date.now() - startTime;
+    timeRemaining = Math.max(0, timeLimit - elapsed / 1000);
+    updateTimeHUD();
+
+    if (timeRemaining <= 0) {
+      stopTimer();
+      if (!isAnimating) {
+        endTimeAttack();
+      } else {
+        const check = setInterval(() => {
+          if (!isAnimating) {
+            clearInterval(check);
+            endTimeAttack();
+          }
+        }, 100);
+      }
+    }
+  }, 50);
+}
+
+function stopTimer() {
+  if (timerInterval) {
+    clearInterval(timerInterval);
+    timerInterval = null;
+  }
+}
+
+function formatTime(sec) {
+  const m = Math.floor(sec / 60);
+  const s = Math.floor(sec % 60);
+  return m > 0 ? `${m}:${s.toString().padStart(2, '0')}` : `${s}s`;
+}
+
+function endTimeAttack() {
+  if (destroyed > highScores[timeLimit]) {
+    highScores[timeLimit] = destroyed;
+    try { localStorage.setItem('pictory_highscores_v2', JSON.stringify(highScores)); } catch(e) {}
+  }
+  showTimeResult();
+}
+
+// ══════════════════════════════════════════════════════════════════════
+// RETRY / NEXT
+// ══════════════════════════════════════════════════════════════════════
+function retryGame() {
+  if (gameMode === 'story') startStoryStage(currentStage);
+  else startTimeAttack(timeLimit);
+}
+
+function nextStage() {
+  if (gameMode === 'story' && currentStage < 9) startStoryStage(currentStage + 1);
+  else exitToMenu();
+}
+
+// ══════════════════════════════════════════════════════════════════════
+// GRID
+// ══════════════════════════════════════════════════════════════════════
+function randomColor() {
+  return colors[Math.floor(Math.random() * colors.length)];
+}
+
+function initGrid() {
+  const totalRows = ROWS + BUFFER_ROWS;
+  grid = [];
+  for (let r = 0; r < totalRows; r++) {
+    grid[r] = [];
+    for (let c = 0; c < COLS; c++) {
+      grid[r][c] = randomColor();
+    }
+  }
+  // Fix any pre-completed rows or columns
+  for (let r = 0; r < totalRows; r++) fixRow(r);
+  for (let c = 0; c < COLS; c++) fixCol(c);
+  renderGrid();
+}
+
+function fixRow(r) {
+  if (!grid[r]) return;
+  const first = grid[r][0];
+  if (grid[r].every(c => c === first)) {
+    const pos = Math.floor(Math.random() * COLS);
+    let nc;
+    do { nc = randomColor(); } while (nc === first);
+    grid[r][pos] = nc;
+  }
+}
+
+function fixCol(c) {
+  const totalRows = ROWS + BUFFER_ROWS;
+  const first = grid[0][c];
+  let allSame = true;
+  for (let r = 1; r < totalRows; r++) {
+    if (grid[r][c] !== first) { allSame = false; break; }
+  }
+  if (allSame) {
+    const pos = Math.floor(Math.random() * totalRows);
+    let nc;
+    do { nc = randomColor(); } while (nc === first);
+    grid[pos][c] = nc;
+  }
+}
+
+function renderGrid() {
+  const container = document.getElementById('grid');
+  container.innerHTML = '';
+  for (let r = BUFFER_ROWS; r < BUFFER_ROWS + ROWS; r++) {
+    for (let c = 0; c < COLS; c++) {
+      const cell = document.createElement('div');
+      cell.className = 'cell';
+      cell.style.background = grid[r][c];
+      cell.onclick = () => onCellClick(r, c);
+      container.appendChild(cell);
+    }
+  }
+}
+
+function getCellElement(r, c) {
+  const visR = r - BUFFER_ROWS;
+  if (visR < 0 || visR >= ROWS) return null;
+  return document.getElementById('grid').children[visR * COLS + c];
+}
+
+// ══════════════════════════════════════════════════════════════════════
+// BFS
+// ══════════════════════════════════════════════════════════════════════
+function getConnectedGroup(startR, startC) {
+  const color = grid[startR][startC];
+  const visited = new Set();
+  const queue = [[startR, startC]];
+  const group = [];
+  const key = (r, c) => `${r},${c}`;
+  visited.add(key(startR, startC));
+
+  while (queue.length > 0) {
+    const [r, c] = queue.shift();
+    group.push([r, c]);
+    for (const [dr, dc] of [[0,1],[0,-1],[1,0],[-1,0]]) {
+      const nr = r + dr, nc = c + dc;
+      if (nr < 0 || nr >= BUFFER_ROWS + ROWS || nc < 0 || nc >= COLS) continue;
+      if (visited.has(key(nr, nc))) continue;
+      if (grid[nr][nc] !== color) continue;
+      visited.add(key(nr, nc));
+      queue.push([nr, nc]);
+    }
+  }
+  return group;
+}
+
+// ══════════════════════════════════════════════════════════════════════
+// DESTRUCTION (가로 + 세로)
+// ══════════════════════════════════════════════════════════════════════
+function findFullRows() {
+  const fullRows = [];
+  for (let r = BUFFER_ROWS; r < BUFFER_ROWS + ROWS; r++) {
+    const first = grid[r][0];
+    if (first && grid[r].every(c => c === first)) fullRows.push(r);
+  }
+  return fullRows;
+}
+
+function findFullCols() {
+  const fullCols = [];
+  for (let c = 0; c < COLS; c++) {
+    const first = grid[BUFFER_ROWS][c];
+    if (!first) continue;
+    let allSame = true;
+    for (let r = BUFFER_ROWS + 1; r < BUFFER_ROWS + ROWS; r++) {
+      if (grid[r][c] !== first) { allSame = false; break; }
+    }
+    if (allSame) fullCols.push(c);
+  }
+  return fullCols;
+}
+
+function findDestroyTargets(fullRows, fullCols) {
+  const targets = new Set();
+
+  // 가로줄 완성 → 해당 줄의 색과 BFS 연결된 모든 블록
+  for (const row of fullRows) {
+    for (let c = 0; c < COLS; c++) {
+      const group = getConnectedGroup(row, c);
+      for (const [r, cc] of group) targets.add(`${r},${cc}`);
+    }
+  }
+
+  // 세로줄 완성 → 해당 열의 색과 BFS 연결된 모든 블록
+  for (const col of fullCols) {
+    for (let r = BUFFER_ROWS; r < BUFFER_ROWS + ROWS; r++) {
+      const group = getConnectedGroup(r, col);
+      for (const [gr, gc] of group) targets.add(`${gr},${gc}`);
+    }
+  }
+
+  return [...targets].map(k => k.split(',').map(Number));
+}
+
+// ══════════════════════════════════════════════════════════════════════
+// GRAVITY
+// ══════════════════════════════════════════════════════════════════════
+function applyGravityAndFill() {
+  const totalRows = BUFFER_ROWS + ROWS;
+  for (let c = 0; c < COLS; c++) {
+    let writeIdx = totalRows - 1;
+    for (let r = totalRows - 1; r >= 0; r--) {
+      if (grid[r][c] !== null) {
+        grid[writeIdx][c] = grid[r][c];
+        if (writeIdx !== r) grid[r][c] = null;
+        writeIdx--;
+      }
+    }
+    for (let r = writeIdx; r >= 0; r--) {
+      grid[r][c] = randomColor();
+    }
+  }
+}
+
+// ══════════════════════════════════════════════════════════════════════
+// GAME LOGIC
+// ══════════════════════════════════════════════════════════════════════
+async function onCellClick(r, c) {
+  if (isAnimating) return;
+
+  const activeColor = getActiveColor();
+
+  // 같은 색 터치 → 무효 (턴 미소모, 큐 미진행)
+  if (grid[r][c] === activeColor) return;
+
+  // 타임어택: 시간 끝났으면 무시
+  if (gameMode === 'time' && timeRemaining <= 0) return;
+
+  isAnimating = true;
+
+  // 1. 색칠
+  const group = getConnectedGroup(r, c);
+  for (const [gr, gc] of group) grid[gr][gc] = activeColor;
+
+  if (gameMode === 'story') turns--;
+  else turns++;
+
+  // 큐 진행
+  advanceQueue();
+
+  renderGrid();
+  await delay(150);
+
+  // 2. 연쇄 파괴
+  let chainCount = 0;
+  while (true) {
+    const fullRows = findFullRows();
+    const fullCols = findFullCols();
+    if (fullRows.length === 0 && fullCols.length === 0) break;
+
+    chainCount++;
+    const targets = findDestroyTargets(fullRows, fullCols);
+
+    for (const [tr, tc] of targets) {
+      const el = getCellElement(tr, tc);
+      if (el) el.classList.add('destroying');
+    }
+    if (chainCount > 1) showChain(chainCount);
+    await delay(400);
+
+    destroyed += targets.length;
+    for (const [tr, tc] of targets) grid[tr][tc] = null;
+
+    applyGravityAndFill();
+    renderGrid();
+    markFallingCells();
+    if (gameMode === 'story') updateStoryHUD();
+    else updateTimeHUD();
+    await delay(300);
+  }
+
+  if (gameMode === 'story') updateStoryHUD();
+  else updateTimeHUD();
+
+  // 3. 승리/패배 체크 (story only)
+  if (gameMode === 'story') {
+    if (destroyed >= goal) {
+      isAnimating = false;
+      clearedStages.add(currentStage);
+      showStoryResult(true);
+      return;
+    }
+    if (turns <= 0) {
+      isAnimating = false;
+      showStoryResult(false);
+      return;
+    }
+  }
+
+  isAnimating = false;
+}
+
+function markFallingCells() {
+  const cells = document.getElementById('grid').children;
+  for (const cell of cells) {
+    cell.classList.add('falling');
+    cell.addEventListener('animationend', () => cell.classList.remove('falling'), { once: true });
+  }
+}
+
+// ══════════════════════════════════════════════════════════════════════
+// HUD UPDATES
+// ══════════════════════════════════════════════════════════════════════
+function updateStoryHUD() {
+  document.getElementById('hud-val-1').textContent = currentStage + 1;
+  document.getElementById('hud-val-2').textContent = turns;
+  document.getElementById('hud-val-3').textContent = goal;
+
+  const turnsEl = document.getElementById('hud-val-2');
+  turnsEl.style.color = turns <= 3 ? '#ff6b6b' : '#fff';
+
+  const pct = Math.min(100, (destroyed / goal) * 100);
+  document.getElementById('progress-bar').style.width = pct + '%';
+  document.getElementById('progress-text').textContent = `${destroyed} / ${goal}`;
+}
+
+function updateTimeHUD() {
+  document.getElementById('hud-val-1').textContent = formatTime(timeRemaining);
+  document.getElementById('hud-val-2').textContent = destroyed;
+  document.getElementById('hud-val-3').textContent = turns;
+
+  const timeEl = document.getElementById('hud-val-1');
+  timeEl.style.color = timeRemaining <= 10 ? '#ff6b6b' : '#fff';
+
+  const pct = Math.max(0, (timeRemaining / timeLimit) * 100);
+  document.getElementById('timer-bar').style.width = pct + '%';
+  document.getElementById('timer-text').textContent = formatTime(timeRemaining);
+
+  const bar = document.getElementById('timer-bar');
+  if (timeRemaining <= 10) {
+    bar.style.background = 'linear-gradient(90deg, #ff6b6b, #ee5a24)';
+  } else if (timeRemaining <= 30) {
+    bar.style.background = 'linear-gradient(90deg, #feca57, #ff6b6b)';
+  } else {
+    bar.style.background = 'linear-gradient(90deg, #ff6b6b, #feca57)';
+  }
+}
+
+// ══════════════════════════════════════════════════════════════════════
+// RESULTS
+// ══════════════════════════════════════════════════════════════════════
+function showStoryResult(isWin) {
+  document.getElementById('overlay').className = 'show';
+  document.getElementById('result-title').textContent = isWin ? 'STAGE CLEAR!' : 'GAME OVER';
+  document.getElementById('result-title').style.color = isWin ? '#48dbfb' : '#ff6b6b';
+  document.getElementById('result-info').textContent =
+    isWin
+      ? `${destroyed}개 파괴 / 남은 턴: ${turns}`
+      : `${destroyed} / ${goal}개 파괴 (${goal - destroyed}개 부족)`;
+  document.getElementById('result-sub').textContent = '';
+  document.getElementById('btn-next').style.display = isWin && currentStage < 9 ? 'inline-block' : 'none';
+}
+
+function showTimeResult() {
+  const isNewRecord = destroyed >= highScores[timeLimit];
+  document.getElementById('overlay').className = 'show';
+  document.getElementById('result-title').textContent = 'TIME UP!';
+  document.getElementById('result-title').style.color = '#feca57';
+  document.getElementById('result-info').textContent = `${destroyed}개 파괴 / ${turns}턴 사용`;
+  if (isNewRecord && destroyed > 0) {
+    document.getElementById('result-sub').innerHTML = '&#x1F3C6; NEW RECORD!';
+  } else {
+    document.getElementById('result-sub').textContent = `Best: ${highScores[timeLimit]}개`;
+  }
+  document.getElementById('btn-next').style.display = 'none';
+}
+
+// ══════════════════════════════════════════════════════════════════════
+// UI HELPERS
+// ══════════════════════════════════════════════════════════════════════
+function showChain(count) {
+  const el = document.getElementById('chain-display');
+  el.textContent = `${count} CHAIN!`;
+  el.className = '';
+  void el.offsetWidth;
+  el.className = 'show';
+}
+
+function delay(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+// ══════════════════════════════════════════════════════════════════════
+// INIT
+// ══════════════════════════════════════════════════════════════════════
+showMainMenu();
+</script>
+</body>
+</html>
