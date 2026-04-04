@@ -1,0 +1,109 @@
+{
+	"achievements": [
+		{
+			"id": "first_clear", "name": "첫 발걸음", "description": "첫 번째 스테이지를 클리어하세요",
+			"condition": {"type": "stage_clear_count", "count": 1},
+			"reward": {"currency": 100}
+		},
+		{
+			"id": "stage_5", "name": "퍼즐 입문자", "description": "5개의 스테이지를 클리어하세요",
+			"condition": {"type": "stage_clear_count", "count": 5},
+			"reward": {"currency": 200}
+		},
+		{
+			"id": "stage_10", "name": "퍼즐 탐험가", "description": "10개의 스테이지를 클리어하세요",
+			"condition": {"type": "stage_clear_count", "count": 10},
+			"reward": {"currency": 300, "icon_id": "icon_water"}
+		},
+		{
+			"id": "stage_master", "name": "스테이지 마스터", "description": "30개의 스테이지를 클리어하세요",
+			"condition": {"type": "stage_clear_count", "count": 30},
+			"reward": {"currency": 1000, "hunya_item_id": "costume_red", "title": "스테이지 마스터"}
+		},
+		{
+			"id": "chapter1_clear", "name": "1챕터 완료", "description": "챕터 1을 클리어하세요",
+			"condition": {"type": "chapter_clear", "chapter": 1},
+			"reward": {"currency": 500}
+		},
+		{
+			"id": "chain_3", "name": "연쇄의 시작", "description": "3콤보 연쇄를 달성하세요",
+			"condition": {"type": "max_chain", "count": 3},
+			"reward": {"currency": 150}
+		},
+		{
+			"id": "chain_5", "name": "연쇄의 달인", "description": "5콤보 연쇄를 달성하세요",
+			"condition": {"type": "max_chain", "count": 5},
+			"reward": {"currency": 300, "icon_id": "icon_lightning"}
+		},
+		{
+			"id": "chain_master", "name": "콤보 마스터", "description": "10콤보 연쇄를 달성하세요",
+			"condition": {"type": "max_chain", "count": 10},
+			"reward": {"currency": 1000, "hunya_item_id": "costume_purple", "icon_id": "icon_galaxy", "title": "콤보 마스터"}
+		},
+		{
+			"id": "destroy_100", "name": "파괴자", "description": "블록 100개를 파괴하세요",
+			"condition": {"type": "total_destroyed", "count": 100},
+			"reward": {"currency": 200}
+		},
+		{
+			"id": "destroy_1000", "name": "대파괴자", "description": "블록 1000개를 파괴하세요",
+			"condition": {"type": "total_destroyed", "count": 1000},
+			"reward": {"currency": 500, "icon_id": "icon_fire"}
+		},
+		{
+			"id": "destroy_10000", "name": "전설의 파괴자", "description": "블록 10000개를 파괴하세요",
+			"condition": {"type": "total_destroyed", "count": 10000},
+			"reward": {"currency": 2000, "title": "전설의 파괴자"}
+		},
+		{
+			"id": "imagen_1", "name": "동료 획득", "description": "이마젠을 1마리 획득하세요",
+			"condition": {"type": "imagen_count", "count": 1},
+			"reward": {"currency": 200}
+		},
+		{
+			"id": "imagen_3", "name": "파티 구성", "description": "이마젠을 3마리 획득하세요",
+			"condition": {"type": "imagen_count", "count": 3},
+			"reward": {"currency": 500, "icon_id": "icon_leaf"}
+		},
+		{
+			"id": "imagen_all", "name": "이마젠 수집가", "description": "모든 이마젠을 획득하세요",
+			"condition": {"type": "imagen_count", "count": 10},
+			"reward": {"currency": 2000, "title": "이마젠 수집가"}
+		},
+		{
+			"id": "infinity_1000", "name": "무한의 도전자", "description": "무한 모드에서 1000점을 달성하세요",
+			"condition": {"type": "infinity_score", "score": 1000},
+			"reward": {"currency": 300}
+		},
+		{
+			"id": "infinity_5000", "name": "무한의 달인", "description": "무한 모드에서 5000점을 달성하세요",
+			"condition": {"type": "infinity_score", "score": 5000},
+			"reward": {"currency": 1000, "title": "무한의 달인"}
+		},
+		{
+			"id": "combo_10", "name": "연속 공격", "description": "한 게임에서 콤보를 10회 발동하세요",
+			"condition": {"type": "combo_count", "count": 10},
+			"reward": {"currency": 200}
+		},
+		{
+			"id": "speed_clear", "name": "스피드런", "description": "30초 이내에 스테이지를 클리어하세요",
+			"condition": {"type": "speed_clear", "seconds": 30},
+			"reward": {"currency": 500, "icon_id": "icon_lightning"}
+		},
+		{
+			"id": "story_complete", "name": "스토리 완주", "description": "모든 스토리를 클리어하세요",
+			"condition": {"type": "chapter_clear", "chapter": 3},
+			"reward": {"currency": 3000, "hunya_item_id": "acc_flower", "title": "이야기꾼", "icon_id": "icon_heart"}
+		},
+		{
+			"id": "rainbow_collector", "name": "무지개 수집가", "description": "레인보우 블록을 50개 파괴하세요",
+			"condition": {"type": "total_destroyed", "count": 50},
+			"reward": {"currency": 500, "icon_id": "icon_rainbow"}
+		},
+		{
+			"id": "legend", "name": "전설", "description": "모든 업적을 달성하세요",
+			"condition": {"type": "achievement_count", "count": 20},
+			"reward": {"currency": 5000, "hunya_item_id": "costume_gold", "hunya_item_id2": "acc_crown", "icon_id": "icon_crown", "title": "전설"}
+		}
+	]
+}

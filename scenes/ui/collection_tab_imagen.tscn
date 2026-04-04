@@ -1,0 +1,110 @@
+[gd_scene load_steps=2 format=3 uid="uid://collection_tab_imagen"]
+
+[ext_resource type="Script" path="res://scripts/ui/collection_tab_imagen.gd" id="1"]
+
+[node name="CollectionTabImagen" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+script = ExtResource("1")
+
+[node name="VBox" type="VBoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+theme_override_constants/separation = 8
+
+[node name="CountLabel" type="Label" parent="VBox"]
+text = "수집: 0 / 0 마리"
+theme_override_font_sizes/font_size = 16
+horizontal_alignment = 1
+
+[node name="PartySlots" type="HBoxContainer" parent="VBox"]
+custom_minimum_size = Vector2(0, 100)
+alignment = 1
+theme_override_constants/separation = 20
+
+[node name="Slot0" type="PanelContainer" parent="VBox/PartySlots"]
+custom_minimum_size = Vector2(120, 90)
+
+[node name="Label" type="Label" parent="VBox/PartySlots/Slot0"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+text = "비어 있음"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Preview" type="Control" parent="VBox/PartySlots/Slot0"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+modulate = Color(0.5, 0.5, 0.5, 0.5)
+
+[node name="Slot1" type="PanelContainer" parent="VBox/PartySlots"]
+custom_minimum_size = Vector2(120, 90)
+
+[node name="Label" type="Label" parent="VBox/PartySlots/Slot1"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+text = "비어 있음"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Preview" type="Control" parent="VBox/PartySlots/Slot1"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+modulate = Color(0.5, 0.5, 0.5, 0.5)
+
+[node name="Scroll" type="ScrollContainer" parent="VBox"]
+size_flags_vertical = 3
+
+[node name="Grid" type="GridContainer" parent="VBox/Scroll"]
+size_flags_horizontal = 3
+columns = 4
+theme_override_constants/h_separation = 8
+theme_override_constants/v_separation = 8
+
+[node name="DetailPanel" type="PanelContainer" parent="VBox"]
+visible = false
+
+[node name="VBox" type="VBoxContainer" parent="VBox/DetailPanel"]
+theme_override_constants/separation = 6
+
+[node name="NameLabel" type="Label" parent="VBox/DetailPanel/VBox"]
+text = ""
+theme_override_font_sizes/font_size = 18
+
+[node name="AttrLabel" type="Label" parent="VBox/DetailPanel/VBox"]
+text = ""
+theme_override_font_sizes/font_size = 14
+
+[node name="SkillLabel" type="Label" parent="VBox/DetailPanel/VBox"]
+text = ""
+theme_override_font_sizes/font_size = 14
+
+[node name="DescLabel" type="Label" parent="VBox/DetailPanel/VBox"]
+text = ""
+theme_override_font_sizes/font_size = 13
+theme_override_colors/font_color = Color(0.75, 0.75, 0.75, 1)
+autowrap_mode = 3
+
+[node name="Buttons" type="HBoxContainer" parent="VBox/DetailPanel/VBox"]
+theme_override_constants/separation = 12
+
+[node name="AssignButton" type="Button" parent="VBox/DetailPanel/VBox/Buttons"]
+custom_minimum_size = Vector2(100, 36)
+text = "편성"
+
+[node name="UnassignButton" type="Button" parent="VBox/DetailPanel/VBox/Buttons"]
+visible = false
+custom_minimum_size = Vector2(100, 36)
+text = "편성 해제"

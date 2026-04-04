@@ -164,3 +164,30 @@ func get_last_party() -> Array[String]:
 func save_last_party(ids: Array[String]) -> void:
 	_data["last_party"] = ids.duplicate()
 	_save()
+
+# ─── Collection ───────────────────────────────────────────────
+
+func get_collection_data() -> Dictionary:
+	return _data.get("collection", {})
+
+func save_collection_data(data: Dictionary) -> void:
+	_data["collection"] = data.duplicate(true)
+	_save()
+
+# ─── Achievement ──────────────────────────────────────────────
+
+func get_achievement_data() -> Dictionary:
+	return _data.get("achievements", {})
+
+func save_achievement_data(data: Dictionary) -> void:
+	_data["achievements"] = data.duplicate(true)
+	_save()
+
+# ─── Stats (업적 체크용) ──────────────────────────────────────
+
+func get_stats() -> Dictionary:
+	return _data.get("stats", {})
+
+func save_stats(stats: Dictionary) -> void:
+	_data["stats"] = stats.duplicate(true)
+	_save()

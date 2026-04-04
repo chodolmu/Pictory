@@ -1,0 +1,16 @@
+{
+	"items": [
+		{"id": "costume_default", "name": "기본 의상", "type": "costume", "color": "#E8A87C", "unlock_condition": {"type": "default"}},
+		{"id": "costume_blue", "name": "블루 의상", "type": "costume", "color": "#5B9BD5", "unlock_condition": {"type": "chapter_clear", "chapter": 1}},
+		{"id": "costume_green", "name": "그린 의상", "type": "costume", "color": "#70B77E", "unlock_condition": {"type": "chapter_clear", "chapter": 2}},
+		{"id": "costume_red", "name": "레드 의상", "type": "costume", "color": "#E05C5C", "unlock_condition": {"type": "achievement", "achievement_id": "stage_master"}},
+		{"id": "costume_purple", "name": "퍼플 의상", "type": "costume", "color": "#9B59B6", "unlock_condition": {"type": "achievement", "achievement_id": "chain_master"}},
+		{"id": "costume_gold", "name": "골드 의상", "type": "costume", "color": "#F1C40F", "unlock_condition": {"type": "achievement", "achievement_id": "legend"}},
+		{"id": "acc_none", "name": "없음", "type": "accessory", "color": "#FFFFFF", "unlock_condition": {"type": "default"}},
+		{"id": "acc_bow", "name": "리본", "type": "accessory", "color": "#FF69B4", "unlock_condition": {"type": "default"}},
+		{"id": "acc_hat", "name": "모자", "type": "accessory", "color": "#8B4513", "unlock_condition": {"type": "chapter_clear", "chapter": 1}},
+		{"id": "acc_crown", "name": "왕관", "type": "accessory", "color": "#FFD700", "unlock_condition": {"type": "achievement", "achievement_id": "legend"}},
+		{"id": "acc_glasses", "name": "안경", "type": "accessory", "color": "#4A4A4A", "unlock_condition": {"type": "chapter_clear", "chapter": 2}},
+		{"id": "acc_flower", "name": "꽃", "type": "accessory", "color": "#FF6B9D", "unlock_condition": {"type": "achievement", "achievement_id": "story_complete"}}
+	]
+}

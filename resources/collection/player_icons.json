@@ -1,0 +1,13 @@
+{
+	"icons": [
+		{"id": "default", "name": "기본", "symbol": "star", "color": "#E8A87C", "unlock_condition": {"type": "default"}},
+		{"id": "icon_fire", "name": "불꽃", "symbol": "fire", "color": "#FF4500", "unlock_condition": {"type": "default"}},
+		{"id": "icon_water", "name": "물결", "symbol": "water", "color": "#1E90FF", "unlock_condition": {"type": "chapter_clear", "chapter": 1}},
+		{"id": "icon_leaf", "name": "나뭇잎", "symbol": "leaf", "color": "#32CD32", "unlock_condition": {"type": "chapter_clear", "chapter": 2}},
+		{"id": "icon_lightning", "name": "번개", "symbol": "lightning", "color": "#FFD700", "unlock_condition": {"type": "achievement", "achievement_id": "speed_clear"}},
+		{"id": "icon_crown", "name": "왕관", "symbol": "crown", "color": "#FFD700", "unlock_condition": {"type": "achievement", "achievement_id": "legend"}},
+		{"id": "icon_heart", "name": "하트", "symbol": "heart", "color": "#FF69B4", "unlock_condition": {"type": "story_progress", "progress": 5}},
+		{"id": "icon_galaxy", "name": "은하", "symbol": "galaxy", "color": "#6A0DAD", "unlock_condition": {"type": "achievement", "achievement_id": "chain_master"}},
+		{"id": "icon_rainbow", "name": "무지개", "symbol": "rainbow", "color": "#FF0000", "unlock_condition": {"type": "achievement", "achievement_id": "rainbow_collector"}}
+	]
+}

@@ -17,12 +17,14 @@ func _ready() -> void:
 	_stage_select_btn.pressed.connect(_on_stage_select)
 	_infinity_btn.pressed.connect(_on_infinity)
 	_settings_btn.pressed.connect(_on_settings)
-	_achievements_btn.pressed.connect(_on_placeholder.bind("업적"))
-	_collection_btn.pressed.connect(_on_placeholder.bind("컬렉션"))
+	_achievements_btn.pressed.connect(_on_achievements)
+	_collection_btn.pressed.connect(_on_collection)
 	_shop_btn.pressed.connect(_on_placeholder.bind("상점"))
+	AchievementManager.achievement_unlocked.connect(_on_achievement_unlocked)
 	PlayerProfile.nickname_changed.connect(_update_player_info)
 	_update_player_info()
 	_update_currency_display()
+	_update_achievement_badge()
 
 func _update_player_info(_name: String = "") -> void:
 	_nickname_label.text = PlayerProfile.get_nickname()
@@ -39,8 +41,26 @@ func _on_infinity() -> void:
 func _on_settings() -> void:
 	_options_popup.show_popup()
 
+func _on_collection() -> void:
+	SceneManager.change_scene("res://scenes/ui/collection.tscn")
+
+func _on_achievements() -> void:
+	# 미수령 업적 팝업 처리
+	var popup = $AchievementPopup if has_node("AchievementPopup") else null
+	if popup:
+		while AchievementManager.has_pending_popups():
+			popup.show_achievement(AchievementManager.pop_pending_popup())
+
+func _on_achievement_unlocked(_id: String) -> void:
+	_update_achievement_badge()
+
+func _update_achievement_badge() -> void:
+	var unclaimed = AchievementManager.get_unclaimed_count()
+	if _achievements_btn:
+		_achievements_btn.text = "업적" if unclaimed == 0 else "업적 (%d)" % unclaimed
+
 func _on_placeholder(feature_name: String) -> void:
-	print("[placeholder] %s — S10/S11에서 구현 예정" % feature_name)
+	print("[placeholder] %s — S11에서 구현 예정" % feature_name)
 
 func _unhandled_input(event: InputEvent) -> void:
 	if event is InputEventKey and event.pressed and event.keycode == KEY_ESCAPE:
