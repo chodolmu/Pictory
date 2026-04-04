@@ -30,5 +30,5 @@ func duplicate() -> Cell:
 func equals(other: Cell) -> bool:
 	return x == other.x and y == other.y and color == other.color
 
-func to_string() -> String:
+func debug_string() -> String:
 	return "Cell(%d,%d) color=%d active=%s gimmick=%d" % [x, y, color, active, gimmick_type]
