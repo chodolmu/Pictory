@@ -1,0 +1,23 @@
+{
+  "chapter": 1,
+  "stage": 4,
+  "type": "post",
+  "lines": [
+    {
+      "speaker": "hunya",
+      "name_display": "후냐",
+      "text": "둘이 힘을 합치니 훨씬 빠르게 해결됐어!",
+      "position": "left",
+      "expression": "happy",
+      "event": null
+    },
+    {
+      "speaker": "imagen_fire",
+      "name_display": "불꽃이",
+      "text": "팀워크가 최고예요! 앞으로도 잘 부탁드려요, 후냐!",
+      "position": "right",
+      "expression": "happy",
+      "event": null
+    }
+  ]
+}

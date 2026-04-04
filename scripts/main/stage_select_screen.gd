@@ -3,6 +3,7 @@ extends Control
 
 const StageButtonScene = preload("res://scenes/ui/stage_button.tscn")
 const ChapterUnlockScript = preload("res://scripts/data/chapter_unlock.gd")
+const ResultPopupScene = preload("res://scenes/ui/result_popup.tscn")
 
 @onready var _back_btn: Button = $VBox/Header/BackButton
 @onready var _chapter_tabs: HBoxContainer = $VBox/ChapterTabContainer
@@ -12,13 +13,56 @@ const ChapterUnlockScript = preload("res://scripts/data/chapter_unlock.gd")
 @onready var _stage_confirm_popup = $StageConfirmPopup
 
 var current_chapter: int = 1
+var _result_chapter: int = 1
+var _result_stage: int = 1
 
 func _ready() -> void:
 	_back_btn.pressed.connect(_on_back)
 	_unlock_btn.pressed.connect(_on_unlock_button_pressed)
 	_stage_confirm_popup.start_requested.connect(_on_start_stage)
+
+	var params = SceneManager.get_params()
+	var ch = params.get("chapter", 1)
+	var st = params.get("stage", 1)
 	_setup_chapter_tabs()
-	_load_chapter(current_chapter)
+	_load_chapter(ch)
+
+	if params.get("show_result", false):
+		_result_chapter = ch
+		_result_stage = st
+		# 한 프레임 뒤에 팝업 — 씬 로드 완료 후
+		call_deferred("_show_result_popup", params.get("result", {}))
+
+func _show_result_popup(result: Dictionary) -> void:
+	var popup = ResultPopupScene.instantiate()
+	add_child(popup)
+	var is_clear: bool = result.get("is_clear", false)
+	var stars: int = result.get("stars", 0)
+	var score: int = result.get("score", 0)
+	var stage_id: String = result.get("stage_id", "")
+
+	if is_clear:
+		var max_stages = 10
+		var has_next = _result_stage < max_stages
+		popup.show_clear(stars, score, 0, has_next)
+		popup.next_stage_requested.connect(_on_result_next_stage)
+	else:
+		popup.show_game_over(score, {})
+	popup.retry_requested.connect(func():
+		popup.queue_free()
+		StoryFlowController.start_stage(_result_chapter, _result_stage)
+	)
+	popup.main_menu_requested.connect(func():
+		popup.queue_free()
+	)
+
+func _on_result_next_stage() -> void:
+	var next = _result_stage + 1
+	if next > 10:
+		# 챕터 완료 처리
+		pass
+	else:
+		StoryFlowController.start_stage(_result_chapter, next)
 
 func _load_chapter(chapter: int) -> void:
 	current_chapter = chapter
@@ -88,10 +132,7 @@ func _on_stage_selected(s_id: String) -> void:
 		_stage_confirm_popup.show_popup(config)
 
 func _on_start_stage(config) -> void:
-	SceneManager.change_scene("res://scenes/game/game.tscn", {
-		"mode": "story",
-		"stage_id": config.stage_id
-	})
+	StoryFlowController.start_stage(config.chapter, config.stage_number)
 
 func _on_back() -> void:
 	SceneManager.change_scene("res://scenes/main/main_menu.tscn")

@@ -1,0 +1,31 @@
+{
+  "chapter": 1,
+  "stage": 4,
+  "type": "pre",
+  "lines": [
+    {
+      "speaker": "imagen_fire",
+      "name_display": "불꽃이",
+      "text": "이 퍼즐은 색이 네 가지나 되네요! 좀 더 복잡해졌어요.",
+      "position": "right",
+      "expression": "normal",
+      "event": null
+    },
+    {
+      "speaker": "hunya",
+      "name_display": "후냐",
+      "text": "빛나는 블록을 잘 쓰면 여러 색을 한 번에 처리할 수 있을 것 같아!",
+      "position": "left",
+      "expression": "normal",
+      "event": null
+    },
+    {
+      "speaker": "imagen_fire",
+      "name_display": "불꽃이",
+      "text": "후냐 말이 맞아요! 무지개 블록은 어떤 색과도 연결된다고 들었어요.",
+      "position": "right",
+      "expression": "happy",
+      "event": null
+    }
+  ]
+}

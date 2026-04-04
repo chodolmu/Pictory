@@ -1,0 +1,262 @@
+[gd_scene load_steps=3 format=3 uid="uid://dialogue_ui"]
+
+[ext_resource type="Script" path="res://scripts/story/dialogue_ui.gd" id="1_dui"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_textbox"]
+bg_color = Color(0.08, 0.08, 0.12, 0.88)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_left = 8
+corner_radius_bottom_right = 8
+content_margin_left = 12
+content_margin_top = 8
+content_margin_right = 12
+content_margin_bottom = 8
+
+[node name="DialogueUI" type="CanvasLayer"]
+layer = 10
+script = ExtResource("1_dui")
+
+[node name="Background" type="ColorRect" parent="."]
+color = Color(0, 0, 0, 0.3)
+mouse_filter = 2
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+
+[node name="CharacterLeft" type="Control" parent="."]
+anchor_bottom = 1.0
+offset_left = 20.0
+offset_right = 160.0
+offset_bottom = 0.0
+
+[node name="Body" type="ColorRect" parent="CharacterLeft"]
+color = Color(0.95, 0.90, 0.80, 1.0)
+offset_left = 0.0
+offset_top = -160.0
+offset_right = 100.0
+offset_bottom = 0.0
+anchor_top = 1.0
+anchor_bottom = 1.0
+
+[node name="EarLeft" type="ColorRect" parent="CharacterLeft/Body"]
+color = Color(0.75, 0.60, 0.45, 1.0)
+offset_left = 8.0
+offset_top = -14.0
+offset_right = 28.0
+offset_bottom = 4.0
+
+[node name="EarRight" type="ColorRect" parent="CharacterLeft/Body"]
+color = Color(0.75, 0.60, 0.45, 1.0)
+offset_left = 72.0
+offset_top = -14.0
+offset_right = 92.0
+offset_bottom = 4.0
+
+[node name="Face" type="Control" parent="CharacterLeft/Body"]
+offset_left = 10.0
+offset_top = 20.0
+offset_right = 90.0
+offset_bottom = 80.0
+
+[node name="EyeLeft" type="ColorRect" parent="CharacterLeft/Body/Face"]
+color = Color(0.1, 0.1, 0.1, 1.0)
+offset_left = 8.0
+offset_top = 8.0
+offset_right = 16.0
+offset_bottom = 14.0
+
+[node name="EyeRight" type="ColorRect" parent="CharacterLeft/Body/Face"]
+color = Color(0.1, 0.1, 0.1, 1.0)
+offset_left = 56.0
+offset_top = 8.0
+offset_right = 64.0
+offset_bottom = 14.0
+
+[node name="Mouth" type="ColorRect" parent="CharacterLeft/Body/Face"]
+color = Color(0.6, 0.3, 0.3, 1.0)
+offset_left = 24.0
+offset_top = 38.0
+offset_right = 56.0
+offset_bottom = 43.0
+
+[node name="NameBadge" type="PanelContainer" parent="CharacterLeft"]
+offset_left = 0.0
+offset_top = -180.0
+offset_right = 100.0
+offset_bottom = -162.0
+anchor_top = 1.0
+anchor_bottom = 1.0
+
+[node name="Label" type="Label" parent="CharacterLeft/NameBadge"]
+text = "후냐"
+horizontal_alignment = 1
+
+[node name="CharacterRight" type="Control" parent="."]
+anchor_left = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -160.0
+offset_right = -20.0
+offset_bottom = 0.0
+
+[node name="Body" type="ColorRect" parent="CharacterRight"]
+color = Color(0.95, 0.30, 0.20, 1.0)
+offset_left = 0.0
+offset_top = -160.0
+offset_right = 100.0
+offset_bottom = 0.0
+anchor_top = 1.0
+anchor_bottom = 1.0
+
+[node name="Face" type="Control" parent="CharacterRight/Body"]
+offset_left = 10.0
+offset_top = 20.0
+offset_right = 90.0
+offset_bottom = 80.0
+
+[node name="EyeLeft" type="ColorRect" parent="CharacterRight/Body/Face"]
+color = Color(0.1, 0.1, 0.1, 1.0)
+offset_left = 8.0
+offset_top = 8.0
+offset_right = 16.0
+offset_bottom = 14.0
+
+[node name="EyeRight" type="ColorRect" parent="CharacterRight/Body/Face"]
+color = Color(0.1, 0.1, 0.1, 1.0)
+offset_left = 56.0
+offset_top = 8.0
+offset_right = 64.0
+offset_bottom = 14.0
+
+[node name="Mouth" type="ColorRect" parent="CharacterRight/Body/Face"]
+color = Color(0.6, 0.3, 0.3, 1.0)
+offset_left = 24.0
+offset_top = 38.0
+offset_right = 56.0
+offset_bottom = 43.0
+
+[node name="NameBadge" type="PanelContainer" parent="CharacterRight"]
+offset_left = 0.0
+offset_top = -180.0
+offset_right = 100.0
+offset_bottom = -162.0
+anchor_top = 1.0
+anchor_bottom = 1.0
+
+[node name="Label" type="Label" parent="CharacterRight/NameBadge"]
+text = "이마젠"
+horizontal_alignment = 1
+
+[node name="TextBox" type="PanelContainer" parent="."]
+theme_override_styles/panel = SubResource("StyleBoxFlat_textbox")
+anchor_left = 0.1
+anchor_top = 1.0
+anchor_right = 0.9
+anchor_bottom = 1.0
+offset_top = -140.0
+offset_bottom = -12.0
+
+[node name="VBox" type="VBoxContainer" parent="TextBox"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+
+[node name="NameLabel" type="Label" parent="TextBox/VBox"]
+text = "후냐"
+theme_override_font_sizes/font_size = 14
+
+[node name="DialogueText" type="RichTextLabel" parent="TextBox/VBox"]
+bbcode_enabled = true
+text = "..."
+fit_content = true
+size_flags_vertical = 3
+theme_override_font_sizes/normal_font_size = 16
+
+[node name="NextIndicator" type="Label" parent="TextBox"]
+text = "▼"
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -28.0
+offset_top = -24.0
+offset_right = -4.0
+offset_bottom = -4.0
+visible = false
+
+[node name="SkipButton" type="Button" parent="."]
+text = "[스토리 스킵]"
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -130.0
+offset_top = 8.0
+offset_right = -8.0
+offset_bottom = 36.0
+
+[node name="ExitButton" type="Button" parent="."]
+text = "[나가기]"
+offset_left = 8.0
+offset_top = 8.0
+offset_right = 100.0
+offset_bottom = 36.0
+
+[node name="SkipConfirmPanel" type="PanelContainer" parent="."]
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -160.0
+offset_top = -70.0
+offset_right = 160.0
+offset_bottom = 70.0
+visible = false
+
+[node name="VBox" type="VBoxContainer" parent="SkipConfirmPanel"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+
+[node name="Label" type="Label" parent="SkipConfirmPanel/VBox"]
+text = "스토리를 건너뛰시겠습니까?"
+horizontal_alignment = 1
+
+[node name="ButtonRow" type="HBoxContainer" parent="SkipConfirmPanel/VBox"]
+alignment = 1
+
+[node name="ConfirmOKButton" type="Button" parent="SkipConfirmPanel/VBox/ButtonRow"]
+text = "확인"
+
+[node name="ConfirmCancelButton" type="Button" parent="SkipConfirmPanel/VBox/ButtonRow"]
+text = "취소"
+
+[node name="ExitConfirmPanel" type="PanelContainer" parent="."]
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -160.0
+offset_top = -70.0
+offset_right = 160.0
+offset_bottom = 70.0
+visible = false
+
+[node name="VBox" type="VBoxContainer" parent="ExitConfirmPanel"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+
+[node name="Label" type="Label" parent="ExitConfirmPanel/VBox"]
+text = "스테이지 선택으로 돌아가시겠습니까?"
+horizontal_alignment = 1
+
+[node name="ButtonRow" type="HBoxContainer" parent="ExitConfirmPanel/VBox"]
+alignment = 1
+
+[node name="ConfirmOKButton" type="Button" parent="ExitConfirmPanel/VBox/ButtonRow"]
+text = "확인"
+
+[node name="ConfirmCancelButton" type="Button" parent="ExitConfirmPanel/VBox/ButtonRow"]
+text = "취소"

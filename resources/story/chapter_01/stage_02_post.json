@@ -1,0 +1,23 @@
+{
+  "chapter": 1,
+  "stage": 2,
+  "type": "post",
+  "lines": [
+    {
+      "speaker": "hunya",
+      "name_display": "후냐",
+      "text": "길이 열렸어! 저 멀리... 뭔가 빛나는 게 보여.",
+      "position": "left",
+      "expression": "surprised",
+      "event": null
+    },
+    {
+      "speaker": "narrator",
+      "name_display": "",
+      "text": "빛은 점점 가까워졌다. 무언가가 후냐를 부르고 있었다.",
+      "position": "center",
+      "expression": null,
+      "event": null
+    }
+  ]
+}

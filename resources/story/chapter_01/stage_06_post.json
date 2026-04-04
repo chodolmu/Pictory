@@ -1,0 +1,31 @@
+{
+  "chapter": 1,
+  "stage": 6,
+  "type": "post",
+  "lines": [
+    {
+      "speaker": "imagen_water",
+      "name_display": "물결이",
+      "text": "고마워요. 오래 갇혀 있었어요... 저는 물결이라고 해요.",
+      "position": "right",
+      "expression": "normal",
+      "event": { "type": "imagen_join", "args": { "imagen_id": "imagen_water" } }
+    },
+    {
+      "speaker": "hunya",
+      "name_display": "후냐",
+      "text": "물결이! 나는 후냐야. 함께 이 세계의 어둠을 몰아내자!",
+      "position": "left",
+      "expression": "happy",
+      "event": null
+    },
+    {
+      "speaker": "imagen_water",
+      "name_display": "물결이",
+      "text": "네. 제 힘이 필요하시다면 기꺼이요.",
+      "position": "right",
+      "expression": "happy",
+      "event": null
+    }
+  ]
+}

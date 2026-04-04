@@ -1,0 +1,31 @@
+{
+  "chapter": 1,
+  "stage": 3,
+  "type": "post",
+  "lines": [
+    {
+      "speaker": "imagen_fire",
+      "name_display": "불꽃이",
+      "text": "와아! 자유다! 감사해요, 후냐!",
+      "position": "right",
+      "expression": "happy",
+      "event": { "type": "imagen_join", "args": { "imagen_id": "imagen_fire" } }
+    },
+    {
+      "speaker": "hunya",
+      "name_display": "후냐",
+      "text": "다행이다. 혼자보다 둘이 낫지! 같이 이 세계를 탐험하자!",
+      "position": "left",
+      "expression": "happy",
+      "event": null
+    },
+    {
+      "speaker": "imagen_fire",
+      "name_display": "불꽃이",
+      "text": "물론이죠! 제 불꽃 에너지로 도움이 될게요!",
+      "position": "right",
+      "expression": "happy",
+      "event": null
+    }
+  ]
+}

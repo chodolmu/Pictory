@@ -1,0 +1,31 @@
+{
+  "chapter": 1,
+  "stage": 1,
+  "type": "pre",
+  "lines": [
+    {
+      "speaker": "narrator",
+      "name_display": "",
+      "text": "어느 날, 후냐는 알 수 없는 힘에 이끌려 신비한 세계로 떨어졌다.",
+      "position": "center",
+      "expression": null,
+      "event": { "type": "flash_white", "args": { "duration": 1.0 } }
+    },
+    {
+      "speaker": "hunya",
+      "name_display": "후냐",
+      "text": "여기가... 어디야? 온통 색깔 블록들뿐이잖아!",
+      "position": "left",
+      "expression": "surprised",
+      "event": null
+    },
+    {
+      "speaker": "hunya",
+      "name_display": "후냐",
+      "text": "일단 주변을 살펴봐야겠어. 뭔가 규칙이 있을 것 같은데...",
+      "position": "left",
+      "expression": "normal",
+      "event": null
+    }
+  ]
+}

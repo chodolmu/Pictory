@@ -1,0 +1,11 @@
+[gd_scene load_steps=3 format=3 uid="uid://chapter_title_screen"]
+
+[ext_resource type="Script" path="res://scripts/story/chapter_title_screen.gd" id="1_cts"]
+[ext_resource type="PackedScene" path="res://scenes/story/chapter_title.tscn" id="2_ct"]
+
+[node name="ChapterTitleScreen" type="Control"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+script = ExtResource("1_cts")
+
+[node name="ChapterTitle" parent="." instance=ExtResource("2_ct")]

@@ -1,0 +1,31 @@
+{
+  "chapter": 1,
+  "stage": 7,
+  "type": "pre",
+  "lines": [
+    {
+      "speaker": "imagen_fire",
+      "name_display": "불꽃이",
+      "text": "셋이 함께니까 두려울 게 없어요! 저 빛나는 코인 블록들도 모아야 해요!",
+      "position": "right",
+      "expression": "happy",
+      "event": null
+    },
+    {
+      "speaker": "imagen_water",
+      "name_display": "물결이",
+      "text": "코인 블록은 라인을 지울 때 함께 파괴하면 보너스를 줘요.",
+      "position": "right",
+      "expression": "normal",
+      "event": null
+    },
+    {
+      "speaker": "hunya",
+      "name_display": "후냐",
+      "text": "좋아, 최대한 많이 모아보자! 이 세계에서 코인이 필요할 것 같으니까.",
+      "position": "left",
+      "expression": "normal",
+      "event": null
+    }
+  ]
+}

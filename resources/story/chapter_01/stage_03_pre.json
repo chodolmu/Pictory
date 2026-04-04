@@ -1,0 +1,31 @@
+{
+  "chapter": 1,
+  "stage": 3,
+  "type": "pre",
+  "lines": [
+    {
+      "speaker": "hunya",
+      "name_display": "후냐",
+      "text": "어? 저기 뭔가 있어! 블록들 사이에 끼어있는 것 같은데...",
+      "position": "left",
+      "expression": "surprised",
+      "event": null
+    },
+    {
+      "speaker": "imagen_fire",
+      "name_display": "불꽃이",
+      "text": "도, 도와주세요! 색 블록에 갇혀서 움직일 수가 없어요!",
+      "position": "right",
+      "expression": "sad",
+      "event": null
+    },
+    {
+      "speaker": "hunya",
+      "name_display": "후냐",
+      "text": "이 빛나는 블록이 눈에 띄네. 저걸 활용하면 한꺼번에 더 많이 지울 수 있을 것 같아!",
+      "position": "left",
+      "expression": "normal",
+      "event": null
+    }
+  ]
+}

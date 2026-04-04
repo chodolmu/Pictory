@@ -1,0 +1,47 @@
+{
+  "_comment": "스토리 다이얼로그 JSON 스키마 (참조용)",
+  "chapter": 1,
+  "stage": 1,
+  "type": "pre",
+  "lines": [
+    {
+      "speaker": "hunya",
+      "name_display": "후냐",
+      "text": "여기가 바로 그 장소야!",
+      "position": "left",
+      "expression": "happy",
+      "event": null
+    },
+    {
+      "speaker": "imagen_fire",
+      "name_display": "불꽃이",
+      "text": "위험한 기운이 느껴져...",
+      "position": "right",
+      "expression": "sad",
+      "event": {
+        "type": "screen_shake",
+        "args": { "intensity": 5, "duration": 0.5 }
+      }
+    },
+    {
+      "speaker": "narrator",
+      "name_display": "",
+      "text": "어둠의 기운이 퍼즐 세계를 감싸고 있었다...",
+      "position": "center",
+      "expression": null,
+      "event": {
+        "type": "flash_black",
+        "args": { "duration": 1.0 }
+      }
+    }
+  ],
+  "_schema_fields": {
+    "speaker": "화자 식별자: hunya | imagen_fire | imagen_water | narrator | unknown",
+    "name_display": "UI 표시 이름 (내레이터는 빈 문자열)",
+    "text": "대사. BBCode 지원 [color=red]...[/color]",
+    "position": "left | right | center",
+    "expression": "normal | happy | sad | angry | surprised | null(이전 유지)",
+    "event": "null 또는 { type: string, args: {} }",
+    "event.type": "screen_shake | flash_white | flash_black | bgm_change | wait | imagen_join | chapter_clear"
+  }
+}

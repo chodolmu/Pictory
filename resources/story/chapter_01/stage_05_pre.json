@@ -1,0 +1,31 @@
+{
+  "chapter": 1,
+  "stage": 5,
+  "type": "pre",
+  "lines": [
+    {
+      "speaker": "hunya",
+      "name_display": "후냐",
+      "text": "어, 이상해. 저 블록들은 잠겨 있어서 색이 바뀌질 않아.",
+      "position": "left",
+      "expression": "normal",
+      "event": null
+    },
+    {
+      "speaker": "imagen_fire",
+      "name_display": "불꽃이",
+      "text": "잠긴 블록이요? 라인을 완성해서 같이 지워야 해방된다고 들었어요!",
+      "position": "right",
+      "expression": "normal",
+      "event": null
+    },
+    {
+      "speaker": "hunya",
+      "name_display": "후냐",
+      "text": "그리고... 저 멀리 뭔가 어두운 기운이 흐르는 것 같아. 기분이 좋지 않은데.",
+      "position": "left",
+      "expression": "sad",
+      "event": { "type": "screen_shake", "args": { "intensity": 3, "duration": 0.4 } }
+    }
+  ]
+}

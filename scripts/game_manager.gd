@@ -43,7 +43,19 @@ var _total_destroyed: int = 0
 var _processing: bool = false
 var _game_ended: bool = false
 
+var _flow_controlled: bool = false
+var _stage_stars: int = 0
+
 func _ready() -> void:
+	var params = SceneManager.get_params()
+	if not params.is_empty():
+		_flow_controlled = params.get("flow_controlled", false)
+		var stage_id = params.get("stage_id", "")
+		if stage_id != "" and params.get("mode", "story") == "story":
+			var config = LevelLoader.load_stage(stage_id)
+			if config != null:
+				start_story(config)
+				return
 	if mode == "story":
 		_start_story_default()
 	else:
@@ -63,6 +75,10 @@ func start_story(config) -> void:
 	_initialize_core(grid_size, num_colors)
 	_color_queue.stride_length = config.color_queue_stride
 	_color_queue.offset_range = config.color_queue_random_offset
+
+	# 기믹 배치
+	if config.gimmick_placements.size() > 0:
+		LevelLoader.apply_gimmicks_to_grid(config, _grid)
 
 	var story = StoryModeScript.new()
 	story.name = "StoryMode"
@@ -244,16 +260,47 @@ func _apply_gimmick_effects(effects: Array) -> void:
 
 func _on_stage_cleared(stars: int, score: int, remaining_turns: int) -> void:
 	_game_ended = true
+	_stage_stars = stars
 	_grid_view.lock_input()
 	var currency = Economy.finalize_and_earn_currency()
 	print("Stage Clear! Stars: %d, Score: %d, Currency: +%d" % [stars, Economy.current_score, currency])
-	game_cleared.emit()
+
+	# 세이브
+	var params = SceneManager.get_params()
+	var stage_id = params.get("stage_id", "")
+	if stage_id != "":
+		SaveManager.save_stage_result(stage_id, stars, Economy.current_score)
+
+	if _flow_controlled:
+		var result = {
+			"is_clear": true,
+			"stars": stars,
+			"score": Economy.current_score,
+			"destroyed": _total_destroyed,
+			"stage_id": stage_id
+		}
+		StoryFlowController.on_game_finished(result)
+	else:
+		game_cleared.emit()
 
 func _on_stage_failed() -> void:
 	_game_ended = true
 	_grid_view.lock_input()
 	print("Game Over (story)")
-	game_over.emit()
+
+	if _flow_controlled:
+		var params = SceneManager.get_params()
+		var stage_id = params.get("stage_id", "")
+		var result = {
+			"is_clear": false,
+			"stars": 0,
+			"score": Economy.current_score,
+			"destroyed": _total_destroyed,
+			"stage_id": stage_id
+		}
+		StoryFlowController.on_game_finished(result)
+	else:
+		game_over.emit()
 
 func _on_time_updated(remaining: float, _max: float) -> void:
 	_hud.update_timer(remaining)

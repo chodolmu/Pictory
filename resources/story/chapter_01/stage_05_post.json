@@ -1,0 +1,23 @@
+{
+  "chapter": 1,
+  "stage": 5,
+  "type": "post",
+  "lines": [
+    {
+      "speaker": "imagen_fire",
+      "name_display": "불꽃이",
+      "text": "클리어했지만... 저 어두운 기운의 정체가 뭘까요?",
+      "position": "right",
+      "expression": "sad",
+      "event": null
+    },
+    {
+      "speaker": "hunya",
+      "name_display": "후냐",
+      "text": "모르겠어. 하지만 분명히 이 세계의 색을 빼앗으려는 뭔가가 있는 것 같아.",
+      "position": "left",
+      "expression": "normal",
+      "event": null
+    }
+  ]
+}
