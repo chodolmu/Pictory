@@ -1,0 +1,14 @@
+{
+  "stage_id": "ch01_s02",
+  "chapter": 1,
+  "stage_number": 2,
+  "grid_size": 5,
+  "num_colors": 3,
+  "turn_limit": 18,
+  "goal": { "type": "destroy_blocks", "target_count": 18 },
+  "star_thresholds": [4, 8, 13],
+  "color_queue_config": { "stride": 3, "random_offset": 1 },
+  "gimmick_placements": [],
+  "buffer_rows": 5,
+  "metadata": { "name_ko": "두 번째 퍼즐", "story_preview_key": "ch01_s02_preview" }
+}

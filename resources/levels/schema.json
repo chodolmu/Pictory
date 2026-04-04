@@ -1,0 +1,55 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema",
+  "title": "Pictory Level Schema",
+  "description": "스토리 모드 스테이지 JSON 스키마",
+  "required": ["stage_id", "grid_size", "num_colors", "turn_limit", "goal", "star_thresholds"],
+  "properties": {
+    "stage_id":      { "type": "string", "example": "ch01_s01" },
+    "chapter":       { "type": "integer" },
+    "stage_number":  { "type": "integer" },
+    "grid_size":     { "type": "integer", "minimum": 3, "maximum": 10 },
+    "num_colors":    { "type": "integer", "minimum": 2, "maximum": 7 },
+    "turn_limit":    { "type": "integer", "minimum": 1 },
+    "goal": {
+      "type": "object",
+      "required": ["type", "target_count"],
+      "properties": {
+        "type":         { "type": "string", "enum": ["destroy_blocks"] },
+        "target_count": { "type": "integer", "minimum": 1 }
+      }
+    },
+    "star_thresholds": {
+      "type": "array",
+      "items": { "type": "integer" },
+      "minItems": 3,
+      "maxItems": 3,
+      "description": "[1성, 2성, 3성] 남은 턴 기준"
+    },
+    "color_queue_config": {
+      "type": "object",
+      "properties": {
+        "stride":        { "type": "integer" },
+        "random_offset": { "type": "integer" }
+      }
+    },
+    "gimmick_placements": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "type": { "type": "string" },
+          "x":    { "type": "integer" },
+          "y":    { "type": "integer" }
+        }
+      }
+    },
+    "buffer_rows": { "type": "integer" },
+    "metadata": {
+      "type": "object",
+      "properties": {
+        "name_ko":             { "type": "string" },
+        "story_preview_key":   { "type": "string" }
+      }
+    }
+  }
+}

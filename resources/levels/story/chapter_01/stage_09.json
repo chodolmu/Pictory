@@ -1,0 +1,14 @@
+{
+  "stage_id": "ch01_s09",
+  "chapter": 1,
+  "stage_number": 9,
+  "grid_size": 7,
+  "num_colors": 4,
+  "turn_limit": 18,
+  "goal": { "type": "destroy_blocks", "target_count": 38 },
+  "star_thresholds": [4, 8, 13],
+  "color_queue_config": { "stride": 3, "random_offset": 1 },
+  "gimmick_placements": [],
+  "buffer_rows": 7,
+  "metadata": { "name_ko": "아홉 번째 퍼즐", "story_preview_key": "ch01_s09_preview" }
+}

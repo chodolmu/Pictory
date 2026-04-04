@@ -1,0 +1,14 @@
+{
+  "stage_id": "ch01_s03",
+  "chapter": 1,
+  "stage_number": 3,
+  "grid_size": 5,
+  "num_colors": 3,
+  "turn_limit": 16,
+  "goal": { "type": "destroy_blocks", "target_count": 20 },
+  "star_thresholds": [3, 7, 12],
+  "color_queue_config": { "stride": 3, "random_offset": 1 },
+  "gimmick_placements": [],
+  "buffer_rows": 5,
+  "metadata": { "name_ko": "세 번째 퍼즐", "story_preview_key": "ch01_s03_preview" }
+}

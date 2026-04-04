@@ -1,0 +1,14 @@
+{
+  "stage_id": "ch01_s05",
+  "chapter": 1,
+  "stage_number": 5,
+  "grid_size": 6,
+  "num_colors": 3,
+  "turn_limit": 20,
+  "goal": { "type": "destroy_blocks", "target_count": 25 },
+  "star_thresholds": [5, 10, 15],
+  "color_queue_config": { "stride": 3, "random_offset": 1 },
+  "gimmick_placements": [],
+  "buffer_rows": 6,
+  "metadata": { "name_ko": "다섯 번째 퍼즐", "story_preview_key": "ch01_s05_preview" }
+}
