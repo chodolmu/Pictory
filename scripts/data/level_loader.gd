@@ -4,6 +4,23 @@ extends Node
 
 const StageConfigScript = preload("res://scripts/data/stage_config.gd")
 
+## type 문자열 → GimmickType 매핑
+const GIMMICK_TYPE_MAP: Dictionary = {
+	"locked":       1,
+	"stone":        2,
+	"ice":          3,
+	"rainbow":      4,
+	"anchor":       5,
+	"paint_bucket": 6,
+	"coin":         7,
+	"chain_mult":   8,
+	"star":         10,
+	"spread":       11,
+	"fade":         12,
+	"time":         20,
+	"poison":       21,
+}
+
 const REQUIRED_FIELDS: Array[String] = [
 	"stage_id", "grid_size", "num_colors", "turn_limit", "goal", "star_thresholds"
 ]
@@ -31,6 +48,31 @@ func load_stage(stage_id: String):
 	var path = "res://resources/levels/story/chapter_%02d/stage_%02d.json" % [chapter, stage_num]
 
 	return _load_from_path(path)
+
+func apply_gimmicks_to_grid(config, grid: Grid) -> void:
+	## StageConfig의 gimmick_placements를 Grid의 셀에 적용한다.
+	for placement in config.gimmick_placements:
+		var x = placement.get("x", -1)
+		var y = placement.get("y", -1)
+		var type_str = placement.get("type", "")
+		var durability = placement.get("durability", 0)
+		var data = placement.get("data", {})
+
+		if not GIMMICK_TYPE_MAP.has(type_str):
+			push_warning("LevelLoader: unknown gimmick type: " + type_str)
+			continue
+
+		if not grid.is_valid_coord(x, y):
+			push_warning("LevelLoader: gimmick coord out of bounds: (%d,%d)" % [x, y])
+			continue
+
+		var gimmick_type = GIMMICK_TYPE_MAP[type_str]
+		var cell = grid.get_cell(x, y)
+		if cell:
+			cell.set_gimmick(gimmick_type, durability, data)
+			# 돌 칸은 색상 강제 -1
+			if type_str == "stone":
+				cell.color = -1
 
 func load_chapter_stages(chapter: int):
 	var result: Array = []

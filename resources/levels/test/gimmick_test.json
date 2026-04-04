@@ -1,0 +1,24 @@
+{
+  "stage_id": "test_gimmick",
+  "chapter": 0,
+  "stage_number": 0,
+  "grid_size": 7,
+  "num_colors": 4,
+  "turn_limit": 50,
+  "goal": { "type": "destroy_blocks", "target_count": 20 },
+  "star_thresholds": [10, 15, 20],
+  "color_queue_config": { "stride": 3, "random_offset": 1 },
+  "gimmick_placements": [
+    {"x": 0, "y": 0, "type": "stone"},
+    {"x": 6, "y": 0, "type": "stone"},
+    {"x": 3, "y": 3, "type": "stone"},
+    {"x": 1, "y": 1, "type": "locked", "durability": 1},
+    {"x": 5, "y": 1, "type": "locked", "durability": 1},
+    {"x": 2, "y": 4, "type": "ice", "durability": 2},
+    {"x": 4, "y": 4, "type": "ice", "durability": 2},
+    {"x": 3, "y": 6, "type": "rainbow"},
+    {"x": 1, "y": 6, "type": "rainbow"}
+  ],
+  "buffer_rows": 7,
+  "metadata": { "name_ko": "기믹 통합 테스트", "description": "S06 4종 기믹 검증용 테스트 레벨" }
+}

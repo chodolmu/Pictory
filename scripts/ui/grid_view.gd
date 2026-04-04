@@ -30,8 +30,12 @@ const COLOR_EMPTY: Color = Color(0.15, 0.15, 0.15)
 # 내부 상태
 # ─────────────────────────────────────────
 
+const GimmickRegistryScript = preload("res://scripts/gimmick/gimmick_registry.gd")
+const GimmickVisualRendererScript = preload("res://scripts/gimmick/gimmick_visual_renderer.gd")
+
 var _grid: Grid = null
-var _cell_rects: Dictionary = {}  # Vector2i(x,y) -> ColorRect
+var _cell_rects: Dictionary = {}   # Vector2i(x,y) -> ColorRect (배경)
+var _gimmick_rects: Dictionary = {} # Vector2i(x,y) -> Control (기믹 오버레이)
 var _input_locked: bool = false
 
 # ─────────────────────────────────────────
@@ -74,6 +78,7 @@ func _clear_rects() -> void:
 	for child in get_children():
 		child.queue_free()
 	_cell_rects.clear()
+	_gimmick_rects.clear()
 
 func _build_rects() -> void:
 	if not _grid:
@@ -96,12 +101,24 @@ func _create_cell_rect(x: int, y: int) -> void:
 	var cell = _grid.get_cell(x, y)
 	if not cell:
 		return
+	var pos = _cell_pixel_pos(x, y)
+	var sz = Vector2(cell_size, cell_size)
+
+	# 배경 ColorRect
 	var rect = ColorRect.new()
-	rect.size = Vector2(cell_size, cell_size)
-	rect.position = _cell_pixel_pos(x, y)
+	rect.size = sz
+	rect.position = pos
 	rect.color = _cell_color(cell)
 	add_child(rect)
 	_cell_rects[Vector2i(x, y)] = rect
+
+	# 기믹 오버레이 Control (_draw로 처리)
+	var overlay = _GimmickOverlay.new()
+	overlay.size = sz
+	overlay.position = pos
+	overlay.cell_ref = cell
+	add_child(overlay)
+	_gimmick_rects[Vector2i(x, y)] = overlay
 
 func _create_separator() -> void:
 	var gs = _grid.grid_size
@@ -115,12 +132,17 @@ func _create_separator() -> void:
 	add_child(sep)
 
 func _refresh_cell_rect(x: int, y: int) -> void:
-	var rect = _cell_rects.get(Vector2i(x, y))
+	var key = Vector2i(x, y)
+	var rect = _cell_rects.get(key)
 	if not rect:
 		return
 	var cell = _grid.get_cell(x, y)
 	if cell:
 		rect.color = _cell_color(cell)
+		# 기믹 오버레이 갱신
+		var overlay = _gimmick_rects.get(key)
+		if overlay:
+			overlay.queue_redraw()
 
 func _cell_pixel_pos(x: int, y: int) -> Vector2:
 	var gs = _grid.grid_size
@@ -192,3 +214,16 @@ func _handle_touch(screen_pos: Vector2) -> void:
 		return
 
 	cell_touched.emit(gx, gy)
+
+# ─────────────────────────────────────────
+# 기믹 오버레이 내부 클래스
+# ─────────────────────────────────────────
+
+class _GimmickOverlay extends Control:
+	var cell_ref = null
+
+	func _draw() -> void:
+		if cell_ref == null or not cell_ref.has_gimmick():
+			return
+		var rect = Rect2(Vector2.ZERO, size)
+		GimmickVisualRenderer.draw_gimmick_overlay(self, cell_ref, rect)
