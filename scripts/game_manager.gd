@@ -245,17 +245,20 @@ func _on_cell_touched(x: int, y: int) -> void:
 
 	# 1. BFS Recolor (on_recolor 훅 포함 — 페인트통/무지개/퇴색 대응)
 	var group = FloodFill.flood_fill(_grid, x, y)
-	print("Touch (%d,%d) cell_color=%d active_color=%d queue=%s" % [x, y, cell.color, active_color, str(_color_queue.peek_all())])
 	FloodFill.recolor_group(_grid, group, active_color)
-	print("Recolor group size: ", group.size())
 	_grid_view.refresh()
 
 	# 2. ColorQueue advance
 	_color_queue.advance()
 	_color_queue_ui.refresh()
 
-	# 3. Chain Combo — 애니메이션 포함 단계별 실행
-	var result = await _execute_chain_with_animation()
+	# 3. Chain Combo — 동기식 실행 (await 제거로 _processing stuck 방지)
+	var result = ChainComboScript.execute(_grid)
+
+	# 3.5. 파괴 후 gravity + 리프레시
+	if result.total_destroyed > 0:
+		Gravity.apply(_grid)
+		_grid_view.refresh()
 
 	var effective = result.effective_destroyed if result.effective_destroyed > 0 else result.total_destroyed
 	_total_destroyed += effective
