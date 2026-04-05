@@ -25,7 +25,7 @@ signal game_over
 @export var num_colors: int = 5
 @export var max_turns: int = 30
 @export var goal: int = 100
-@export var time_limit: float = 60.0
+@export var time_limit: float = 30.0
 
 # Core systems
 var _grid: Grid
