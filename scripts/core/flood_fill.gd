@@ -37,6 +37,11 @@ static func flood_fill(grid: Grid, start_x: int, start_y: int) -> Array:
 
 		result.append(cell)
 
+		# 리컬러 불가능한 셀(잠긴 칸 등)은 이웃 탐색을 하지 않음
+		# → 잠긴 칸 너머로 색이 전파되는 버그 방지
+		if not handler.can_recolor(cell, target_color):
+			continue
+
 		for dir in directions:
 			var next = pos + dir
 			if visited.has(next):
