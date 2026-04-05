@@ -139,7 +139,7 @@ func _animate_stamina_gain(_amount: int) -> void:
 	)
 
 func _on_back_pressed() -> void:
-	SceneManager.change_scene("res://scenes/main/main_menu.tscn")
+	SceneManager.change_scene("res://scenes/main/stage_select.tscn")
 
 func _make_card() -> ShopItemCard:
 	return load(ITEM_CARD_SCENE).instantiate() as ShopItemCard

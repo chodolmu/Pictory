@@ -596,7 +596,7 @@ func _on_infinity_game_over(_final_score: int, total_dest: int) -> void:
 	)
 	popup.main_menu_requested.connect(func():
 		popup.queue_free()
-		SceneManager.change_scene("res://scenes/main/main_menu.tscn")
+		SceneManager.change_scene("res://scenes/main/stage_select.tscn")
 	)
 	game_over.emit()
 

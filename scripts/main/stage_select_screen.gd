@@ -3,17 +3,37 @@ extends Control
 
 const ResultPopupScene = preload("res://scenes/ui/result_popup.tscn")
 const ChapterUnlockScript = preload("res://scripts/data/chapter_unlock.gd")
+const InfinityPopupScene = "res://scenes/ui/infinity_confirm_popup.tscn"
+const OptionsPopupScene = "res://scenes/ui/options_popup.tscn"
 
-@onready var _back_btn: Button = $MarginContainer/VBox/Header/BackButton
-@onready var _chapter_prev_btn: Button = $MarginContainer/VBox/Header/ChapterPrevButton
-@onready var _chapter_next_btn: Button = $MarginContainer/VBox/Header/ChapterNextButton
-@onready var _chapter_label: Label = $MarginContainer/VBox/Header/ChapterLabel
+# ── 상단 바 ──
+@onready var _player_icon: Panel = $MarginContainer/VBox/TopBar/PlayerIcon
+@onready var _nickname_label: Label = $MarginContainer/VBox/TopBar/NicknameLabel
+@onready var _currency_label: Label = $MarginContainer/VBox/TopBar/CurrencyLabel
+@onready var _settings_btn: Button = $MarginContainer/VBox/TopBar/SettingsButton
+
+# ── 챕터 바 ──
+@onready var _chapter_prev_btn: Button = $MarginContainer/VBox/ChapterBar/ChapterPrevButton
+@onready var _chapter_next_btn: Button = $MarginContainer/VBox/ChapterBar/ChapterNextButton
+@onready var _chapter_label: Label = $MarginContainer/VBox/ChapterBar/ChapterLabel
+
+# ── 노드맵 ──
 @onready var _node_map_scroll: ScrollContainer = $MarginContainer/VBox/NodeMapScroll
 @onready var _node_map_container: Control = $MarginContainer/VBox/NodeMapScroll/NodeMapContainer
+
+# ── 해금 ──
 @onready var _unlock_info_label: Label = $MarginContainer/VBox/UnlockInfoLabel
 @onready var _unlock_btn: Button = $MarginContainer/VBox/UnlockButton
 
+# ── 하단 네비 ──
+@onready var _infinity_btn: Button = $MarginContainer/VBox/BottomNav/InfinityButton
+@onready var _collection_btn: Button = $MarginContainer/VBox/BottomNav/CollectionButton
+@onready var _shop_btn: Button = $MarginContainer/VBox/BottomNav/ShopButton
+@onready var _achievements_btn: Button = $MarginContainer/VBox/BottomNav/AchievementsButton
+
 var _stage_confirm_popup = null
+var _infinity_confirm_popup = null
+var _options_popup = null
 
 var current_chapter: int = 1
 var _result_chapter: int = 1
@@ -36,7 +56,8 @@ const NODE_COLORS = {
 
 # 캐릭터 마커
 var _character_marker: Panel = null
-var _current_stage_pos: Vector2 = Vector2.ZERO
+var _node_positions: Array[Vector2] = []  # positions[i] = 화면상 위치 (i=0 → 최상단 노드=10스테이지)
+var _stage_count: int = 0
 
 # 드래그 스크롤
 var _dragging: bool = false
@@ -44,10 +65,22 @@ var _drag_start_y: float = 0.0
 var _scroll_start: int = 0
 
 func _ready() -> void:
-	_back_btn.pressed.connect(_on_back)
+	# 상단
+	_settings_btn.pressed.connect(_on_settings)
+	# 챕터
 	_chapter_prev_btn.pressed.connect(_on_chapter_prev)
 	_chapter_next_btn.pressed.connect(_on_chapter_next)
 	_unlock_btn.pressed.connect(_on_unlock_button_pressed)
+	# 하단 네비
+	_infinity_btn.pressed.connect(_on_infinity)
+	_collection_btn.pressed.connect(_on_collection)
+	_shop_btn.pressed.connect(_on_shop)
+	_achievements_btn.pressed.connect(_on_achievements)
+	# 플레이어 정보
+	AchievementManager.achievement_unlocked.connect(_on_achievement_unlocked)
+	_update_player_info()
+	_update_currency_display()
+	_update_achievement_badge()
 
 	var params = SceneManager.get_params()
 	var ch = params.get("chapter", 1)
@@ -58,12 +91,91 @@ func _ready() -> void:
 		_result_stage = params.get("stage", 1)
 		call_deferred("_show_result_popup", params.get("result", {}))
 
+# ─────────────────────────────────────────
+# 플레이어 정보 (기존 메인 메뉴 기능)
+# ─────────────────────────────────────────
+
+func _update_player_info() -> void:
+	_nickname_label.text = PlayerProfile.get_nickname()
+	_update_player_icon()
+
+func _update_player_icon() -> void:
+	var icon_id = CollectionManager.get_selected_icon()
+	var icon_data = CollectionManager.get_icon_data(icon_id)
+	var icon_color = Color("#E8A87C")
+	if not icon_data.is_empty():
+		icon_color = Color(icon_data.get("color", "#E8A87C"))
+	var style = StyleBoxFlat.new()
+	style.bg_color = icon_color
+	style.corner_radius_top_left = 18
+	style.corner_radius_top_right = 18
+	style.corner_radius_bottom_left = 18
+	style.corner_radius_bottom_right = 18
+	_player_icon.add_theme_stylebox_override("panel", style)
+
+func _update_currency_display() -> void:
+	_currency_label.text = "💰 %d" % SaveManager.get_currency()
+
+func _on_achievement_unlocked(_id: String) -> void:
+	_update_achievement_badge()
+
+func _update_achievement_badge() -> void:
+	var unclaimed = AchievementManager.get_unclaimed_count()
+	if _achievements_btn:
+		_achievements_btn.text = "업적" if unclaimed == 0 else "업적(%d)" % unclaimed
+
+# ─────────────────────────────────────────
+# 하단 네비 (기존 메인 메뉴 기능)
+# ─────────────────────────────────────────
+
+func _on_infinity() -> void:
+	var popup = _get_or_create_popup("_infinity_confirm_popup", InfinityPopupScene)
+	popup.show_popup()
+
+func _on_settings() -> void:
+	var popup = _get_or_create_popup("_options_popup", OptionsPopupScene)
+	popup.show_popup()
+
+func _on_shop() -> void:
+	_free_popups()
+	SceneManager.change_scene("res://scenes/ui/shop.tscn")
+
+func _on_collection() -> void:
+	_free_popups()
+	SceneManager.change_scene("res://scenes/ui/collection.tscn")
+
+func _on_achievements() -> void:
+	var popup = load("res://scenes/ui/achievement_popup.tscn").instantiate()
+	get_tree().root.add_child(popup)
+	while AchievementManager.has_pending_popups():
+		popup.show_achievement(AchievementManager.pop_pending_popup())
+
+func _get_or_create_popup(var_ref: String, scene_path: String) -> Node:
+	var popup = get(var_ref)
+	if popup == null or not is_instance_valid(popup):
+		popup = load(scene_path).instantiate()
+		get_tree().root.add_child(popup)
+		set(var_ref, popup)
+	return popup
+
+func _free_popups() -> void:
+	for ref in ["_infinity_confirm_popup", "_options_popup", "_stage_confirm_popup"]:
+		var popup = get(ref)
+		if popup != null and is_instance_valid(popup):
+			popup.queue_free()
+			set(ref, null)
+
+# ─────────────────────────────────────────
+# 노드맵
+# ─────────────────────────────────────────
+
 func _load_chapter(chapter: int) -> void:
 	current_chapter = chapter
 	_chapter_label.text = "챕터 %d" % chapter
 	_update_chapter_buttons()
 	_build_node_map(chapter)
 	_update_unlock_info()
+	_update_currency_display()
 
 func _build_node_map(chapter: int) -> void:
 	for child in _node_map_container.get_children():
@@ -71,25 +183,25 @@ func _build_node_map(chapter: int) -> void:
 	await get_tree().process_frame
 
 	var stages = LevelLoader.load_chapter_stages(chapter)
-	var count = stages.size()
-	var map_height = MAP_TOP_MARGIN + count * NODE_GAP_Y + 60.0
+	_stage_count = stages.size()
+	var map_height = MAP_TOP_MARGIN + _stage_count * NODE_GAP_Y + 60.0
 	_node_map_container.custom_minimum_size = Vector2(390, maxf(map_height, 900))
 
 	var vp_width = get_viewport_rect().size.x
 	if vp_width <= 0:
 		vp_width = 390.0
 
-	# 현재 스테이지 찾기 (플레이어 위치)
-	var current_stage_idx = _find_current_stage(stages)
+	# 캐릭터 위치: 마지막으로 클리어한 스테이지
+	var last_cleared_idx = _find_last_cleared_stage(stages)
 
-	# 노드 위치 계산 (아래→위, 지그재그)
-	var positions: Array[Vector2] = []
-	for i in range(count):
-		var stage_idx = count - 1 - i
+	# 노드 위치 계산
+	_node_positions.clear()
+	for i in range(_stage_count):
+		var stage_idx = _stage_count - 1 - i
 		var x_offset = 25.0 if (stage_idx % 2 == 0) else -25.0
 		var px = vp_width / 2.0 + x_offset
 		var py = MAP_TOP_MARGIN + i * NODE_GAP_Y
-		positions.append(Vector2(px, py))
+		_node_positions.append(Vector2(px, py))
 
 	# 연결선
 	var line_drawer = Control.new()
@@ -97,65 +209,55 @@ func _build_node_map(chapter: int) -> void:
 	line_drawer.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	line_drawer.custom_minimum_size = _node_map_container.custom_minimum_size
 	_node_map_container.add_child(line_drawer)
-
-	var line_positions = positions.duplicate()
+	var lp = _node_positions.duplicate()
 	line_drawer.draw.connect(func():
-		for i in range(line_positions.size() - 1):
-			line_drawer.draw_line(line_positions[i], line_positions[i + 1], LINE_COLOR, LINE_WIDTH, true)
+		for i in range(lp.size() - 1):
+			line_drawer.draw_line(lp[i], lp[i + 1], LINE_COLOR, LINE_WIDTH, true)
 	)
 
-	# 캐릭터 위치 저장
-	var char_position_idx = count - 1 - current_stage_idx  # positions 인덱스
-	if char_position_idx >= 0 and char_position_idx < positions.size():
-		_current_stage_pos = positions[char_position_idx]
-
 	# 노드 버튼 생성
-	for i in range(count):
-		var stage_idx = count - 1 - i
+	for i in range(_stage_count):
+		var stage_idx = _stage_count - 1 - i
 		var config = stages[stage_idx]
 		var save = SaveManager.get_stage_data(config.stage_id)
 		var stars = save.get("stars", 0) if not save.is_empty() else 0
 		var locked = _is_stage_locked(config)
-		var pos = positions[i]
-		var is_current = (stage_idx == current_stage_idx)
+		var pos = _node_positions[i]
+		var is_current_target = (stage_idx == last_cleared_idx + 1) if last_cleared_idx < _stage_count - 1 else false
 
-		var node_btn = _create_node_button(config, stars, locked, pos, is_current)
+		var node_btn = _create_node_button(config, stars, locked, pos, is_current_target)
 		_node_map_container.add_child(node_btn)
 
-	# 캐릭터 마커 생성
-	_create_character_marker()
+	# 캐릭터 마커: 마지막 클리어 노드에 배치
+	var char_pos_idx = _stage_count - 1 - maxi(last_cleared_idx, 0)
+	_create_character_marker(_node_positions[char_pos_idx])
 
-	# 스크롤 위치: 캐릭터가 보이도록
+	# 스크롤: 캐릭터가 보이도록
 	await get_tree().process_frame
-	var scroll_target = int(_current_stage_pos.y - _node_map_scroll.size.y / 2.0)
+	var scroll_target = int(_node_positions[char_pos_idx].y - _node_map_scroll.size.y / 2.0)
 	_node_map_scroll.scroll_vertical = clampi(scroll_target, 0, int(_node_map_container.custom_minimum_size.y))
 
 	line_drawer.queue_redraw()
 
-func _find_current_stage(stages: Array) -> int:
-	# 가장 높은 클리어된 스테이지의 다음, 또는 첫 번째 미클리어 스테이지
+func _find_last_cleared_stage(stages: Array) -> int:
 	var highest_cleared = -1
 	for i in range(stages.size()):
 		var save = SaveManager.get_stage_data(stages[i].stage_id)
 		if not save.is_empty() and save.get("stars", 0) > 0:
 			highest_cleared = i
-	if highest_cleared < 0:
-		return 0  # 아무것도 안 깸 → 1스테이지
-	if highest_cleared >= stages.size() - 1:
-		return stages.size() - 1  # 다 깸 → 마지막 스테이지
-	return highest_cleared + 1  # 다음 스테이지
+	return highest_cleared
 
-func _create_character_marker() -> void:
+func _create_character_marker(pos: Vector2) -> void:
 	_character_marker = Panel.new()
 	_character_marker.name = "CharacterMarker"
 	var marker_size = NODE_RADIUS * 1.6
 	_character_marker.size = Vector2(marker_size, marker_size)
 	_character_marker.position = Vector2(
-		_current_stage_pos.x - marker_size / 2.0,
-		_current_stage_pos.y - NODE_RADIUS - marker_size - 4.0
+		pos.x - marker_size / 2.0,
+		pos.y - NODE_RADIUS - marker_size - 4.0
 	)
 	var style = StyleBoxFlat.new()
-	style.bg_color = Color(0.95, 0.90, 0.80)  # 후냐 크림색
+	style.bg_color = Color(0.95, 0.90, 0.80)
 	var r = int(marker_size / 2.0)
 	style.corner_radius_top_left = r
 	style.corner_radius_top_right = r
@@ -168,8 +270,6 @@ func _create_character_marker() -> void:
 	style.border_color = Color(0.8, 0.7, 0.5)
 	_character_marker.add_theme_stylebox_override("panel", style)
 	_node_map_container.add_child(_character_marker)
-
-	# 바운스 애니메이션
 	_animate_character_bounce()
 
 func _animate_character_bounce() -> void:
@@ -180,7 +280,7 @@ func _animate_character_bounce() -> void:
 	tween.tween_property(_character_marker, "position:y", base_y - 6.0, 0.5).set_trans(Tween.TRANS_SINE)
 	tween.tween_property(_character_marker, "position:y", base_y, 0.5).set_trans(Tween.TRANS_SINE)
 
-func _move_character_to_stage(target_pos: Vector2) -> void:
+func _move_character_to_node(target_pos: Vector2, callback: Callable = Callable()) -> void:
 	if _character_marker == null or not is_instance_valid(_character_marker):
 		return
 	var marker_size = _character_marker.size.x
@@ -190,8 +290,10 @@ func _move_character_to_stage(target_pos: Vector2) -> void:
 	)
 	var tween = create_tween()
 	tween.tween_property(_character_marker, "position", target, 0.4).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN_OUT)
+	if callback.is_valid():
+		tween.tween_callback(callback)
 
-func _create_node_button(config, stars: int, locked: bool, pos: Vector2, is_current: bool) -> Control:
+func _create_node_button(config, stars: int, locked: bool, pos: Vector2, is_current_target: bool) -> Control:
 	var container = Control.new()
 	container.position = Vector2(pos.x - NODE_RADIUS - 8, pos.y - NODE_RADIUS - 8)
 	container.size = Vector2((NODE_RADIUS + 8) * 2, (NODE_RADIUS + 8) * 2)
@@ -217,8 +319,7 @@ func _create_node_button(config, stars: int, locked: bool, pos: Vector2, is_curr
 	else:
 		style.bg_color = NODE_COLORS["cleared_3"]
 
-	# 현재 스테이지 강조 테두리
-	if is_current and not locked:
+	if is_current_target and not locked:
 		style.border_width_bottom = 2
 		style.border_width_top = 2
 		style.border_width_left = 2
@@ -255,10 +356,33 @@ func _create_node_button(config, stars: int, locked: bool, pos: Vector2, is_curr
 	btn.flat = true
 	btn.modulate = Color(1, 1, 1, 0)
 	if not locked:
-		btn.pressed.connect(_on_stage_selected.bind(config.stage_id))
+		# 클릭 시: 캐릭터 이동 → 스테이지 진입
+		var stage_id = config.stage_id
+		var stage_num = config.stage_number
+		var node_pos = pos
+		btn.pressed.connect(_on_node_clicked.bind(stage_id, stage_num, node_pos))
 	container.add_child(btn)
 
 	return container
+
+func _on_node_clicked(stage_id: String, stage_num: int, node_pos: Vector2) -> void:
+	# 캐릭터를 해당 노드로 이동시킨 후 스테이지 진입
+	_move_character_to_node(node_pos, func():
+		_open_stage_confirm(stage_id)
+	)
+
+func _open_stage_confirm(stage_id: String) -> void:
+	var config = LevelLoader.load_stage(stage_id)
+	if config == null:
+		return
+	if _stage_confirm_popup == null or not is_instance_valid(_stage_confirm_popup):
+		_stage_confirm_popup = load("res://scenes/ui/stage_confirm_popup.tscn").instantiate()
+		get_tree().root.add_child(_stage_confirm_popup)
+		_stage_confirm_popup.start_requested.connect(_on_start_stage)
+	_stage_confirm_popup.show_popup(config)
+
+func _on_start_stage(config) -> void:
+	StoryFlowController.start_stage(config.chapter, config.stage_number)
 
 func _is_stage_locked(config) -> bool:
 	if config.stage_number == 1:
@@ -295,18 +419,9 @@ func _on_chapter_next() -> void:
 	if current_chapter < 10 and SaveManager.is_chapter_unlocked(current_chapter + 1):
 		_load_chapter(current_chapter + 1)
 
-func _on_stage_selected(s_id: String) -> void:
-	var config = LevelLoader.load_stage(s_id)
-	if config == null:
-		return
-	if _stage_confirm_popup == null or not is_instance_valid(_stage_confirm_popup):
-		_stage_confirm_popup = load("res://scenes/ui/stage_confirm_popup.tscn").instantiate()
-		get_tree().root.add_child(_stage_confirm_popup)
-		_stage_confirm_popup.start_requested.connect(_on_start_stage)
-	_stage_confirm_popup.show_popup(config)
-
-func _on_start_stage(config) -> void:
-	StoryFlowController.start_stage(config.chapter, config.stage_number)
+# ─────────────────────────────────────────
+# 결과 팝업
+# ─────────────────────────────────────────
 
 func _show_result_popup(result: Dictionary) -> void:
 	var popup = ResultPopupScene.instantiate()
@@ -316,8 +431,7 @@ func _show_result_popup(result: Dictionary) -> void:
 	var score: int = result.get("score", 0)
 
 	if is_clear:
-		var max_stages = 10
-		var has_next = _result_stage < max_stages
+		var has_next = _result_stage < 10
 		var currency: int = result.get("currency", 0)
 		popup.show_clear(stars, score, currency, has_next)
 		popup.next_stage_requested.connect(_on_result_next_stage)
@@ -332,22 +446,13 @@ func _show_result_popup(result: Dictionary) -> void:
 	)
 
 func _on_result_next_stage() -> void:
-	var next = _result_stage + 1
-	if next > 10:
-		pass
-	else:
-		StoryFlowController.start_stage(_result_chapter, next)
+	if _result_stage + 1 <= 10:
+		StoryFlowController.start_stage(_result_chapter, _result_stage + 1)
 
 func _on_unlock_button_pressed() -> void:
 	var next_chapter = current_chapter + 1
 	if ChapterUnlockScript.try_unlock(next_chapter):
 		_load_chapter(next_chapter)
-
-func _on_back() -> void:
-	if _stage_confirm_popup != null and is_instance_valid(_stage_confirm_popup):
-		_stage_confirm_popup.queue_free()
-		_stage_confirm_popup = null
-	SceneManager.change_scene("res://scenes/main/main_menu.tscn")
 
 # ─────────────────────────────────────────
 # 드래그 스크롤

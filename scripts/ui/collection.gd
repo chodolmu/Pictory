@@ -43,4 +43,4 @@ func _show_tab_content(index: int) -> void:
 	_content_container.add_child(tab)
 
 func _on_back() -> void:
-	SceneManager.change_scene("res://scenes/main/main_menu.tscn")
+	SceneManager.change_scene("res://scenes/main/stage_select.tscn")
