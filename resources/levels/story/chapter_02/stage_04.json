@@ -4,10 +4,10 @@
   "stage_number": 4,
   "grid_size": 5,
   "num_colors": 3,
-  "turn_limit": 16,
+  "turn_limit": 12,
   "goal": {
     "type": "destroy_blocks",
-    "target_count": 16
+    "target_count": 20
   },
   "star_thresholds": [
     1,
