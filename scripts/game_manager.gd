@@ -252,11 +252,13 @@ func _on_cell_touched(x: int, y: int) -> void:
 	_color_queue.advance()
 	_color_queue_ui.refresh()
 
-	# 3. Chain Combo — 동기식 실행 (await 제거로 _processing stuck 방지)
-	#    ChainCombo.execute() 내부에서 파괴 + Gravity.apply()를 반복 실행함
-	var result = ChainComboScript.execute(_grid)
-	_grid_view.refresh()
+	# 3. Chain Combo — 애니메이션 포함 단계별 실행
+	var result = await _execute_chain_with_animation()
 
+	# ── 이후 처리는 _finalize_action에서 (await 실패와 무관하게 실행 보장)
+	_finalize_action(result)
+
+func _finalize_action(result: ChainCombo.ChainResult) -> void:
 	var effective = result.effective_destroyed if result.effective_destroyed > 0 else result.total_destroyed
 	_total_destroyed += effective
 
@@ -264,7 +266,6 @@ func _on_cell_touched(x: int, y: int) -> void:
 	Economy.add_score(effective, result.chain_count)
 	if not result.collected_rewards.is_empty():
 		Economy.add_rewards(result.collected_rewards)
-	# 기믹 효과 처리 (별/시간 등)
 	_apply_gimmick_effects(result.collected_effects)
 
 	# 5. HUD 갱신
@@ -274,7 +275,8 @@ func _on_cell_touched(x: int, y: int) -> void:
 	_grid_view.refresh()
 
 	# 6. 모드에 위임
-	_current_mode.on_action_performed(effective, result.chain_count)
+	if _current_mode != null:
+		_current_mode.on_action_performed(effective, result.chain_count)
 
 	# 7. 스냅샷 저장 (K6 되감기용)
 	save_snapshot()
@@ -317,8 +319,9 @@ func _execute_chain_with_animation() -> ChainCombo.ChainResult:
 					if effect.get("type") == "multiply_count":
 						has_chain_mult = true
 
-		# ── 파괴 애니메이션
-		await _grid_view.animate_destroy(actually_destroyed)
+		# ── 파괴 애니메이션 (실패 시 건너뜀)
+		if _grid_view.has_method("animate_destroy"):
+			await _grid_view.animate_destroy(actually_destroyed)
 
 		# ── 그리드에서 파괴된 셀 제거
 		for dc in actually_destroyed:
@@ -328,8 +331,9 @@ func _execute_chain_with_animation() -> ChainCombo.ChainResult:
 		# ── 중력 이동 계산 (파괴 적용 후 그리드 기준)
 		var gravity_moves = Gravity.calculate_moves(_grid)
 
-		# ── 낙하 애니메이션
-		await _grid_view.animate_gravity(gravity_moves)
+		# ── 낙하 애니메이션 (실패 시 건너뜀)
+		if _grid_view.has_method("animate_gravity") and gravity_moves.size() > 0:
+			await _grid_view.animate_gravity(gravity_moves)
 
 		# ── 중력 실제 적용
 		Gravity.apply(_grid)
@@ -342,15 +346,9 @@ func _execute_chain_with_animation() -> ChainCombo.ChainResult:
 		result.effective_destroyed += effective
 		result.destroyed_per_chain.append(actually_destroyed.size())
 
-		print("Chain ", result.chain_count, ": destroyed ", actually_destroyed.size(),
-			" (effective: ", effective, ")")
-
 		# ── 다음 체인 전 짧은 정지 (플레이어가 각 단계를 볼 수 있도록)
 		if i < ChainCombo.MAX_CHAIN - 1:
 			await get_tree().create_timer(0.1).timeout
-
-	if result.chain_count >= ChainCombo.MAX_CHAIN:
-		push_warning("ChainCombo: MAX_CHAIN reached!")
 
 	return result
 
