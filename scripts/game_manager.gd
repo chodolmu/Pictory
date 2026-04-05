@@ -270,8 +270,6 @@ func _finalize_action(result: ChainCombo.ChainResult) -> void:
 
 	# 5. HUD 갱신
 	_hud.update_destroyed(effective)
-	if result.chain_count >= 1:
-		_hud.show_chain(result.chain_count)
 	_grid_view.refresh()
 
 	# 6. 모드에 위임
@@ -345,6 +343,10 @@ func _execute_chain_with_animation() -> ChainCombo.ChainResult:
 		result.total_destroyed += actually_destroyed.size()
 		result.effective_destroyed += effective
 		result.destroyed_per_chain.append(actually_destroyed.size())
+
+		# ── 콤보 표시 (2연쇄부터 매 단계마다 갱신)
+		if result.chain_count >= 2:
+			_hud.show_chain(result.chain_count)
 
 		# ── 다음 체인 전 짧은 정지 (플레이어가 각 단계를 볼 수 있도록)
 		if i < ChainCombo.MAX_CHAIN - 1:

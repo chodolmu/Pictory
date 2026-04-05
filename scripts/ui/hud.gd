@@ -83,9 +83,8 @@ func update_timer(remaining: float) -> void:
 func show_chain(chain_count: int) -> void:
 	if not _get_chain_label():
 		return
-	if chain_count >= 1:
-		var msg = "Destroy!" if chain_count == 1 else "Chain x%d!" % chain_count
-		chain_label.text = msg
+	if chain_count >= 2:
+		chain_label.text = "콤보 x%d!" % chain_count
 		chain_label.modulate.a = 1.0
 		chain_label.visible = true
 		var tween = create_tween()
