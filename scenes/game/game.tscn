@@ -68,6 +68,7 @@ custom_minimum_size = Vector2(0, 24)
 size_flags_horizontal = 3
 max_value = 100.0
 value = 0.0
+show_percentage = false
 
 [node name="ProgressLabel" type="Label" parent="HUD/BottomBar/ProgressBar"]
 anchors_preset = 15
