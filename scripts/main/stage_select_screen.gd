@@ -398,7 +398,15 @@ func _update_chapter_buttons() -> void:
 
 func _update_unlock_info() -> void:
 	var next_chapter = current_chapter + 1
+	# 다음 챕터가 없거나 이미 해금되었으면 숨김
 	if next_chapter > 10 or SaveManager.is_chapter_unlocked(next_chapter):
+		_unlock_info_label.visible = false
+		_unlock_btn.visible = false
+		return
+	# 현재 챕터의 마지막 스테이지를 클리어하지 않았으면 해금 안내 숨김
+	var last_stage_id = "ch%02d_s%02d" % [current_chapter, 10]
+	var last_save = SaveManager.get_stage_data(last_stage_id)
+	if last_save.is_empty() or last_save.get("stars", 0) == 0:
 		_unlock_info_label.visible = false
 		_unlock_btn.visible = false
 		return
