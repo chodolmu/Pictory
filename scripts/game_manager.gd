@@ -352,12 +352,16 @@ func _execute_chain_with_animation() -> ChainCombo.ChainResult:
 		if _grid_view.has_method("animate_gravity") and gravity_moves.size() > 0:
 			await _grid_view.animate_gravity(gravity_moves)
 
-		# ── 중력 실제 적용
-		Gravity.apply(_grid)
-		# ── 무한모드: 새로 내려온 블럭에 기믹 부여
+		# ── 무한모드: 새 블럭 생성 시 기믹 부여 콜백 설정
 		if _current_mode is InfinityMode:
 			_infinity_action_count += 1
-			_attach_gimmick_to_new_cells()
+			if _infinity_action_count % INFINITY_GIMMICK_INTERVAL == 0:
+				Gravity.on_cell_refilled = _on_new_cell_refilled
+			else:
+				Gravity.on_cell_refilled = Callable()
+		# ── 중력 실제 적용
+		Gravity.apply(_grid)
+		Gravity.on_cell_refilled = Callable()
 		_grid_view.refresh()
 
 		# ── 체인 결과 누적
@@ -647,31 +651,24 @@ const INFINITY_GIMMICK_POOL = [
 	{"type": GimmickBase.GimmickType.POISON, "data": {"speed_multiplier": 1.5}, "weight": 1},
 ]
 
-func _attach_gimmick_to_new_cells() -> void:
-	## gravity refill 후 새로 내려온 블럭에 기믹 부여.
-	## 매 N액션마다만 시도, 각 새 블럭에 개별 확률 적용.
-	if _infinity_action_count % INFINITY_GIMMICK_INTERVAL != 0:
+var _refill_gimmick_count: int = 0
+
+func _on_new_cell_refilled(cell) -> void:
+	## buffer에서 새 셀이 생성될 때 호출. 기믹을 즉시 부여.
+	if _refill_gimmick_count >= INFINITY_MAX_GIMMICKS:
 		return
-
-	# 현재 기믹 수 확인
-	var current_gimmick_count = 0
-	for cell in _grid.get_all_main_cells():
-		if cell.has_gimmick():
-			current_gimmick_count += 1
-
-	# 새로 내려온 블럭 = main area 상단 행들에서 기믹 없는 셀
-	# (gravity가 위에서 아래로 채우므로 상단에 새 블럭이 위치)
-	for y in range(_grid.grid_size):
-		for x in range(_grid.grid_size):
-			if current_gimmick_count >= INFINITY_MAX_GIMMICKS:
-				return
-			var cell = _grid.get_cell(x, y)
-			if cell == null or cell.has_gimmick() or cell.color < 0:
-				continue
-			if randf() < INFINITY_GIMMICK_CHANCE:
-				var gimmick = _pick_weighted_gimmick()
-				cell.set_gimmick(gimmick["type"], 0, gimmick["data"].duplicate())
-				current_gimmick_count += 1
+	# 현재 기믹 수 재확인
+	if _refill_gimmick_count <= 0:
+		_refill_gimmick_count = 0
+		for c in _grid.get_all_main_cells():
+			if c.has_gimmick():
+				_refill_gimmick_count += 1
+	if _refill_gimmick_count >= INFINITY_MAX_GIMMICKS:
+		return
+	if randf() < INFINITY_GIMMICK_CHANCE:
+		var gimmick = _pick_weighted_gimmick()
+		cell.set_gimmick(gimmick["type"], 0, gimmick["data"].duplicate())
+		_refill_gimmick_count += 1
 
 	# 가중치 기반 기믹 타입 선택
 	var gimmick = _pick_weighted_gimmick()

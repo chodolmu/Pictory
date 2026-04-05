@@ -151,6 +151,8 @@ static func _compact_segment(grid: Grid, x: int, segment: Array) -> void:
 			cell.clear_gimmick()
 		write_y -= 1
 
+static var on_cell_refilled: Callable = Callable()  ## 새 셀 생성 시 콜백
+
 static func _refill_buffer(grid: Grid) -> void:
 	## buffer 영역의 빈 셀 전체를 랜덤 색상으로 채운다.
 	for y in range(-1, -grid.grid_size - 1, -1):
@@ -159,6 +161,8 @@ static func _refill_buffer(grid: Grid) -> void:
 			if cell != null and cell.color == -1 and not cell.has_gimmick():
 				cell.color = randi() % grid.num_colors
 				cell.active = false
+				if on_cell_refilled.is_valid():
+					on_cell_refilled.call(cell)
 
 static func _refill_empty_in_buffer(grid: Grid, x: int) -> void:
 	## 특정 열의 buffer 빈 셀만 채운다.
