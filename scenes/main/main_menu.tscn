@@ -36,7 +36,11 @@ theme_override_constants/separation = 8
 
 [node name="PlayerInfoContainer" type="HBoxContainer" parent="MarginContainer/VBox/Header"]
 size_flags_horizontal = 3
-theme_override_constants/separation = 6
+theme_override_constants/separation = 8
+alignment = 0
+
+[node name="PlayerIcon" type="Panel" parent="MarginContainer/VBox/Header/PlayerInfoContainer"]
+custom_minimum_size = Vector2(36, 36)
 
 [node name="NicknameLabel" type="Label" parent="MarginContainer/VBox/Header/PlayerInfoContainer"]
 text = "플레이어"

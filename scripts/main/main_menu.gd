@@ -1,6 +1,7 @@
 class_name MainMenu
 extends Control
 
+@onready var _player_icon: Panel = $MarginContainer/VBox/Header/PlayerInfoContainer/PlayerIcon
 @onready var _nickname_label: Label = $MarginContainer/VBox/Header/PlayerInfoContainer/NicknameLabel
 @onready var _currency_label: Label = $MarginContainer/VBox/Header/CurrencyLabel
 @onready var _stage_select_btn: Button = $MarginContainer/VBox/StageSelectButton
@@ -34,6 +35,21 @@ func _ready() -> void:
 
 func _update_player_info(_name: String = "") -> void:
 	_nickname_label.text = PlayerProfile.get_nickname()
+	_update_player_icon()
+
+func _update_player_icon() -> void:
+	var icon_id = CollectionManager.get_selected_icon()
+	var icon_data = CollectionManager.get_icon_data(icon_id)
+	var icon_color = Color("#E8A87C")
+	if not icon_data.is_empty():
+		icon_color = Color(icon_data.get("color", "#E8A87C"))
+	var style = StyleBoxFlat.new()
+	style.bg_color = icon_color
+	style.corner_radius_top_left = 18
+	style.corner_radius_top_right = 18
+	style.corner_radius_bottom_left = 18
+	style.corner_radius_bottom_right = 18
+	_player_icon.add_theme_stylebox_override("panel", style)
 
 func _update_currency_display() -> void:
 	_currency_label.text = "💰 %d" % SaveManager.get_currency()
