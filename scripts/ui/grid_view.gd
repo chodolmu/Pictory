@@ -78,12 +78,14 @@ func animate_destroy(cells: Array) -> void:
 
 	var tween = create_tween()
 	tween.set_parallel(true)
+	var has_targets = false
 
 	for cell in cells:
 		var key = Vector2i(cell.x, cell.y)
 		var rect: ColorRect = _cell_rects.get(key)
 		if rect == null:
 			continue
+		has_targets = true
 		var overlay = _gimmick_rects.get(key)
 
 		# 흰색 번쩍
@@ -100,6 +102,10 @@ func animate_destroy(cells: Array) -> void:
 			overlay.pivot_offset = overlay.size / 2.0
 			tween.tween_property(overlay, "scale", Vector2.ZERO, 0.25).set_delay(0.05)
 			tween.tween_property(overlay, "modulate:a", 0.0, 0.25).set_delay(0.05)
+
+	if not has_targets:
+		tween.kill()
+		return
 
 	await tween.finished
 
@@ -124,20 +130,25 @@ func animate_gravity(moves: Array) -> void:
 
 	var tween = create_tween()
 	tween.set_parallel(true)
+	var has_targets = false
 
 	for move in moves:
 		var from_key = Vector2i(move["from_x"], move["from_y"])
-		var to_key   = Vector2i(move["to_x"],   move["to_y"])
 
 		var rect: ColorRect = _cell_rects.get(from_key)
 		var overlay = _gimmick_rects.get(from_key)
 		if rect == null:
 			continue
+		has_targets = true
 
 		var to_pos = _cell_pixel_pos(move["to_x"], move["to_y"])
 		tween.tween_property(rect, "position", to_pos, 0.2).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
 		if overlay:
 			tween.tween_property(overlay, "position", to_pos, 0.2).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
+
+	if not has_targets:
+		tween.kill()
+		return
 
 	await tween.finished
 

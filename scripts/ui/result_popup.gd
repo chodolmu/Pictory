@@ -37,9 +37,8 @@ func _ready() -> void:
 func show_clear(stars: int, score: int, currency: int, has_next_stage: bool) -> void:
 	_title_label.text = "스테이지 클리어!"
 	_stars_container.visible = true
-	_score_label.text = "점수: %s" % _format_number(score)
-	_currency_label.text = "획득 재화: +%d" % currency
-	_currency_label.visible = true
+	_score_label.visible = false
+	_currency_label.visible = false
 	_destroyed_label.visible = false
 	_high_score_label.visible = false
 	_next_stage_button.visible = true
