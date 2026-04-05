@@ -20,11 +20,11 @@ var _result_chapter: int = 1
 var _result_stage: int = 1
 
 # 노드맵 설정
-const NODE_RADIUS: float = 28.0
-const NODE_GAP_Y: float = 90.0
-const MAP_TOP_MARGIN: float = 60.0
+const NODE_RADIUS: float = 20.0
+const NODE_GAP_Y: float = 80.0
+const MAP_TOP_MARGIN: float = 50.0
 const LINE_COLOR: Color = Color(0.3, 0.3, 0.5, 0.6)
-const LINE_WIDTH: float = 3.0
+const LINE_WIDTH: float = 2.0
 
 const NODE_COLORS = {
 	"locked": Color(0.25, 0.25, 0.3),
@@ -33,6 +33,15 @@ const NODE_COLORS = {
 	"cleared_2": Color(0.75, 0.65, 0.15),
 	"cleared_3": Color(0.95, 0.85, 0.1),
 }
+
+# 캐릭터 마커
+var _character_marker: Panel = null
+var _current_stage_pos: Vector2 = Vector2.ZERO
+
+# 드래그 스크롤
+var _dragging: bool = false
+var _drag_start_y: float = 0.0
+var _scroll_start: int = 0
 
 func _ready() -> void:
 	_back_btn.pressed.connect(_on_back)
@@ -57,76 +66,145 @@ func _load_chapter(chapter: int) -> void:
 	_update_unlock_info()
 
 func _build_node_map(chapter: int) -> void:
-	# 기존 노드 제거
 	for child in _node_map_container.get_children():
 		child.queue_free()
 	await get_tree().process_frame
 
 	var stages = LevelLoader.load_chapter_stages(chapter)
 	var count = stages.size()
-	var map_height = MAP_TOP_MARGIN + count * NODE_GAP_Y + 40.0
+	var map_height = MAP_TOP_MARGIN + count * NODE_GAP_Y + 60.0
 	_node_map_container.custom_minimum_size = Vector2(390, maxf(map_height, 900))
 
-	# 뷰포트 너비
 	var vp_width = get_viewport_rect().size.x
 	if vp_width <= 0:
 		vp_width = 390.0
 
-	# 노드 위치 계산 (아래→위, 세로 배치, 약간 좌우 지그재그)
+	# 현재 스테이지 찾기 (플레이어 위치)
+	var current_stage_idx = _find_current_stage(stages)
+
+	# 노드 위치 계산 (아래→위, 지그재그)
 	var positions: Array[Vector2] = []
 	for i in range(count):
-		var stage_idx = count - 1 - i  # 1스테이지가 맨 아래
-		var x_offset = 30.0 if (stage_idx % 2 == 0) else -30.0
+		var stage_idx = count - 1 - i
+		var x_offset = 25.0 if (stage_idx % 2 == 0) else -25.0
 		var px = vp_width / 2.0 + x_offset
 		var py = MAP_TOP_MARGIN + i * NODE_GAP_Y
 		positions.append(Vector2(px, py))
 
-	# 연결선 그리기 (커스텀 드로잉)
+	# 연결선
 	var line_drawer = Control.new()
 	line_drawer.name = "LineDrawer"
 	line_drawer.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	line_drawer.custom_minimum_size = _node_map_container.custom_minimum_size
 	_node_map_container.add_child(line_drawer)
 
-	# 연결선은 _draw에서 그림
 	var line_positions = positions.duplicate()
 	line_drawer.draw.connect(func():
 		for i in range(line_positions.size() - 1):
 			line_drawer.draw_line(line_positions[i], line_positions[i + 1], LINE_COLOR, LINE_WIDTH, true)
 	)
 
-	# 노드 버튼 생성 (위→아래 순서로 추가, 10→1)
+	# 캐릭터 위치 저장
+	var char_position_idx = count - 1 - current_stage_idx  # positions 인덱스
+	if char_position_idx >= 0 and char_position_idx < positions.size():
+		_current_stage_pos = positions[char_position_idx]
+
+	# 노드 버튼 생성
 	for i in range(count):
-		var stage_idx = count - 1 - i  # positions[0] = stage 10, positions[count-1] = stage 1
+		var stage_idx = count - 1 - i
 		var config = stages[stage_idx]
 		var save = SaveManager.get_stage_data(config.stage_id)
 		var stars = save.get("stars", 0) if not save.is_empty() else 0
 		var locked = _is_stage_locked(config)
 		var pos = positions[i]
+		var is_current = (stage_idx == current_stage_idx)
 
-		var node_btn = _create_node_button(config, stars, locked, pos)
+		var node_btn = _create_node_button(config, stars, locked, pos, is_current)
 		_node_map_container.add_child(node_btn)
 
-	# 스크롤을 맨 아래로 (1스테이지가 보이도록)
+	# 캐릭터 마커 생성
+	_create_character_marker()
+
+	# 스크롤 위치: 캐릭터가 보이도록
 	await get_tree().process_frame
-	_node_map_scroll.scroll_vertical = int(_node_map_container.custom_minimum_size.y)
+	var scroll_target = int(_current_stage_pos.y - _node_map_scroll.size.y / 2.0)
+	_node_map_scroll.scroll_vertical = clampi(scroll_target, 0, int(_node_map_container.custom_minimum_size.y))
 
 	line_drawer.queue_redraw()
 
-func _create_node_button(config, stars: int, locked: bool, pos: Vector2) -> Control:
-	var container = Control.new()
-	container.position = Vector2(pos.x - NODE_RADIUS - 10, pos.y - NODE_RADIUS - 10)
-	container.size = Vector2((NODE_RADIUS + 10) * 2, (NODE_RADIUS + 10) * 2)
+func _find_current_stage(stages: Array) -> int:
+	# 가장 높은 클리어된 스테이지의 다음, 또는 첫 번째 미클리어 스테이지
+	var highest_cleared = -1
+	for i in range(stages.size()):
+		var save = SaveManager.get_stage_data(stages[i].stage_id)
+		if not save.is_empty() and save.get("stars", 0) > 0:
+			highest_cleared = i
+	if highest_cleared < 0:
+		return 0  # 아무것도 안 깸 → 1스테이지
+	if highest_cleared >= stages.size() - 1:
+		return stages.size() - 1  # 다 깸 → 마지막 스테이지
+	return highest_cleared + 1  # 다음 스테이지
 
-	# 원형 노드 (Panel + StyleBoxFlat)
+func _create_character_marker() -> void:
+	_character_marker = Panel.new()
+	_character_marker.name = "CharacterMarker"
+	var marker_size = NODE_RADIUS * 1.6
+	_character_marker.size = Vector2(marker_size, marker_size)
+	_character_marker.position = Vector2(
+		_current_stage_pos.x - marker_size / 2.0,
+		_current_stage_pos.y - NODE_RADIUS - marker_size - 4.0
+	)
+	var style = StyleBoxFlat.new()
+	style.bg_color = Color(0.95, 0.90, 0.80)  # 후냐 크림색
+	var r = int(marker_size / 2.0)
+	style.corner_radius_top_left = r
+	style.corner_radius_top_right = r
+	style.corner_radius_bottom_left = r
+	style.corner_radius_bottom_right = r
+	style.border_width_bottom = 2
+	style.border_width_top = 2
+	style.border_width_left = 2
+	style.border_width_right = 2
+	style.border_color = Color(0.8, 0.7, 0.5)
+	_character_marker.add_theme_stylebox_override("panel", style)
+	_node_map_container.add_child(_character_marker)
+
+	# 바운스 애니메이션
+	_animate_character_bounce()
+
+func _animate_character_bounce() -> void:
+	if _character_marker == null or not is_instance_valid(_character_marker):
+		return
+	var base_y = _character_marker.position.y
+	var tween = create_tween().set_loops()
+	tween.tween_property(_character_marker, "position:y", base_y - 6.0, 0.5).set_trans(Tween.TRANS_SINE)
+	tween.tween_property(_character_marker, "position:y", base_y, 0.5).set_trans(Tween.TRANS_SINE)
+
+func _move_character_to_stage(target_pos: Vector2) -> void:
+	if _character_marker == null or not is_instance_valid(_character_marker):
+		return
+	var marker_size = _character_marker.size.x
+	var target = Vector2(
+		target_pos.x - marker_size / 2.0,
+		target_pos.y - NODE_RADIUS - marker_size - 4.0
+	)
+	var tween = create_tween()
+	tween.tween_property(_character_marker, "position", target, 0.4).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN_OUT)
+
+func _create_node_button(config, stars: int, locked: bool, pos: Vector2, is_current: bool) -> Control:
+	var container = Control.new()
+	container.position = Vector2(pos.x - NODE_RADIUS - 8, pos.y - NODE_RADIUS - 8)
+	container.size = Vector2((NODE_RADIUS + 8) * 2, (NODE_RADIUS + 8) * 2)
+
 	var panel = Panel.new()
-	panel.position = Vector2(10, 10)
+	panel.position = Vector2(8, 8)
 	panel.size = Vector2(NODE_RADIUS * 2, NODE_RADIUS * 2)
 	var style = StyleBoxFlat.new()
-	style.corner_radius_top_left = int(NODE_RADIUS)
-	style.corner_radius_top_right = int(NODE_RADIUS)
-	style.corner_radius_bottom_left = int(NODE_RADIUS)
-	style.corner_radius_bottom_right = int(NODE_RADIUS)
+	var r = int(NODE_RADIUS)
+	style.corner_radius_top_left = r
+	style.corner_radius_top_right = r
+	style.corner_radius_bottom_left = r
+	style.corner_radius_bottom_right = r
 
 	if locked:
 		style.bg_color = NODE_COLORS["locked"]
@@ -139,38 +217,43 @@ func _create_node_button(config, stars: int, locked: bool, pos: Vector2) -> Cont
 	else:
 		style.bg_color = NODE_COLORS["cleared_3"]
 
+	# 현재 스테이지 강조 테두리
+	if is_current and not locked:
+		style.border_width_bottom = 2
+		style.border_width_top = 2
+		style.border_width_left = 2
+		style.border_width_right = 2
+		style.border_color = Color(1.0, 1.0, 1.0, 0.8)
+
 	panel.add_theme_stylebox_override("panel", style)
 	container.add_child(panel)
 
-	# 스테이지 번호 라벨
 	var lbl = Label.new()
 	lbl.text = str(config.stage_number)
 	lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	lbl.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	lbl.position = Vector2(10, 10)
+	lbl.position = Vector2(8, 8)
 	lbl.size = Vector2(NODE_RADIUS * 2, NODE_RADIUS * 2)
-	lbl.add_theme_font_size_override("font_size", 16)
+	lbl.add_theme_font_size_override("font_size", 13)
 	if locked:
 		lbl.modulate = Color(0.5, 0.5, 0.5)
 	container.add_child(lbl)
 
-	# 별 표시 (클리어된 경우)
 	if stars > 0:
 		var star_lbl = Label.new()
 		star_lbl.text = "★".repeat(stars)
 		star_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-		star_lbl.position = Vector2(10 - 8, 10 + NODE_RADIUS * 2 + 2)
-		star_lbl.size = Vector2(NODE_RADIUS * 2 + 16, 20)
-		star_lbl.add_theme_font_size_override("font_size", 10)
+		star_lbl.position = Vector2(8 - 6, 8 + NODE_RADIUS * 2 + 1)
+		star_lbl.size = Vector2(NODE_RADIUS * 2 + 12, 16)
+		star_lbl.add_theme_font_size_override("font_size", 9)
 		star_lbl.modulate = Color(1.0, 0.85, 0.0)
 		container.add_child(star_lbl)
 
-	# 터치 영역 (투명 버튼)
 	var btn = Button.new()
-	btn.position = Vector2(0, 0)
+	btn.position = Vector2.ZERO
 	btn.size = container.size
 	btn.flat = true
-	btn.modulate = Color(1, 1, 1, 0)  # 완전 투명
+	btn.modulate = Color(1, 1, 1, 0)
 	if not locked:
 		btn.pressed.connect(_on_stage_selected.bind(config.stage_id))
 	container.add_child(btn)
@@ -265,3 +348,29 @@ func _on_back() -> void:
 		_stage_confirm_popup.queue_free()
 		_stage_confirm_popup = null
 	SceneManager.change_scene("res://scenes/main/main_menu.tscn")
+
+# ─────────────────────────────────────────
+# 드래그 스크롤
+# ─────────────────────────────────────────
+
+func _input(event: InputEvent) -> void:
+	if event is InputEventScreenTouch:
+		if event.pressed:
+			_dragging = true
+			_drag_start_y = event.position.y
+			_scroll_start = _node_map_scroll.scroll_vertical
+		else:
+			_dragging = false
+	elif event is InputEventScreenDrag and _dragging:
+		var delta = _drag_start_y - event.position.y
+		_node_map_scroll.scroll_vertical = _scroll_start + int(delta)
+	elif event is InputEventMouseButton:
+		if event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
+			_dragging = true
+			_drag_start_y = event.position.y
+			_scroll_start = _node_map_scroll.scroll_vertical
+		elif not event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
+			_dragging = false
+	elif event is InputEventMouseMotion and _dragging:
+		var delta = _drag_start_y - event.position.y
+		_node_map_scroll.scroll_vertical = _scroll_start + int(delta)
