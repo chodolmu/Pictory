@@ -27,7 +27,10 @@ func _ready() -> void:
 
 func _get_chain_label() -> Label:
 	if chain_label == null:
-		chain_label = get_node_or_null("../ChainLabel")
+		var found = get_node_or_null("../ChainLabel")
+		if found != null:
+			chain_label = found
+		return found
 	return chain_label
 
 func setup(mode: String, stage: int = 1, goal: int = 100, max_turns: int = 30) -> void:

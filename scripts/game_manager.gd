@@ -245,6 +245,7 @@ func _on_cell_touched(x: int, y: int) -> void:
 
 	# 1. BFS Recolor (on_recolor 훅 포함 — 페인트통/무지개/퇴색 대응)
 	var group = FloodFill.flood_fill(_grid, x, y)
+	print("Touch (%d,%d) cell_color=%d active_color=%d queue=%s" % [x, y, cell.color, active_color, str(_color_queue.peek_all())])
 	FloodFill.recolor_group(_grid, group, active_color)
 	print("Recolor group size: ", group.size())
 	_grid_view.refresh()
