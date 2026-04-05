@@ -39,6 +39,7 @@ func init_grid(p_size: int = 7, p_colors: int = 5) -> void:
 			var c = Cell.new(x, y, randi() % num_colors, true)
 			_cells[Vector2i(x, y)] = c
 
+	_ensure_all_colors_present()
 	ensure_no_completed_lines()
 
 # ─────────────────────────────────────────
@@ -107,6 +108,37 @@ func count_gimmick(gimmick_type: int) -> int:
 # ─────────────────────────────────────────
 # 완성 라인 방지
 # ─────────────────────────────────────────
+
+func _ensure_all_colors_present() -> void:
+	## main grid에 모든 색상이 최소 1개씩 존재하도록 보장.
+	var present: Array[bool] = []
+	present.resize(num_colors)
+	present.fill(false)
+
+	for y in range(grid_size):
+		for x in range(grid_size):
+			var cell = get_cell(x, y)
+			if cell and cell.color >= 0 and cell.color < num_colors:
+				present[cell.color] = true
+
+	var missing: Array[int] = []
+	for c in range(num_colors):
+		if not present[c]:
+			missing.append(c)
+
+	if missing.is_empty():
+		return
+
+	# 누락된 색상을 랜덤 위치의 셀에 배치 (중복 방지)
+	var positions: Array[Vector2i] = []
+	for y in range(grid_size):
+		for x in range(grid_size):
+			positions.append(Vector2i(x, y))
+	positions.shuffle()
+
+	for i in range(missing.size()):
+		if i < positions.size():
+			set_cell_color(positions[i].x, positions[i].y, missing[i])
 
 func ensure_no_completed_lines() -> void:
 	var max_iterations = 100

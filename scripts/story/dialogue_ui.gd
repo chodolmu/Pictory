@@ -65,7 +65,7 @@ func get_manager() -> DialogueManager:
 # 입력 처리
 # ─────────────────────────────────────────
 
-func _unhandled_input(event: InputEvent) -> void:
+func _input(event: InputEvent) -> void:
 	if not visible or _confirm_open:
 		return
 	if event is InputEventScreenTouch and event.pressed:

@@ -17,6 +17,7 @@ config/icon="res://icon.svg"
 
 [autoload]
 
+TestBridge="*res://test_bridge.gd"
 SaveManager="*res://scripts/data/save_manager.gd"
 PlayerProfile="*res://scripts/data/player_profile.gd"
 LevelLoader="*res://scripts/data/level_loader.gd"
@@ -29,6 +30,13 @@ CollectionManager="*res://scripts/collection/collection_manager.gd"
 AchievementManager="*res://scripts/collection/achievement_manager.gd"
 StaminaManager="*res://scripts/data/stamina_manager.gd"
 AdManager="*res://scripts/data/ad_manager.gd"
+
+[display]
+
+window/size/viewport_width=390
+window/size/viewport_height=844
+window/stretch/mode="canvas_items"
+window/handheld/orientation=1
 
 [editor_plugins]
 

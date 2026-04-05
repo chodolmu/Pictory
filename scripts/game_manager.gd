@@ -62,12 +62,16 @@ func _ready() -> void:
 	var params = SceneManager.get_params()
 	if not params.is_empty():
 		_flow_controlled = params.get("flow_controlled", false)
+		var param_mode = params.get("mode", mode)
 		var stage_id = params.get("stage_id", "")
-		if stage_id != "" and params.get("mode", "story") == "story":
+		if stage_id != "" and param_mode == "story":
 			var config = LevelLoader.load_stage(stage_id)
 			if config != null:
 				start_story(config)
 				return
+		if param_mode == "infinity":
+			start_infinity()
+			return
 	if mode == "story":
 		_start_story_default()
 	else:
@@ -98,6 +102,7 @@ func start_story(config) -> void:
 	story.initialize(config)
 	story.stage_cleared.connect(_on_stage_cleared)
 	story.stage_failed.connect(_on_stage_failed)
+	story.turn_used.connect(_on_turn_used)
 	_current_mode = story
 
 	_hud.setup("story", config.stage_number, config.goal_target_count, config.turn_limit)
@@ -106,6 +111,7 @@ func start_story(config) -> void:
 func start_infinity() -> void:
 	_cleanup_mode()
 	_initialize_core(grid_size, num_colors)
+	_turn_manager.mode = "infinity"
 
 	var inf = InfinityModeScript.new()
 	inf.name = "InfinityMode"
@@ -146,12 +152,15 @@ func _cleanup_mode() -> void:
 func _initialize_core(gs: int, nc: int) -> void:
 	_total_destroyed = 0
 	_game_ended = false
+	Economy.reset()
+	GimmickRegistry.initialize_all()
 
 	_grid = Grid.new()
 	_grid.init_grid(gs, nc)
 
 	_color_queue = ColorQueueScript.new()
 	_color_queue.num_colors = nc
+	_color_queue.initialize()
 
 	_turn_manager = TurnManagerScript.new()
 	_turn_manager.mode = "story"
@@ -244,8 +253,9 @@ func _on_cell_touched(x: int, y: int) -> void:
 	_color_queue.advance()
 	_color_queue_ui.refresh()
 
-	# 3. Chain Combo
-	var result = ChainComboScript.execute(_grid)
+	# 3. Chain Combo — 애니메이션 포함 단계별 실행
+	var result = await _execute_chain_with_animation()
+
 	var effective = result.effective_destroyed if result.effective_destroyed > 0 else result.total_destroyed
 	_total_destroyed += effective
 
@@ -279,9 +289,76 @@ func _on_cell_touched(x: int, y: int) -> void:
 	if not _game_ended:
 		_grid_view.unlock_input()
 
+## 체인 콤보를 단계별로 실행하며 파괴·낙하 애니메이션을 재생한다.
+## ChainResult 호환 딕셔너리를 반환한다.
+func _execute_chain_with_animation() -> ChainCombo.ChainResult:
+	var result = ChainCombo.ChainResult.new()
+
+	for i in range(ChainCombo.MAX_CHAIN):
+		# ── 파괴 대상 계산
+		var destroy_set = RowDestroy.check_all(_grid)
+		if destroy_set.size() == 0:
+			break
+
+		# ── 기믹 on_destroy 처리 (보상/효과 수집, 파괴 여부 결정)
+		var has_chain_mult = false
+		var actually_destroyed: Array = []
+		for dc in destroy_set:
+			var handler = GimmickRegistry.get_handler(dc.gimmick_type)
+			var d_result = handler.on_destroy(dc)
+			if d_result.get("destroyed", true):
+				actually_destroyed.append(dc)
+				var rewards = d_result.get("rewards", {})
+				for k in rewards:
+					result.collected_rewards[k] = result.collected_rewards.get(k, 0) + rewards[k]
+				for effect in d_result.get("effects", []):
+					result.collected_effects.append(effect)
+					if effect.get("type") == "multiply_count":
+						has_chain_mult = true
+
+		# ── 파괴 애니메이션
+		await _grid_view.animate_destroy(actually_destroyed)
+
+		# ── 그리드에서 파괴된 셀 제거
+		for dc in actually_destroyed:
+			_grid.set_cell_color(dc.x, dc.y, -1)
+		_grid_view.refresh()
+
+		# ── 중력 이동 계산 (파괴 적용 후 그리드 기준)
+		var gravity_moves = Gravity.calculate_moves(_grid)
+
+		# ── 낙하 애니메이션
+		await _grid_view.animate_gravity(gravity_moves)
+
+		# ── 중력 실제 적용
+		Gravity.apply(_grid)
+		_grid_view.refresh()
+
+		# ── 체인 결과 누적
+		var effective = actually_destroyed.size() * 2 if has_chain_mult else actually_destroyed.size()
+		result.chain_count += 1
+		result.total_destroyed += actually_destroyed.size()
+		result.effective_destroyed += effective
+		result.destroyed_per_chain.append(actually_destroyed.size())
+
+		print("Chain ", result.chain_count, ": destroyed ", actually_destroyed.size(),
+			" (effective: ", effective, ")")
+
+		# ── 다음 체인 전 짧은 정지 (플레이어가 각 단계를 볼 수 있도록)
+		if i < ChainCombo.MAX_CHAIN - 1:
+			await get_tree().create_timer(0.1).timeout
+
+	if result.chain_count >= ChainCombo.MAX_CHAIN:
+		push_warning("ChainCombo: MAX_CHAIN reached!")
+
+	return result
+
 # ─────────────────────────────────────────
 # 모드 시그널 핸들러
 # ─────────────────────────────────────────
+
+func _on_turn_used(remaining: int) -> void:
+	_hud.update_turns(max_turns - remaining, remaining)
 
 func _on_turn_end() -> void:
 	## 턴 종료: on_turn() 호출 (번짐 감염, 퇴색 카운터). 상태 변경 후 라인 재판정.
@@ -315,11 +392,11 @@ func _apply_gimmick_effects(effects: Array) -> void:
 		match effect.get("type", ""):
 			"bonus_turn":
 				# 스토리 모드에서만 의미 있음
-				if _current_mode is StoryModeScript:
+				if _current_mode is StoryMode:
 					_turn_manager.add_turns(effect.get("value", 1))
 			"bonus_time":
 				# 무한 모드에서만 의미 있음
-				if _current_mode is InfinityModeScript:
+				if _current_mode is InfinityMode:
 					_current_mode.add_time(effect.get("value", 5.0))
 			"multiply_count":
 				pass  # chain_combo에서 이미 처리됨
@@ -337,7 +414,7 @@ func save_snapshot() -> void:
 		"destroyed_count": _total_destroyed
 	}
 	# 스토리 모드: turns_remaining 포함
-	if _current_mode is StoryModeScript:
+	if _current_mode is StoryMode:
 		snapshot["turns_remaining"] = _current_mode.remaining_turns
 		snapshot["destroyed_story"] = _current_mode.destroyed_count
 
@@ -356,7 +433,7 @@ func restore_snapshot() -> bool:
 		_color_queue._queue = q_state.duplicate()
 	# 파괴 카운트 복원
 	_total_destroyed = snap.get("destroyed_count", _total_destroyed)
-	if _current_mode is StoryModeScript:
+	if _current_mode is StoryMode:
 		_current_mode.remaining_turns = snap.get("turns_remaining", _current_mode.remaining_turns)
 		_current_mode.destroyed_count = snap.get("destroyed_story", _current_mode.destroyed_count)
 	_grid_view.refresh()
@@ -497,8 +574,72 @@ func _on_time_updated(remaining: float, _max: float) -> void:
 func _on_infinity_game_over(final_score: int, total_dest: int) -> void:
 	_game_ended = true
 	_grid_view.lock_input()
+	var high_score_before = SaveManager.get_infinity_high_score()
 	var is_new_record = SaveManager.save_infinity_result(final_score)
 	var currency = CurrencyConverter.calculate_infinity_reward(final_score, is_new_record)
 	SaveManager.add_currency(currency)
 	print("Game Over (infinity) Score: %d, Destroyed: %d, Currency: +%d" % [final_score, total_dest, currency])
+
+	# 결과 팝업 표시
+	var popup = load("res://scenes/ui/result_popup.tscn").instantiate()
+	get_tree().root.add_child(popup)
+	popup.show_game_over(final_score, {
+		"total_destroyed": total_dest,
+		"is_new_record": is_new_record,
+		"high_score": maxi(final_score, high_score_before),
+		"currency": currency
+	})
+	popup.retry_requested.connect(func():
+		popup.queue_free()
+		SceneManager.change_scene("res://scenes/game/game.tscn", {"mode": "infinity"})
+	)
+	popup.main_menu_requested.connect(func():
+		popup.queue_free()
+		SceneManager.change_scene("res://scenes/main/main_menu.tscn")
+	)
 	game_over.emit()
+
+# ─────────────────────────────────────────
+# 테스트/디버그 헬퍼 (MCP 브릿지용)
+# ─────────────────────────────────────────
+
+func debug_get_grid_state() -> String:
+	if _grid == null:
+		return "{}"
+	var rows: Array = []
+	for y in range(_grid.grid_size):
+		var row: Array = []
+		for x in range(_grid.grid_size):
+			var cell = _grid.get_cell(x, y)
+			row.append(cell.color if cell else -1)
+		rows.append(row)
+	var queue_colors: Array = []
+	if _color_queue:
+		queue_colors = _color_queue.peek_all()
+	var mode_name = "story"
+	var extra = {}
+	if _current_mode is InfinityMode:
+		mode_name = "infinity"
+		extra["time_remaining"] = _current_mode.time_remaining if "time_remaining" in _current_mode else 0
+	elif _current_mode is StoryMode:
+		mode_name = "story"
+		extra["turns_remaining"] = _current_mode.remaining_turns if "remaining_turns" in _current_mode else 0
+		extra["destroyed_count"] = _current_mode.destroyed_count if "destroyed_count" in _current_mode else 0
+		extra["goal"] = goal
+	var data = {
+		"size": _grid.grid_size,
+		"cells": rows,
+		"queue": queue_colors,
+		"destroyed": _total_destroyed,
+		"game_ended": _game_ended,
+		"mode": mode_name,
+		"num_colors": num_colors,
+	}
+	data.merge(extra)
+	return JSON.stringify(data)
+
+func debug_get_cell_screen_pos(gx: int, gy: int) -> String:
+	var stride = _grid_view.cell_size + 2
+	var sx = _grid_view.global_position.x + gx * stride + _grid_view.cell_size / 2.0
+	var sy = _grid_view.global_position.y + gy * stride + _grid_view.cell_size / 2.0
+	return JSON.stringify({"x": sx, "y": sy})

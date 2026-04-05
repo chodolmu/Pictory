@@ -52,7 +52,7 @@ func refresh() -> void:
 	if not _grid:
 		return
 	var gs = _grid.grid_size
-	for y in range(-gs, gs):
+	for y in range(gs):
 		for x in range(gs):
 			_refresh_cell_rect(x, y)
 
@@ -70,6 +70,92 @@ func lock_input() -> void:
 func unlock_input() -> void:
 	_input_locked = false
 
+## 파괴 애니메이션: 지정 셀들을 흰색으로 번쩍인 뒤 축소+페이드아웃 (약 0.3s).
+## 완료까지 await한다.
+func animate_destroy(cells: Array) -> void:
+	if cells.is_empty():
+		return
+
+	var tween = create_tween()
+	tween.set_parallel(true)
+
+	for cell in cells:
+		var key = Vector2i(cell.x, cell.y)
+		var rect: ColorRect = _cell_rects.get(key)
+		if rect == null:
+			continue
+		var overlay = _gimmick_rects.get(key)
+
+		# 흰색 번쩍
+		var orig_color = rect.color
+		rect.color = Color.WHITE
+		tween.tween_property(rect, "color", orig_color, 0.05)
+
+		# 축소 + 페이드 아웃 (pivot 중앙)
+		rect.pivot_offset = rect.size / 2.0
+		tween.tween_property(rect, "scale", Vector2.ZERO, 0.25).set_delay(0.05)
+		tween.tween_property(rect, "modulate:a", 0.0, 0.25).set_delay(0.05)
+
+		if overlay:
+			overlay.pivot_offset = overlay.size / 2.0
+			tween.tween_property(overlay, "scale", Vector2.ZERO, 0.25).set_delay(0.05)
+			tween.tween_property(overlay, "modulate:a", 0.0, 0.25).set_delay(0.05)
+
+	await tween.finished
+
+	# 애니메이션 완료 후 rect 상태 리셋 (refresh()가 새 색으로 덮어쓸 것)
+	for cell in cells:
+		var key = Vector2i(cell.x, cell.y)
+		var rect: ColorRect = _cell_rects.get(key)
+		if rect:
+			rect.scale = Vector2.ONE
+			rect.modulate.a = 1.0
+		var overlay = _gimmick_rects.get(key)
+		if overlay:
+			overlay.scale = Vector2.ONE
+			overlay.modulate.a = 1.0
+
+## 중력 낙하 애니메이션: 각 셀을 from 위치에서 to 위치로 트윈 (약 0.2s).
+## moves: Array of {from_x, from_y, to_x, to_y, color, ...}
+## 완료까지 await한다.
+func animate_gravity(moves: Array) -> void:
+	if moves.is_empty():
+		return
+
+	var tween = create_tween()
+	tween.set_parallel(true)
+
+	for move in moves:
+		var from_key = Vector2i(move["from_x"], move["from_y"])
+		var to_key   = Vector2i(move["to_x"],   move["to_y"])
+
+		var rect: ColorRect = _cell_rects.get(from_key)
+		var overlay = _gimmick_rects.get(from_key)
+		if rect == null:
+			continue
+
+		var to_pos = _cell_pixel_pos(move["to_x"], move["to_y"])
+		tween.tween_property(rect, "position", to_pos, 0.2).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
+		if overlay:
+			tween.tween_property(overlay, "position", to_pos, 0.2).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
+
+	await tween.finished
+
+	# 위치 트윈 후 모든 rect를 그리드 데이터 기준으로 즉시 재배치
+	# (refresh()가 색을 갱신하지만 position은 갱신 안 하므로 여기서 복원)
+	if not _grid:
+		return
+	var gs = _grid.grid_size
+	for y in range(gs):
+		for x in range(gs):
+			var key = Vector2i(x, y)
+			var rect: ColorRect = _cell_rects.get(key)
+			if rect:
+				rect.position = _cell_pixel_pos(x, y)
+			var overlay = _gimmick_rects.get(key)
+			if overlay:
+				overlay.position = _cell_pixel_pos(x, y)
+
 # ─────────────────────────────────────────
 # 내부 렌더링
 # ─────────────────────────────────────────
@@ -84,18 +170,10 @@ func _build_rects() -> void:
 	if not _grid:
 		return
 	var gs = _grid.grid_size
-	# buffer: y = -gs ~ -1
-	for brow in range(gs):
-		var y = -(gs - brow)
-		for x in range(gs):
-			_create_cell_rect(x, y)
-	# main: y = 0 ~ gs-1
+	# main: y = 0 ~ gs-1 (buffer는 비표시)
 	for y in range(gs):
 		for x in range(gs):
 			_create_cell_rect(x, y)
-
-	# 구분선 (buffer/main 사이)
-	_create_separator()
 
 func _create_cell_rect(x: int, y: int) -> void:
 	var cell = _grid.get_cell(x, y)
@@ -145,16 +223,8 @@ func _refresh_cell_rect(x: int, y: int) -> void:
 			overlay.queue_redraw()
 
 func _cell_pixel_pos(x: int, y: int) -> Vector2:
-	var gs = _grid.grid_size
 	var px = x * (cell_size + cell_gap)
-	var py: float
-	if y < 0:
-		# buffer: y=-gs → row 0, y=-1 → row gs-1
-		var row = y + gs  # 0-based row in buffer block
-		py = row * (cell_size + cell_gap)
-	else:
-		# main: y=0 → just below buffer
-		py = gs * (cell_size + cell_gap) + buffer_gap + y * (cell_size + cell_gap)
+	var py = y * (cell_size + cell_gap)
 	return Vector2(px, py)
 
 func _cell_color(cell: Cell) -> Color:
@@ -177,7 +247,7 @@ func _center_on_viewport() -> void:
 		return
 	var gs = _grid.grid_size
 	var total_width = gs * (cell_size + cell_gap) - cell_gap
-	var total_height = (gs * 2) * (cell_size + cell_gap) - cell_gap + buffer_gap
+	var total_height = gs * (cell_size + cell_gap) - cell_gap
 	var vp_size = get_viewport_rect().size
 
 	# HUD TopBar: 상단 60px, BottomBar: 하단 108px 확보
@@ -186,7 +256,7 @@ func _center_on_viewport() -> void:
 	var usable_height = vp_size.y - TOP_RESERVED - BOTTOM_RESERVED
 	var usable_top = TOP_RESERVED
 
-	# 그리드가 usable 영역보다 크면 cell_size를 줄임
+	# 그리드�� usable 영역보다 크면 cell_size를 줄임
 	if total_height > usable_height or total_width > vp_size.x - 24.0:
 		var scale_h = usable_height / total_height
 		var scale_w = (vp_size.x - 24.0) / total_width
@@ -195,7 +265,7 @@ func _center_on_viewport() -> void:
 		cell_size = maxi(cell_size, 20)
 		# 재계산
 		total_width = gs * (cell_size + cell_gap) - cell_gap
-		total_height = (gs * 2) * (cell_size + cell_gap) - cell_gap + buffer_gap
+		total_height = gs * (cell_size + cell_gap) - cell_gap
 		# cell_rect 재빌드
 		_clear_rects()
 		_build_rects()
@@ -222,14 +292,8 @@ func _handle_touch(screen_pos: Vector2) -> void:
 	var local_pos = screen_pos - global_position
 	var gs = _grid.grid_size
 
-	# main area 시작 y픽셀
-	var main_top_y = gs * (cell_size + cell_gap) + buffer_gap
-	var rel_y = local_pos.y - main_top_y
-	if rel_y < 0:
-		return  # buffer 또는 gap 영역 — 무시
-
 	var gx = int(local_pos.x / (cell_size + cell_gap))
-	var gy = int(rel_y / (cell_size + cell_gap))
+	var gy = int(local_pos.y / (cell_size + cell_gap))
 
 	if gx < 0 or gx >= gs:
 		return

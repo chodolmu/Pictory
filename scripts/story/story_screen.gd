@@ -34,11 +34,14 @@ func _ready() -> void:
 
 	var story_path = "res://resources/story/chapter_%02d/stage_%02d_%s.json" % [chapter, stage, dtype]
 	var lines = _load_story(story_path)
+	# stage-level 파일이 없으면 chapter-level fallback
+	if lines.is_empty():
+		var chapter_path = "res://resources/story/chapter_%02d/chapter_%02d_%s.json" % [chapter, chapter, dtype]
+		lines = _load_story(chapter_path)
 
 	_dialogue_ui.get_manager().event_triggered.connect(_on_event_triggered)
 	_dialogue_ui.skip_requested.connect(_on_dialogue_done)
 	_dialogue_ui.exit_requested.connect(_on_exit_requested)
-	_dialogue_ui.get_manager().dialogue_finished.connect(_on_dialogue_done)
 
 	if lines.is_empty():
 		# 다이얼로그 없으면 즉시 다음 씬으로

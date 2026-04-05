@@ -14,6 +14,40 @@ class ChainResult:
 	var collected_effects: Array = []  # {type, value} 배열
 	var collected_rewards: Dictionary = {}  # 누적 보상
 
+## 애니메이션용: 각 체인 스텝의 파괴/이동 정보를 반환하なが 그리드를 실제로 변경한다.
+## 반환: Array of {destroyed_cells: Array[Cell], gravity_moves: Array, chain_index: int}
+## game_manager._execute_chain_with_animation()이 같은 로직을 인라인으로 구현하므로
+## 이 함수는 외부 스크립트에서 사전 계획용으로 활용할 수 있다.
+static func execute_steps(grid: Grid) -> Array:
+	var steps: Array = []
+	var sim_grid = grid  # grid를 직접 변경함
+
+	for i in range(MAX_CHAIN):
+		var destroy_set = RowDestroy.check_all(sim_grid)
+		if destroy_set.size() == 0:
+			break
+
+		# 파괴 대상 셀 목록
+		var destroyed_cells: Array = destroy_set.duplicate()
+
+		# gravity 이동 계산 (파괴 적용 전 그리드 기준으로 계산하면 틀리므로,
+		# 파괴 적용 후 임시 상태를 만들어서 계산)
+		for cell in destroy_set:
+			sim_grid.set_cell_color(cell.x, cell.y, -1)
+
+		var gravity_moves = Gravity.calculate_moves(sim_grid)
+
+		# gravity 실제 적용 (다음 반복을 위해)
+		Gravity.apply(sim_grid)
+
+		steps.append({
+			"destroyed_cells": destroyed_cells,
+			"gravity_moves": gravity_moves,
+			"chain_index": i
+		})
+
+	return steps
+
 static func execute(grid: Grid) -> ChainResult:
 	var result = ChainResult.new()
 

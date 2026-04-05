@@ -12,6 +12,11 @@ var _queue: Array[int] = []
 var _base_index: int = 0
 
 func _init() -> void:
+	pass
+
+func initialize() -> void:
+	_queue.clear()
+	_base_index = 0
 	_fill_queue()
 
 func _fill_queue() -> void:

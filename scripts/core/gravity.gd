@@ -9,6 +9,52 @@ static func apply(grid: Grid) -> void:
 		_compact_column(grid, x)
 	_refill_buffer(grid)
 
+## 이동 목록을 계산하되 실제로 그리드를 변경하지 않는다.
+## 반환: Array of {from_x, from_y, to_x, to_y, color, gimmick_type, gimmick_data, gimmick_durability}
+static func calculate_moves(grid: Grid) -> Array:
+	var moves: Array = []
+	for x in range(grid.grid_size):
+		_collect_column_moves(grid, x, moves)
+	return moves
+
+static func _collect_column_moves(grid: Grid, x: int, moves: Array) -> void:
+	var segments = _split_into_segments(grid, x)
+	for segment in segments:
+		_collect_segment_moves(grid, x, segment, moves)
+
+static func _collect_segment_moves(grid: Grid, x: int, segment: Array, moves: Array) -> void:
+	var y_start = segment[0]
+	var y_end = segment[1]
+
+	# 비어있지 않은 셀을 아래→위 순으로 수집 (apply와 동일 순서)
+	var non_empty: Array = []
+	for y in range(y_end, y_start - 1, -1):
+		var cell = grid.get_cell(x, y)
+		if cell != null and cell.color != -1:
+			non_empty.append({
+				"from_y": y,
+				"color": cell.color,
+				"gimmick_type": cell.gimmick_type,
+				"gimmick_data": cell.gimmick_data.duplicate(),
+				"gimmick_durability": cell.gimmick_durability
+			})
+
+	# 아래부터 채울 위치를 계산하여 from→to 쌍 생성
+	var write_y = y_end
+	for data in non_empty:
+		if data["from_y"] != write_y:
+			moves.append({
+				"from_x": x,
+				"from_y": data["from_y"],
+				"to_x": x,
+				"to_y": write_y,
+				"color": data["color"],
+				"gimmick_type": data["gimmick_type"],
+				"gimmick_data": data["gimmick_data"],
+				"gimmick_durability": data["gimmick_durability"]
+			})
+		write_y -= 1
+
 static func _compact_column(grid: Grid, x: int) -> void:
 	# 전체 column (main + buffer)을 세그먼트로 분할.
 	# on_gravity()=false 셀(돌/앵커)이 경계가 됨.
@@ -18,6 +64,11 @@ static func _compact_column(grid: Grid, x: int) -> void:
 		_compact_segment(grid, x, segment)
 
 	_refill_empty_in_buffer(grid, x)
+
+	# buffer를 채운 뒤 다시 compact — buffer의 새 셀이 main area 빈칸으로 내려오도록
+	var segments2 = _split_into_segments(grid, x)
+	for segment in segments2:
+		_compact_segment(grid, x, segment)
 
 static func _split_into_segments(grid: Grid, x: int) -> Array:
 	## 열을 고정 셀(on_gravity=false) 기준으로 세그먼트 배열로 분할.

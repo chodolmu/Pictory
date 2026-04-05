@@ -54,8 +54,13 @@ func show_game_over(score: int, extra_data: Dictionary = {}) -> void:
 	_title_label.text = "게임 오버"
 	_stars_container.visible = false
 	_score_label.text = "점수: %s" % _format_number(score)
-	_currency_label.visible = false
 	_next_stage_button.visible = false
+
+	if extra_data.has("currency") and extra_data["currency"] > 0:
+		_currency_label.text = "획득 재화: +%d" % extra_data["currency"]
+		_currency_label.visible = true
+	else:
+		_currency_label.visible = false
 
 	if extra_data.has("total_destroyed"):
 		_destroyed_label.visible = true

@@ -1,7 +1,6 @@
-[gd_scene load_steps=4 format=3 uid="uid://stage_select"]
+[gd_scene load_steps=3 format=3 uid="uid://stage_select"]
 
 [ext_resource type="Script" path="res://scripts/main/stage_select_screen.gd" id="1_ss"]
-[ext_resource type="PackedScene" path="res://scenes/ui/stage_confirm_popup.tscn" id="2_scp"]
 [ext_resource type="PackedScene" path="res://scenes/ui/stamina_bar.tscn" id="3_sb"]
 
 [node name="StageSelect" type="Control"]
@@ -83,6 +82,3 @@ autowrap_mode = 3
 custom_minimum_size = Vector2(0, 48)
 text = "챕터 해금"
 visible = false
-
-[node name="StageConfirmPopup" parent="."]
-instance = ExtResource("2_scp")

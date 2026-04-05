@@ -58,8 +58,9 @@ offset_bottom = -8.0
 theme_override_constants/separation = 4
 
 [node name="ColorQueueUI" type="Control" parent="HUD/BottomBar"]
-custom_minimum_size = Vector2(0, 64)
+custom_minimum_size = Vector2(200, 64)
 size_flags_horizontal = 3
+clip_contents = false
 script = ExtResource("3_cq")
 
 [node name="ProgressBar" type="ProgressBar" parent="HUD/BottomBar"]
@@ -83,12 +84,15 @@ size_flags_horizontal = 3
 size_flags_horizontal = 3
 text = "Destroyed: 0"
 
-[node name="GoalLabel" type="Label" parent="HUD/BottomBar/InfoRow"]
-size_flags_horizontal = 3
-horizontal_alignment = 2
-text = "Goal: 100"
+[node name="GridView" type="Control" parent="."]
+script = ExtResource("2_gv")
+cell_size = 48
+cell_gap = 2
+buffer_gap = 8
+buffer_alpha = 0.45
 
-[node name="ChainLabel" type="Label" parent="HUD"]
+[node name="ChainLabel" type="Label" parent="."]
+anchors_preset = 8
 anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
@@ -102,10 +106,3 @@ visible = false
 horizontal_alignment = 1
 vertical_alignment = 1
 theme_override_font_sizes/font_size = 28
-
-[node name="GridView" type="Control" parent="."]
-script = ExtResource("2_gv")
-cell_size = 48
-cell_gap = 2
-buffer_gap = 8
-buffer_alpha = 0.45

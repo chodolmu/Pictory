@@ -1,9 +1,9 @@
 class_name NicknameInputScreen
 extends Control
 
-@onready var _nickname_edit: LineEdit = $VBox/NicknameLineEdit
-@onready var _validation_label: Label = $VBox/ValidationLabel
-@onready var _confirm_btn: Button = $VBox/ConfirmButton
+@onready var _nickname_edit: LineEdit = $CenterContainer/VBox/NicknameLineEdit
+@onready var _validation_label: Label = $CenterContainer/VBox/ValidationLabel
+@onready var _confirm_btn: Button = $CenterContainer/VBox/ConfirmButton
 
 func _ready() -> void:
 	_confirm_btn.pressed.connect(_on_confirm)

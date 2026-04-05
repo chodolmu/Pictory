@@ -18,11 +18,8 @@ var _result_chapter: int = 1
 var _result_stage: int = 1
 
 func _ready() -> void:
-	_stage_confirm_popup = get_node_or_null("StageConfirmPopup")
 	_back_btn.pressed.connect(_on_back)
 	_unlock_btn.pressed.connect(_on_unlock_button_pressed)
-	if _stage_confirm_popup:
-		_stage_confirm_popup.start_requested.connect(_on_start_stage)
 
 	var params = SceneManager.get_params()
 	var ch = params.get("chapter", 1)
@@ -133,8 +130,14 @@ func _update_unlock_info() -> void:
 
 func _on_stage_selected(s_id: String) -> void:
 	var config = LevelLoader.load_stage(s_id)
-	if config and _stage_confirm_popup:
-		_stage_confirm_popup.show_popup(config)
+	if config == null:
+		return
+	# 팝업 없거나 해제됐으면 새로 생성
+	if _stage_confirm_popup == null or not is_instance_valid(_stage_confirm_popup):
+		_stage_confirm_popup = load("res://scenes/ui/stage_confirm_popup.tscn").instantiate()
+		get_tree().root.add_child(_stage_confirm_popup)
+		_stage_confirm_popup.start_requested.connect(_on_start_stage)
+	_stage_confirm_popup.show_popup(config)
 
 func _on_start_stage(config) -> void:
 	StoryFlowController.start_stage(config.chapter, config.stage_number)
@@ -155,6 +158,9 @@ func _update_fill_bg(chapter: int) -> void:
 	_fill_rect.anchor_bottom = 1.0
 
 func _on_back() -> void:
+	if _stage_confirm_popup != null and is_instance_valid(_stage_confirm_popup):
+		_stage_confirm_popup.queue_free()
+		_stage_confirm_popup = null
 	SceneManager.change_scene("res://scenes/main/main_menu.tscn")
 
 func _on_unlock_button_pressed() -> void:

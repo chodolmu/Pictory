@@ -10,10 +10,10 @@ signal game_over(final_score: int, total_destroyed: int)
 signal difficulty_scaled(level: int)
 
 @export var initial_time: float = 60.0
-@export var max_time: float = 90.0
-@export var bonus_threshold: int = 5
-@export var bonus_coefficient: float = 0.5
-@export var combo_time_multiplier: float = 1.2
+@export var max_time: float = 75.0
+@export var bonus_threshold: int = 7
+@export var bonus_coefficient: float = 0.3
+@export var combo_time_multiplier: float = 1.1
 
 @export var scaling_enabled: bool = true
 @export var scaling_intervals: Array[float] = [60.0, 120.0, 180.0]
@@ -99,16 +99,14 @@ func _process(delta: float) -> void:
 		return
 
 	elapsed_time += delta
+	remaining_time -= delta
+	time_updated.emit(remaining_time, max_time)
 
-	if not _timer_paused:
-		remaining_time -= delta
-		time_updated.emit(remaining_time, max_time)
-
-		if remaining_time <= 0.0:
-			remaining_time = 0.0
-			is_active = false
-			game_over.emit(total_score, total_destroyed)
-			return
+	if remaining_time <= 0.0:
+		remaining_time = 0.0
+		is_active = false
+		game_over.emit(total_score, total_destroyed)
+		return
 
 	if scaling_enabled:
 		_check_scaling()

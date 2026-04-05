@@ -20,7 +20,6 @@ var _skipped: bool = false
 
 func _ready() -> void:
 	visible = false
-	modulate.a = 1.0
 
 func setup(imagen_data: ImagenData) -> void:
 	_data = imagen_data
@@ -72,7 +71,12 @@ func _run_animation() -> void:
 
 	# 3.5~4.0s: 정지 후 페이드아웃
 	_anim_tween.tween_interval(1.0)
-	_anim_tween.tween_property(self, "modulate:a", 0.0, 0.5)
+	_anim_tween.tween_property(_background, "modulate:a", 0.0, 0.5)
+	_anim_tween.parallel().tween_property(_imagen_body, "modulate:a", 0.0, 0.5)
+	_anim_tween.parallel().tween_property(_imagen_name, "modulate:a", 0.0, 0.5)
+	_anim_tween.parallel().tween_property(_join_text, "modulate:a", 0.0, 0.5)
+	_anim_tween.parallel().tween_property(_skill_name, "modulate:a", 0.0, 0.5)
+	_anim_tween.parallel().tween_property(_skill_desc, "modulate:a", 0.0, 0.5)
 	_anim_tween.tween_callback(_on_finished)
 
 func _unhandled_input(event: InputEvent) -> void:
@@ -89,10 +93,8 @@ func _skip() -> void:
 	_skipped = true
 	if _anim_tween:
 		_anim_tween.kill()
-	modulate.a = 0.0
 	_on_finished()
 
 func _on_finished() -> void:
 	visible = false
-	modulate.a = 1.0
 	finished.emit()

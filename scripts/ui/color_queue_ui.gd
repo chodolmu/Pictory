@@ -9,6 +9,9 @@ const SPACING: float = 12.0
 
 var _color_queue = null
 
+func _ready() -> void:
+	custom_minimum_size.x = 200.0
+
 func setup(queue) -> void:
 	_color_queue = queue
 	queue_redraw()

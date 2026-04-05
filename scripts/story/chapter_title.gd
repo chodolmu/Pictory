@@ -115,10 +115,18 @@ func _run_fadeout() -> void:
 	if _anim_tween:
 		_anim_tween.kill()
 	_anim_tween = create_tween()
-	_anim_tween.tween_property(self, "modulate:a", 0.0, 0.5)
+	_anim_tween.tween_property(_background, "modulate:a", 0.0, 0.5)
+	_anim_tween.parallel().tween_property(_chapter_number, "modulate:a", 0.0, 0.5)
+	_anim_tween.parallel().tween_property(_chapter_name, "modulate:a", 0.0, 0.5)
+	_anim_tween.parallel().tween_property(_deco_left, "modulate:a", 0.0, 0.5)
+	_anim_tween.parallel().tween_property(_deco_right, "modulate:a", 0.0, 0.5)
 	_anim_tween.tween_callback(_on_finished)
 
 func _on_finished() -> void:
 	visible = false
-	modulate.a = 1.0
+	_background.modulate.a = 1.0
+	_chapter_number.modulate.a = 1.0
+	_chapter_name.modulate.a = 1.0
+	_deco_left.modulate.a = 1.0
+	_deco_right.modulate.a = 1.0
 	title_finished.emit()

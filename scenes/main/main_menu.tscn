@@ -1,10 +1,6 @@
-[gd_scene load_steps=7 format=3 uid="uid://main_menu"]
+[gd_scene load_steps=3 format=3 uid="uid://main_menu"]
 
 [ext_resource type="Script" path="res://scripts/main/main_menu.gd" id="1_mm"]
-[ext_resource type="PackedScene" path="res://scenes/ui/infinity_confirm_popup.tscn" id="2_icp"]
-[ext_resource type="PackedScene" path="res://scenes/ui/options_popup.tscn" id="3_op"]
-[ext_resource type="PackedScene" path="res://scenes/ui/confirm_quit_popup.tscn" id="4_cqp"]
-[ext_resource type="PackedScene" path="res://scenes/ui/achievement_popup.tscn" id="5_ap"]
 [ext_resource type="PackedScene" path="res://scenes/ui/stamina_bar.tscn" id="6_sb"]
 
 [node name="MainMenu" type="Control"]
@@ -104,15 +100,3 @@ text = "컬렉션"
 size_flags_horizontal = 3
 custom_minimum_size = Vector2(0, 52)
 text = "상점"
-
-[node name="InfinityConfirmPopup" parent="."]
-instance = ExtResource("2_icp")
-
-[node name="OptionsPopup" parent="."]
-instance = ExtResource("3_op")
-
-[node name="ConfirmQuitPopup" parent="."]
-instance = ExtResource("4_cqp")
-
-[node name="AchievementPopup" parent="."]
-instance = ExtResource("5_ap")

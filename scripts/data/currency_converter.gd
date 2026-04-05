@@ -11,10 +11,9 @@ const INFINITY_MIN_REWARD := 10
 const INFINITY_MAX_REWARD := 1000
 const INFINITY_HIGHSCORE_BONUS := 100
 
-static func calculate_story_reward(stars: int, is_first_clear: bool) -> int:
-	var base = STORY_CLEAR_BASE if is_first_clear else STORY_REPLAY_BASE
-	var star_bonus = STORY_STAR_BONUS[clampi(stars - 1, 0, 2)] if stars > 0 else 0
-	return base + star_bonus
+static func calculate_story_reward(_stars: int, _is_first_clear: bool) -> int:
+	# 스토리 모드에서는 코인 보상 없음 — 코인은 인피니티 모드에서만 획득
+	return 0
 
 static func calculate_infinity_reward(score: int, is_new_highscore: bool) -> int:
 	var reward = maxi(int(score * INFINITY_SCORE_RATIO), INFINITY_MIN_REWARD)

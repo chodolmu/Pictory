@@ -29,9 +29,6 @@ func _go_to_title() -> void:
 func _input(event: InputEvent) -> void:
 	if _skipped:
 		return
-	if event is InputEventMouseButton and event.pressed:
-		_skipped = true
-		_go_to_title()
-	elif event is InputEventScreenTouch and event.pressed:
-		_skipped = true
+	if (event is InputEventMouseButton and event.pressed) or \
+	   (event is InputEventScreenTouch and event.pressed):
 		_go_to_title()

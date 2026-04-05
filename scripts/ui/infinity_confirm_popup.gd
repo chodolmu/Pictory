@@ -59,7 +59,7 @@ func _on_start_pressed() -> void:
 	if StaminaManager.can_play("infinity"):
 		StaminaManager.consume(2)
 		start_requested.emit()
-		hide_popup()
+		queue_free()
 		SceneManager.change_scene("res://scenes/game/game.tscn", {"mode": "infinity"})
 	else:
 		_show_stamina_depleted()
