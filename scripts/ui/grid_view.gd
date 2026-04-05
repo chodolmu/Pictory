@@ -228,9 +228,16 @@ func _refresh_cell_rect(x: int, y: int) -> void:
 	var cell = _grid.get_cell(x, y)
 	if cell:
 		rect.color = _cell_color(cell)
+		# 위치도 항상 복원 (gravity 애니메이션 후 꼬임 방지)
+		rect.position = _cell_pixel_pos(x, y)
+		rect.scale = Vector2.ONE
+		rect.modulate.a = 1.0
 		# 기믹 오버레이 갱신
 		var overlay = _gimmick_rects.get(key)
 		if overlay:
+			overlay.position = _cell_pixel_pos(x, y)
+			overlay.scale = Vector2.ONE
+			overlay.modulate.a = 1.0
 			overlay.queue_redraw()
 
 func _cell_pixel_pos(x: int, y: int) -> Vector2:
