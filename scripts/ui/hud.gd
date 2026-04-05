@@ -6,7 +6,7 @@ extends Control
 @onready var stage_label: Label = $TopBar/StageLabel
 @onready var turn_label: Label = $TopBar/TurnLabel
 @onready var destroyed_label: Label = $StatusBar/InfoRow/DestroyedLabel
-@onready var chain_label: Label = get_node_or_null("../ChainLabel")
+var chain_label: Label = null
 @onready var progress_bar: ProgressBar = $StatusBar/ProgressBar
 @onready var progress_label: Label = $StatusBar/ProgressBar/ProgressLabel
 @onready var _back_btn: Button = $TopBar/BackButton
@@ -15,15 +15,20 @@ var _mode: String = "story"
 var _total_destroyed: int = 0
 var _goal: int = 100
 
-# ─────────────────────────────────────────
-# 초기화
-# ─────────────────────────────────────────
+# ─────────────────────────────��───────────
+# ��기화
+# ─────────────────────���───────────────────
 
 func _ready() -> void:
 	# Node2D 부모 아래에서는 앵커가 동작하지 않으므로 뷰포트 크기에 맞춤
 	var vp = get_viewport_rect().size
 	size = vp
 	_back_btn.pressed.connect(_on_back_pressed)
+
+func _get_chain_label() -> Label:
+	if chain_label == null:
+		chain_label = get_node_or_null("../ChainLabel")
+	return chain_label
 
 func setup(mode: String, stage: int = 1, goal: int = 100, max_turns: int = 30) -> void:
 	_mode = mode
@@ -43,11 +48,12 @@ func setup(mode: String, stage: int = 1, goal: int = 100, max_turns: int = 30) -
 		progress_bar.value = 1.0
 		progress_label.text = ""
 
-	chain_label.visible = false
+	if _get_chain_label():
+		chain_label.visible = false
 
-# ─────────────────────────────────────────
+# ───────────��─────────────────────────────
 # 갱신
-# ─────────────────────────────────────────
+# ──────────────────���──────────────────────
 
 func update_turns(used: int, remaining: int) -> void:
 	if _mode == "story":
@@ -77,6 +83,8 @@ func update_timer(remaining: float) -> void:
 	_update_bar_color()
 
 func show_chain(chain_count: int) -> void:
+	if not _get_chain_label():
+		return
 	if chain_count > 1:
 		chain_label.text = "Chain x%d!" % chain_count
 		chain_label.modulate.a = 1.0
@@ -87,9 +95,9 @@ func show_chain(chain_count: int) -> void:
 	else:
 		chain_label.visible = false
 
-# ─────────────────────────────────────────
+# ───────────���──────────────────────��──────
 # Progress bar 색상 그라데이션
-# ─────────────────────────────────────────
+# ──────────────��──────────────────────────
 
 func _update_bar_color() -> void:
 	var ratio: float
