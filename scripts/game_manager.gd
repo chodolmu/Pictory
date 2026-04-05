@@ -269,7 +269,7 @@ func _on_cell_touched(x: int, y: int) -> void:
 
 	# 5. HUD 갱신
 	_hud.update_destroyed(effective)
-	if result.chain_count > 1:
+	if result.chain_count >= 1:
 		_hud.show_chain(result.chain_count)
 	_grid_view.refresh()
 
