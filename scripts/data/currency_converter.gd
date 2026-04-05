@@ -6,10 +6,10 @@ extends RefCounted
 const STORY_CLEAR_BASE := 50
 const STORY_STAR_BONUS := [0, 25, 50]  # 인덱스 = 별 수 - 1 (1성=0, 2성=25, 3성=50)
 const STORY_REPLAY_BASE := 25
-const INFINITY_SCORE_RATIO := 0.5
-const INFINITY_MIN_REWARD := 50
-const INFINITY_MAX_REWARD := 5000
-const INFINITY_HIGHSCORE_BONUS := 500
+const INFINITY_SCORE_RATIO := 3.0
+const INFINITY_MIN_REWARD := 100
+const INFINITY_MAX_REWARD := 10000
+const INFINITY_HIGHSCORE_BONUS := 1000
 
 static func calculate_story_reward(_stars: int, _is_first_clear: bool) -> int:
 	# 스토리 모드에서는 코인 보상 없음 — 코인은 인피니티 모드에서만 획득
