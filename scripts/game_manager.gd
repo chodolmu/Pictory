@@ -57,6 +57,7 @@ var _game_ended: bool = false
 
 var _flow_controlled: bool = false
 var _stage_stars: int = 0
+var _infinity_action_count: int = 0
 
 func _ready() -> void:
 	var params = SceneManager.get_params()
@@ -275,6 +276,11 @@ func _finalize_action(result: ChainCombo.ChainResult) -> void:
 	# 6. 모드에 위임
 	if _current_mode != null:
 		_current_mode.on_action_performed(effective, result.chain_count)
+
+	# 6.5. 무한모드 기믹 스폰
+	if _current_mode is InfinityMode:
+		_infinity_action_count += 1
+		_try_spawn_infinity_gimmick()
 
 	# 7. 스냅샷 저장 (K6 되감기용)
 	save_snapshot()
@@ -603,6 +609,68 @@ func _on_infinity_game_over(_final_score: int, total_dest: int) -> void:
 		SceneManager.change_scene("res://scenes/main/stage_select.tscn")
 	)
 	game_over.emit()
+
+# ─────────────────────────────────────────
+# 테스트/디버그 헬퍼 (MCP 브릿지용)
+# ─────────────────────────────────────────
+
+# ─────────────────────────────────────────
+# 무한모드 기믹 스폰
+# ─────────────────────────────────────────
+
+const INFINITY_GIMMICK_INTERVAL: int = 3     # 매 N액션마다 스폰 시도
+const INFINITY_GIMMICK_CHANCE: float = 0.6   # 스폰 확률 (60%)
+const INFINITY_MAX_GIMMICKS: int = 4         # 동시 최대 기믹 수
+
+# 무한모드 기믹 풀: [타입, 데이터, 가중치]
+const INFINITY_GIMMICK_POOL = [
+	{"type": GimmickBase.GimmickType.COIN, "data": {}, "weight": 4},
+	{"type": GimmickBase.GimmickType.TIME, "data": {"bonus_time": 3.0}, "weight": 3},
+	{"type": GimmickBase.GimmickType.CHAIN_MULT, "data": {"multiplier": 2}, "weight": 2},
+	{"type": GimmickBase.GimmickType.POISON, "data": {"speed_multiplier": 1.5}, "weight": 1},
+]
+
+func _try_spawn_infinity_gimmick() -> void:
+	if _infinity_action_count % INFINITY_GIMMICK_INTERVAL != 0:
+		return
+	if randf() > INFINITY_GIMMICK_CHANCE:
+		return
+
+	# 현재 기믹 수 확인
+	var current_gimmick_count = 0
+	for cell in _grid.get_all_main_cells():
+		if cell.has_gimmick():
+			current_gimmick_count += 1
+	if current_gimmick_count >= INFINITY_MAX_GIMMICKS:
+		return
+
+	# 빈 셀(기믹 없고 color >= 0) 중 랜덤 위치 선택
+	var candidates: Array = []
+	for cell in _grid.get_all_main_cells():
+		if not cell.has_gimmick() and cell.color >= 0:
+			candidates.append(cell)
+	if candidates.is_empty():
+		return
+
+	candidates.shuffle()
+	var target_cell = candidates[0]
+
+	# 가중치 기반 기믹 타입 선택
+	var gimmick = _pick_weighted_gimmick()
+	target_cell.set_gimmick(gimmick["type"], 0, gimmick["data"].duplicate())
+	_grid_view.refresh()
+
+func _pick_weighted_gimmick() -> Dictionary:
+	var total_weight = 0
+	for g in INFINITY_GIMMICK_POOL:
+		total_weight += g["weight"]
+	var roll = randi() % total_weight
+	var cumulative = 0
+	for g in INFINITY_GIMMICK_POOL:
+		cumulative += g["weight"]
+		if roll < cumulative:
+			return g
+	return INFINITY_GIMMICK_POOL[0]
 
 # ─────────────────────────────────────────
 # 테스트/디버그 헬퍼 (MCP 브릿지용)
