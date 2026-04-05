@@ -45,10 +45,10 @@ func _update_player_icon() -> void:
 		icon_color = Color(icon_data.get("color", "#E8A87C"))
 	var style = StyleBoxFlat.new()
 	style.bg_color = icon_color
-	style.corner_radius_top_left = 18
-	style.corner_radius_top_right = 18
-	style.corner_radius_bottom_left = 18
-	style.corner_radius_bottom_right = 18
+	style.corner_radius_top_left = 27
+	style.corner_radius_top_right = 27
+	style.corner_radius_bottom_left = 27
+	style.corner_radius_bottom_right = 27
 	_player_icon.add_theme_stylebox_override("panel", style)
 
 func _update_currency_display() -> void:
