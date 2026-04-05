@@ -55,9 +55,9 @@ func _build_currency_tab() -> void:
 	for p in _products.get("currency_products", []):
 		var card = _make_card()
 		var badge = p.get("badge", "")
+		_item_list.add_child(card)
 		card.setup(p["id"], "💰", "재화 %d개" % p["amount"], p["price_display"], true, badge)
 		card.purchase_requested.connect(func(pid): _on_buy_currency(pid))
-		_item_list.add_child(card)
 
 func _build_stamina_tab() -> void:
 	for p in _products.get("stamina_products", []):
@@ -66,9 +66,9 @@ func _build_stamina_tab() -> void:
 		var label = p.get("label", "")
 		var name_text = "행동력 %d개%s" % [p["amount"], (" (%s)" % label) if label else ""]
 		var card = _make_card()
+		_item_list.add_child(card)
 		card.setup(p["id"], "⚡", name_text, "💰 %d" % cost, can_buy)
 		card.purchase_requested.connect(func(pid): _on_buy_stamina(pid))
-		_item_list.add_child(card)
 
 func _build_chapter_tab() -> void:
 	for p in _products.get("chapter_products", []):
@@ -77,6 +77,7 @@ func _build_chapter_tab() -> void:
 		var is_unlocked = SaveManager.is_chapter_unlocked(ch)
 		var check = ChapterUnlockScript.can_unlock(ch)
 		var card = _make_card()
+		_item_list.add_child(card)
 		if is_unlocked:
 			card.setup(p["id"], "📖", "챕터 %d" % ch, "해금됨", false)
 		else:
@@ -85,7 +86,6 @@ func _build_chapter_tab() -> void:
 			var price_text = "💰 %d" % cost if can_buy else "💰 %d  (%s)" % [cost, reason]
 			card.setup(p["id"], "📖", "챕터 %d 해금" % ch, price_text, can_buy)
 			card.purchase_requested.connect(func(pid): _on_buy_chapter(pid))
-		_item_list.add_child(card)
 
 func _on_buy_currency(product_id: String) -> void:
 	var result = ShopManager.buy_currency(product_id)
