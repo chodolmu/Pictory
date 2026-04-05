@@ -35,6 +35,11 @@ static func flood_fill(grid: Grid, start_x: int, start_y: int) -> Array:
 		if not _colors_match(cell, target_color, handler):
 			continue
 
+		# 리컬러 불가능한 셀(잠긴 칸 등)은 그룹에 포함하지 않고 확장도 차단
+		# → 잠긴 칸이 색 전파의 장벽 역할
+		if not handler.can_recolor(cell, target_color):
+			continue
+
 		result.append(cell)
 
 		for dir in directions:
@@ -51,7 +56,6 @@ static func flood_fill(grid: Grid, start_x: int, start_y: int) -> Array:
 			if not n_handler.can_bfs_traverse(neighbor, cell):
 				continue
 			# 색 매칭 또는 와일드카드인 경우만 큐에 추가
-			# → 다른 색 셀을 통과하여 확장되는 것을 방지
 			if not _colors_match(neighbor, target_color, n_handler):
 				continue
 			visited[next] = true
