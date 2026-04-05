@@ -235,10 +235,14 @@ func _on_cell_touched(x: int, y: int) -> void:
 	if cell == null or cell.color == -1:
 		return
 
+	# 리컬러 불가능한 셀(잠긴 칸 등) 터치 시 무시
+	var cell_handler = GimmickRegistry.get_handler(cell.gimmick_type)
+	if not cell_handler.can_recolor(cell, 0):
+		return
+
 	var active_color = _color_queue.get_active_color()
 
 	if cell.color == active_color:
-		print("Same color — no action")
 		return
 
 	_processing = true
