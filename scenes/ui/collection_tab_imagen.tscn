@@ -22,12 +22,12 @@ theme_override_font_sizes/font_size = 16
 horizontal_alignment = 1
 
 [node name="PartySlots" type="HBoxContainer" parent="VBox"]
-custom_minimum_size = Vector2(0, 100)
+custom_minimum_size = Vector2(0, 80)
 alignment = 1
-theme_override_constants/separation = 20
+theme_override_constants/separation = 12
 
 [node name="Slot0" type="PanelContainer" parent="VBox/PartySlots"]
-custom_minimum_size = Vector2(120, 90)
+custom_minimum_size = Vector2(100, 72)
 
 [node name="Label" type="Label" parent="VBox/PartySlots/Slot0"]
 layout_mode = 1
@@ -46,7 +46,7 @@ anchor_bottom = 1.0
 modulate = Color(0.5, 0.5, 0.5, 0.5)
 
 [node name="Slot1" type="PanelContainer" parent="VBox/PartySlots"]
-custom_minimum_size = Vector2(120, 90)
+custom_minimum_size = Vector2(100, 72)
 
 [node name="Label" type="Label" parent="VBox/PartySlots/Slot1"]
 layout_mode = 1
@@ -69,7 +69,7 @@ size_flags_vertical = 3
 
 [node name="Grid" type="GridContainer" parent="VBox/Scroll"]
 size_flags_horizontal = 3
-columns = 4
+columns = 3
 theme_override_constants/h_separation = 8
 theme_override_constants/v_separation = 8
 

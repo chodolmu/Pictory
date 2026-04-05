@@ -1,12 +1,12 @@
 extends Control
 ## CollectionTabHunya — 후냐 커스터마이징 탭.
 
-@onready var _preview: Control = $HSplit/PreviewPanel/Preview
-@onready var _cat_costume_btn: Button = $HSplit/Right/VBox/CategoryBar/CostumeButton
-@onready var _cat_acc_btn: Button = $HSplit/Right/VBox/CategoryBar/AccessoryButton
-@onready var _grid: GridContainer = $HSplit/Right/VBox/Scroll/Grid
-@onready var _item_name_label: Label = $HSplit/Right/VBox/InfoBar/ItemNameLabel
-@onready var _equip_btn: Button = $HSplit/Right/VBox/InfoBar/EquipButton
+@onready var _preview: Control = $VBox/PreviewPanel/Preview
+@onready var _cat_costume_btn: Button = $VBox/CategoryBar/CostumeButton
+@onready var _cat_acc_btn: Button = $VBox/CategoryBar/AccessoryButton
+@onready var _grid: GridContainer = $VBox/Scroll/Grid
+@onready var _item_name_label: Label = $VBox/InfoBar/ItemNameLabel
+@onready var _equip_btn: Button = $VBox/InfoBar/EquipButton
 
 var _current_category: String = "costume"
 var _selected_item_id: String = ""

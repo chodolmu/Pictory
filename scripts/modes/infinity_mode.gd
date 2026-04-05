@@ -9,11 +9,11 @@ signal bonus_time_added(amount: float, reason: String)
 signal game_over(final_score: int, total_destroyed: int)
 signal difficulty_scaled(level: int)
 
-@export var initial_time: float = 60.0
-@export var max_time: float = 75.0
+@export var initial_time: float = 30.0
+@export var max_time: float = 45.0
 @export var bonus_threshold: int = 7
-@export var bonus_coefficient: float = 0.3
-@export var combo_time_multiplier: float = 1.1
+@export var bonus_coefficient: float = 0.2
+@export var combo_time_multiplier: float = 1.05
 
 @export var scaling_enabled: bool = true
 @export var scaling_intervals: Array[float] = [60.0, 120.0, 180.0]
