@@ -41,6 +41,7 @@ alignment = 0
 
 [node name="PlayerIcon" type="Panel" parent="MarginContainer/VBox/Header/PlayerInfoContainer"]
 custom_minimum_size = Vector2(36, 36)
+size_flags_vertical = 4
 
 [node name="NicknameLabel" type="Label" parent="MarginContainer/VBox/Header/PlayerInfoContainer"]
 text = "플레이어"
