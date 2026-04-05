@@ -571,22 +571,23 @@ func _on_stage_failed() -> void:
 func _on_time_updated(remaining: float, _max: float) -> void:
 	_hud.update_timer(remaining)
 
-func _on_infinity_game_over(final_score: int, total_dest: int) -> void:
+func _on_infinity_game_over(_final_score: int, total_dest: int) -> void:
 	_game_ended = true
 	_grid_view.lock_input()
+	var actual_score = Economy.current_score
 	var high_score_before = SaveManager.get_infinity_high_score()
-	var is_new_record = SaveManager.save_infinity_result(final_score)
-	var currency = CurrencyConverter.calculate_infinity_reward(final_score, is_new_record)
+	var is_new_record = SaveManager.save_infinity_result(actual_score)
+	var currency = CurrencyConverter.calculate_infinity_reward(actual_score, is_new_record)
 	SaveManager.add_currency(currency)
-	print("Game Over (infinity) Score: %d, Destroyed: %d, Currency: +%d" % [final_score, total_dest, currency])
+	print("Game Over (infinity) Score: %d, Destroyed: %d, Currency: +%d" % [actual_score, total_dest, currency])
 
 	# 결과 팝업 표시
 	var popup = load("res://scenes/ui/result_popup.tscn").instantiate()
 	get_tree().root.add_child(popup)
-	popup.show_game_over(final_score, {
+	popup.show_game_over(actual_score, {
 		"total_destroyed": total_dest,
 		"is_new_record": is_new_record,
-		"high_score": maxi(final_score, high_score_before),
+		"high_score": maxi(actual_score, high_score_before),
 		"currency": currency
 	})
 	popup.retry_requested.connect(func():
