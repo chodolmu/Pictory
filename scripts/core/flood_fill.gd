@@ -37,11 +37,6 @@ static func flood_fill(grid: Grid, start_x: int, start_y: int) -> Array:
 
 		result.append(cell)
 
-		# 리컬러 불가능한 셀(잠긴 칸 등)은 이웃 탐색을 하지 않음
-		# → 잠긴 칸 너머로 색이 전파되는 버그 방지
-		if not handler.can_recolor(cell, target_color):
-			continue
-
 		for dir in directions:
 			var next = pos + dir
 			if visited.has(next):
@@ -54,6 +49,10 @@ static func flood_fill(grid: Grid, start_x: int, start_y: int) -> Array:
 			var n_handler = GimmickRegistry.get_handler(neighbor.gimmick_type)
 			# BFS 진입 가능 여부 (돌 칸은 차단)
 			if not n_handler.can_bfs_traverse(neighbor, cell):
+				continue
+			# 색 매칭 또는 와일드카드인 경우만 큐에 추가
+			# → 다른 색 셀을 통과하여 확장되는 것을 방지
+			if not _colors_match(neighbor, target_color, n_handler):
 				continue
 			visited[next] = true
 			queue.append(next)
