@@ -291,11 +291,6 @@ func _finalize_action(result: ChainCombo.ChainResult) -> void:
 	if _current_mode != null:
 		_current_mode.on_action_performed(effective, result.chain_count)
 
-	# 6.5. 무한모드 기믹 스폰
-	if _current_mode is InfinityMode:
-		_infinity_action_count += 1
-		_try_spawn_infinity_gimmick()
-
 	# 7. 스냅샷 저장 (K6 되감기용)
 	save_snapshot()
 
@@ -355,6 +350,10 @@ func _execute_chain_with_animation() -> ChainCombo.ChainResult:
 
 		# ── 중력 실제 적용
 		Gravity.apply(_grid)
+		# ── 무한모드: 새로 내려온 블럭에 기믹 부여
+		if _current_mode is InfinityMode:
+			_infinity_action_count += 1
+			_attach_gimmick_to_new_cells()
 		_grid_view.refresh()
 
 		# ── 체인 결과 누적
@@ -632,8 +631,8 @@ func _on_infinity_game_over(_final_score: int, total_dest: int) -> void:
 # 무한모드 기믹 스폰
 # ─────────────────────────────────────────
 
-const INFINITY_GIMMICK_INTERVAL: int = 3     # 매 N액션마다 스폰 시도
-const INFINITY_GIMMICK_CHANCE: float = 0.6   # 스폰 확률 (60%)
+const INFINITY_GIMMICK_INTERVAL: int = 3     # 매 N액션마다 기믹 부여 시도
+const INFINITY_GIMMICK_CHANCE: float = 0.15  # 새 블럭당 기믹 확률 (15%)
 const INFINITY_MAX_GIMMICKS: int = 4         # 동시 최대 기믹 수
 
 # 무한모드 기믹 풀: [타입, 데이터, 가중치]
@@ -644,10 +643,10 @@ const INFINITY_GIMMICK_POOL = [
 	{"type": GimmickBase.GimmickType.POISON, "data": {"speed_multiplier": 1.5}, "weight": 1},
 ]
 
-func _try_spawn_infinity_gimmick() -> void:
+func _attach_gimmick_to_new_cells() -> void:
+	## gravity refill 후 새로 내려온 블럭에 기믹 부여.
+	## 매 N액션마다만 시도, 각 새 블럭에 개별 확률 적용.
 	if _infinity_action_count % INFINITY_GIMMICK_INTERVAL != 0:
-		return
-	if randf() > INFINITY_GIMMICK_CHANCE:
 		return
 
 	# 현재 기믹 수 확인
@@ -655,19 +654,20 @@ func _try_spawn_infinity_gimmick() -> void:
 	for cell in _grid.get_all_main_cells():
 		if cell.has_gimmick():
 			current_gimmick_count += 1
-	if current_gimmick_count >= INFINITY_MAX_GIMMICKS:
-		return
 
-	# 빈 셀(기믹 없고 color >= 0) 중 랜덤 위치 선택
-	var candidates: Array = []
-	for cell in _grid.get_all_main_cells():
-		if not cell.has_gimmick() and cell.color >= 0:
-			candidates.append(cell)
-	if candidates.is_empty():
-		return
-
-	candidates.shuffle()
-	var target_cell = candidates[0]
+	# 새로 내려온 블럭 = main area 상단 행들에서 기믹 없는 셀
+	# (gravity가 위에서 아래로 채우므로 상단에 새 블럭이 위치)
+	for y in range(_grid.grid_size):
+		for x in range(_grid.grid_size):
+			if current_gimmick_count >= INFINITY_MAX_GIMMICKS:
+				return
+			var cell = _grid.get_cell(x, y)
+			if cell == null or cell.has_gimmick() or cell.color < 0:
+				continue
+			if randf() < INFINITY_GIMMICK_CHANCE:
+				var gimmick = _pick_weighted_gimmick()
+				cell.set_gimmick(gimmick["type"], 0, gimmick["data"].duplicate())
+				current_gimmick_count += 1
 
 	# 가중치 기반 기믹 타입 선택
 	var gimmick = _pick_weighted_gimmick()
