@@ -1,0 +1,59 @@
+[gd_scene load_steps=2 format=3 uid="uid://gem_shop"]
+
+[ext_resource type="Script" path="res://scripts/ui/gem_shop.gd" id="1_gs"]
+
+[node name="GemShop" type="Control"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+script = ExtResource("1_gs")
+
+[node name="BgRect" type="ColorRect" parent="."]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+color = Color(0.08, 0.08, 0.14, 1)
+
+[node name="MarginContainer" type="MarginContainer" parent="."]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+theme_override_constants/margin_left = 20
+theme_override_constants/margin_right = 20
+theme_override_constants/margin_top = 16
+theme_override_constants/margin_bottom = 20
+
+[node name="VBox" type="VBoxContainer" parent="MarginContainer"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+theme_override_constants/separation = 16
+
+[node name="Header" type="HBoxContainer" parent="MarginContainer/VBox"]
+custom_minimum_size = Vector2(0, 52)
+theme_override_constants/separation = 8
+
+[node name="BackButton" type="Button" parent="MarginContainer/VBox/Header"]
+custom_minimum_size = Vector2(48, 48)
+text = "←"
+theme_override_font_sizes/font_size = 20
+
+[node name="TitleLabel" type="Label" parent="MarginContainer/VBox/Header"]
+text = "젬 상점"
+size_flags_horizontal = 3
+vertical_alignment = 1
+theme_override_font_sizes/font_size = 22
+
+[node name="BalanceLabel" type="Label" parent="MarginContainer/VBox/Header"]
+text = "💎 0"
+vertical_alignment = 1
+theme_override_font_sizes/font_size = 16
+
+[node name="HSeparator" type="HSeparator" parent="MarginContainer/VBox"]
+
+[node name="ScrollContainer" type="ScrollContainer" parent="MarginContainer/VBox"]
+size_flags_vertical = 3
+
+[node name="ProductList" type="VBoxContainer" parent="MarginContainer/VBox/ScrollContainer"]
+size_flags_horizontal = 3
+theme_override_constants/separation = 12

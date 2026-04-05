@@ -3,7 +3,6 @@ extends Control
 
 const ResultPopupScene = preload("res://scenes/ui/result_popup.tscn")
 const ChapterUnlockScript = preload("res://scripts/data/chapter_unlock.gd")
-const InfinityPopupScene = "res://scenes/ui/infinity_confirm_popup.tscn"
 const OptionsPopupScene = "res://scenes/ui/options_popup.tscn"
 
 # ── 상단 바 ──
@@ -26,13 +25,11 @@ const OptionsPopupScene = "res://scenes/ui/options_popup.tscn"
 @onready var _unlock_btn: Button = $MarginContainer/VBox/UnlockButton
 
 # ── 하단 네비 ──
-@onready var _infinity_btn: Button = $MarginContainer/VBox/BottomNav/InfinityButton
 @onready var _collection_btn: Button = $MarginContainer/VBox/BottomNav/CollectionButton
 @onready var _shop_btn: Button = $MarginContainer/VBox/BottomNav/ShopButton
 @onready var _achievements_btn: Button = $MarginContainer/VBox/BottomNav/AchievementsButton
 
 var _stage_confirm_popup = null
-var _infinity_confirm_popup = null
 var _options_popup = null
 
 var current_chapter: int = 1
@@ -86,7 +83,6 @@ func _ready() -> void:
 	_chapter_next_btn.pressed.connect(_on_chapter_next)
 	_unlock_btn.pressed.connect(_on_unlock_button_pressed)
 	# 하단 네비
-	_infinity_btn.pressed.connect(_on_infinity)
 	_collection_btn.pressed.connect(_on_collection)
 	_shop_btn.pressed.connect(_on_shop)
 	_achievements_btn.pressed.connect(_on_achievements)
@@ -128,7 +124,7 @@ func _update_player_icon() -> void:
 	_player_icon.add_theme_stylebox_override("panel", style)
 
 func _update_currency_display() -> void:
-	_currency_label.text = "💰 %d" % SaveManager.get_currency()
+	_currency_label.text = "💎 %d" % SaveManager.get_gems()
 
 func _on_achievement_unlocked(_id: String) -> void:
 	_update_achievement_badge()
@@ -142,17 +138,13 @@ func _update_achievement_badge() -> void:
 # 하단 네비 (기존 메인 메뉴 기능)
 # ─────────────────────────────────────────
 
-func _on_infinity() -> void:
-	var popup = _get_or_create_popup("_infinity_confirm_popup", InfinityPopupScene)
-	popup.show_popup()
-
 func _on_settings() -> void:
 	var popup = _get_or_create_popup("_options_popup", OptionsPopupScene)
 	popup.show_popup()
 
 func _on_shop() -> void:
-	_free_popups()
-	SceneManager.change_scene("res://scenes/ui/shop.tscn")
+	# TODO: Phase 3에서 젬 상점으로 교체
+	pass
 
 func _on_collection() -> void:
 	_free_popups()
@@ -173,7 +165,7 @@ func _get_or_create_popup(var_ref: String, scene_path: String) -> Node:
 	return popup
 
 func _free_popups() -> void:
-	for ref in ["_infinity_confirm_popup", "_options_popup", "_stage_confirm_popup"]:
+	for ref in ["_options_popup", "_stage_confirm_popup"]:
 		var popup = get(ref)
 		if popup != null and is_instance_valid(popup):
 			popup.queue_free()
@@ -238,7 +230,7 @@ func _build_node_map(chapter: int) -> void:
 		var stage_idx = _stage_count - 1 - i
 		var config = stages[stage_idx]
 		var save = SaveManager.get_stage_data(config.stage_id)
-		var stars = save.get("stars", 0) if not save.is_empty() else 0
+		var stars = 1 if (not save.is_empty() and save.get("cleared", false)) else 0
 		var locked = _is_stage_locked(config)
 		var pos = _node_positions[i]
 		var is_current_target = (stage_idx == last_cleared_idx + 1) if last_cleared_idx < _stage_count - 1 else false
@@ -261,7 +253,7 @@ func _find_last_cleared_stage(stages: Array) -> int:
 	var highest_cleared = -1
 	for i in range(stages.size()):
 		var save = SaveManager.get_stage_data(stages[i].stage_id)
-		if not save.is_empty() and save.get("stars", 0) > 0:
+		if not save.is_empty() and save.get("cleared", false):
 			highest_cleared = i
 	return highest_cleared
 
@@ -432,7 +424,7 @@ func _is_stage_locked(config) -> bool:
 		return false
 	var prev_id = "ch%02d_s%02d" % [config.chapter, config.stage_number - 1]
 	var prev_save = SaveManager.get_stage_data(prev_id)
-	return prev_save.is_empty() or prev_save.get("stars", 0) == 0
+	return prev_save.is_empty() or not prev_save.get("cleared", false)
 
 func _update_chapter_buttons() -> void:
 	_chapter_prev_btn.disabled = (current_chapter <= 1)
@@ -478,16 +470,11 @@ func _show_result_popup(result: Dictionary) -> void:
 	var popup = ResultPopupScene.instantiate()
 	add_child(popup)
 	var is_clear: bool = result.get("is_clear", false)
-	var stars: int = result.get("stars", 0)
-	var score: int = result.get("score", 0)
 
 	if is_clear:
-		var has_next = _result_stage < 10
-		var currency: int = result.get("currency", 0)
-		popup.show_clear(stars, score, currency, has_next)
-		popup.next_stage_requested.connect(_on_result_next_stage)
+		popup.show_success()
 	else:
-		popup.show_game_over(score, {})
+		popup.show_fail()
 	popup.retry_requested.connect(func():
 		popup.queue_free()
 		StoryFlowController.start_stage(_result_chapter, _result_stage)
@@ -495,10 +482,6 @@ func _show_result_popup(result: Dictionary) -> void:
 	popup.main_menu_requested.connect(func():
 		popup.queue_free()
 	)
-
-func _on_result_next_stage() -> void:
-	if _result_stage + 1 <= 10:
-		StoryFlowController.start_stage(_result_chapter, _result_stage + 1)
 
 func _on_unlock_button_pressed() -> void:
 	var next_chapter = current_chapter + 1

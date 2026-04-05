@@ -1,7 +1,7 @@
 [gd_scene load_steps=3 format=3 uid="uid://main_menu"]
 
 [ext_resource type="Script" path="res://scripts/main/main_menu.gd" id="1_mm"]
-[ext_resource type="PackedScene" path="res://scenes/ui/stamina_bar.tscn" id="6_sb"]
+[ext_resource type="Script" path="res://scripts/ui/sticker_book.gd" id="2_sb"]
 
 [node name="MainMenu" type="Control"]
 anchors_preset = 15
@@ -19,89 +19,148 @@ color = Color(0.08, 0.08, 0.14, 1)
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-theme_override_constants/margin_left = 20
-theme_override_constants/margin_right = 20
-theme_override_constants/margin_top = 16
-theme_override_constants/margin_bottom = 20
+theme_override_constants/margin_left = 16
+theme_override_constants/margin_right = 16
+theme_override_constants/margin_top = 12
+theme_override_constants/margin_bottom = 12
 
 [node name="VBox" type="VBoxContainer" parent="MarginContainer"]
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-theme_override_constants/separation = 12
+theme_override_constants/separation = 6
 
-[node name="Header" type="HBoxContainer" parent="MarginContainer/VBox"]
-custom_minimum_size = Vector2(0, 52)
-theme_override_constants/separation = 8
+[node name="TopBar" type="HBoxContainer" parent="MarginContainer/VBox"]
+custom_minimum_size = Vector2(0, 48)
+theme_override_constants/separation = 6
 
-[node name="PlayerInfoContainer" type="HBoxContainer" parent="MarginContainer/VBox/Header"]
-size_flags_horizontal = 3
-theme_override_constants/separation = 8
-alignment = 0
+[node name="PlayerInfoContainer" type="HBoxContainer" parent="MarginContainer/VBox/TopBar"]
+theme_override_constants/separation = 6
 
-[node name="PlayerIcon" type="Panel" parent="MarginContainer/VBox/Header/PlayerInfoContainer"]
-custom_minimum_size = Vector2(54, 54)
+[node name="PlayerIcon" type="Panel" parent="MarginContainer/VBox/TopBar/PlayerInfoContainer"]
+custom_minimum_size = Vector2(44, 44)
 size_flags_vertical = 4
 
-[node name="NicknameLabel" type="Label" parent="MarginContainer/VBox/Header/PlayerInfoContainer"]
+[node name="NicknameLabel" type="Label" parent="MarginContainer/VBox/TopBar/PlayerInfoContainer"]
 text = "플레이어"
 vertical_alignment = 1
-theme_override_font_sizes/font_size = 18
+theme_override_font_sizes/font_size = 14
 
-[node name="CurrencyLabel" type="Label" parent="MarginContainer/VBox/Header"]
-text = "💰 0"
+[node name="ChapterLabel" type="Label" parent="MarginContainer/VBox/TopBar"]
+size_flags_horizontal = 3
+text = "Chapter 1"
+horizontal_alignment = 1
 vertical_alignment = 1
 theme_override_font_sizes/font_size = 16
 
-[node name="SettingsButton" type="Button" parent="MarginContainer/VBox/Header"]
-custom_minimum_size = Vector2(48, 48)
+[node name="GemLabel" type="Label" parent="MarginContainer/VBox/TopBar"]
+text = "💎 0"
+vertical_alignment = 1
+theme_override_font_sizes/font_size = 13
+
+[node name="StarLabel" type="Label" parent="MarginContainer/VBox/TopBar"]
+text = "⭐ 0"
+vertical_alignment = 1
+theme_override_font_sizes/font_size = 13
+
+[node name="SettingsButton" type="Button" parent="MarginContainer/VBox/TopBar"]
+custom_minimum_size = Vector2(44, 44)
 text = "⚙"
 
-[node name="StaminaBarNode" parent="MarginContainer/VBox" instance=ExtResource("6_sb")]
-
-[node name="Spacer1" type="Control" parent="MarginContainer/VBox"]
+[node name="HeartContainer" type="HBoxContainer" parent="MarginContainer/VBox"]
 custom_minimum_size = Vector2(0, 24)
-size_flags_vertical = 3
+theme_override_constants/separation = 4
 
-[node name="LogoLabel" type="Label" parent="MarginContainer/VBox"]
-text = "PICTORY"
+[node name="HeartLabel" type="Label" parent="MarginContainer/VBox/HeartContainer"]
+text = "♥♥♥♥♥"
+theme_override_font_sizes/font_size = 18
+
+[node name="RecoveryLabel" type="Label" parent="MarginContainer/VBox/HeartContainer"]
+text = ""
+theme_override_font_sizes/font_size = 12
+vertical_alignment = 1
+
+[node name="StageProgressLabel" type="Label" parent="MarginContainer/VBox"]
+text = "0 / 10 클리어"
 horizontal_alignment = 1
-theme_override_font_sizes/font_size = 48
+theme_override_font_sizes/font_size = 12
+theme_override_colors/font_color = Color(0.6, 0.6, 0.65, 1)
 
-[node name="Spacer2" type="Control" parent="MarginContainer/VBox"]
-custom_minimum_size = Vector2(0, 16)
-
-[node name="StageSelectButton" type="Button" parent="MarginContainer/VBox"]
-custom_minimum_size = Vector2(0, 64)
-text = "스테이지 선택"
-theme_override_font_sizes/font_size = 20
-
-[node name="InfinityModeButton" type="Button" parent="MarginContainer/VBox"]
-custom_minimum_size = Vector2(0, 64)
-text = "인피니티 모드"
-theme_override_font_sizes/font_size = 20
-
-[node name="Spacer3" type="Control" parent="MarginContainer/VBox"]
+[node name="StickerArea" type="Control" parent="MarginContainer/VBox"]
 size_flags_vertical = 3
+clip_contents = true
+
+[node name="StickerBook" type="Control" parent="MarginContainer/VBox/StickerArea"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = 2
+script = ExtResource("2_sb")
+
+[node name="ChapterPrevButton" type="Button" parent="MarginContainer/VBox/StickerArea"]
+anchors_preset = 4
+anchor_top = 0.5
+anchor_bottom = 0.5
+offset_left = 0.0
+offset_top = -24.0
+offset_right = 36.0
+offset_bottom = 24.0
+text = "◄"
+theme_override_font_sizes/font_size = 20
+
+[node name="ChapterNextButton" type="Button" parent="MarginContainer/VBox/StickerArea"]
+anchors_preset = 6
+anchor_left = 1.0
+anchor_top = 0.5
+anchor_right = 1.0
+anchor_bottom = 0.5
+offset_left = -36.0
+offset_top = -24.0
+offset_right = 0.0
+offset_bottom = 24.0
+text = "►"
+theme_override_font_sizes/font_size = 20
+
+[node name="ButtonRow" type="HBoxContainer" parent="MarginContainer/VBox"]
+custom_minimum_size = Vector2(0, 56)
+alignment = 1
+theme_override_constants/separation = 10
+
+[node name="StartButton" type="Button" parent="MarginContainer/VBox/ButtonRow"]
+size_flags_horizontal = 3
+custom_minimum_size = Vector2(0, 52)
+text = "시작"
+theme_override_font_sizes/font_size = 20
+
+[node name="ColorButton" type="Button" parent="MarginContainer/VBox/ButtonRow"]
+size_flags_horizontal = 3
+custom_minimum_size = Vector2(0, 52)
+text = "⭐ 색칠하기"
+theme_override_font_sizes/font_size = 16
 
 [node name="HSeparator" type="HSeparator" parent="MarginContainer/VBox"]
 
 [node name="BottomButtons" type="HBoxContainer" parent="MarginContainer/VBox"]
-custom_minimum_size = Vector2(0, 56)
+custom_minimum_size = Vector2(0, 48)
 alignment = 1
-theme_override_constants/separation = 8
+theme_override_constants/separation = 6
 
 [node name="AchievementsButton" type="Button" parent="MarginContainer/VBox/BottomButtons"]
 size_flags_horizontal = 3
-custom_minimum_size = Vector2(0, 52)
+custom_minimum_size = Vector2(0, 44)
 text = "업적"
 
-[node name="CollectionButton" type="Button" parent="MarginContainer/VBox/BottomButtons"]
+[node name="CompanionButton" type="Button" parent="MarginContainer/VBox/BottomButtons"]
 size_flags_horizontal = 3
-custom_minimum_size = Vector2(0, 52)
-text = "컬렉션"
+custom_minimum_size = Vector2(0, 44)
+text = "동료"
+
+[node name="FashionButton" type="Button" parent="MarginContainer/VBox/BottomButtons"]
+size_flags_horizontal = 3
+custom_minimum_size = Vector2(0, 44)
+text = "패션"
 
 [node name="ShopButton" type="Button" parent="MarginContainer/VBox/BottomButtons"]
 size_flags_horizontal = 3
-custom_minimum_size = Vector2(0, 52)
+custom_minimum_size = Vector2(0, 44)
 text = "상점"

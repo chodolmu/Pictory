@@ -18,4 +18,4 @@ func _on_start_pressed() -> void:
 	if PlayerProfile.is_first_launch():
 		SceneManager.change_scene("res://scenes/main/nickname_input.tscn")
 	else:
-		SceneManager.change_scene("res://scenes/main/stage_select.tscn")
+		SceneManager.change_scene("res://scenes/main/main_menu.tscn")

@@ -17,19 +17,18 @@ config/icon="res://icon.svg"
 
 [autoload]
 
-TestBridge="*res://test_bridge.gd"
 SaveManager="*res://scripts/data/save_manager.gd"
 PlayerProfile="*res://scripts/data/player_profile.gd"
 LevelLoader="*res://scripts/data/level_loader.gd"
-Economy="*res://scripts/data/economy.gd"
 SceneManager="*res://scripts/ui/scene_manager.gd"
 StoryFlowController="*res://scripts/story/story_flow_controller.gd"
 ImagenDatabase="*res://scripts/companion/imagen_database.gd"
 PartyManager="*res://scripts/companion/party_manager.gd"
 CollectionManager="*res://scripts/collection/collection_manager.gd"
 AchievementManager="*res://scripts/collection/achievement_manager.gd"
-StaminaManager="*res://scripts/data/stamina_manager.gd"
-AdManager="*res://scripts/data/ad_manager.gd"
+HeartManager="*res://scripts/data/heart_manager.gd"
+GemManager="*res://scripts/data/gem_manager.gd"
+StarManager="*res://scripts/data/star_manager.gd"
 
 [display]
 

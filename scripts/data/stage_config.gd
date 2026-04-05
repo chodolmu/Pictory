@@ -11,7 +11,6 @@ var num_colors: int = 5
 var turn_limit: int = 30
 var goal_type: String = "destroy_blocks"
 var goal_target_count: int = 100
-var star_thresholds: Array = [3, 6, 10]
 var color_queue_stride: int = 3
 var color_queue_random_offset: int = 1
 var gimmick_placements: Array = []

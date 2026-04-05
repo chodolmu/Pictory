@@ -7,6 +7,7 @@ signal nickname_changed(new_name: String)
 var _nickname: String = ""
 var _selected_icon: String = "default"
 var _first_launch: bool = true
+var _created_at: int = 0
 
 func _ready() -> void:
 	_load_from_save()
@@ -26,6 +27,9 @@ func set_selected_icon(icon_id: String) -> void:
 	_selected_icon = icon_id
 	_save_to_save_manager()
 
+func get_created_at() -> int:
+	return _created_at
+
 func is_first_launch() -> bool:
 	return _first_launch
 
@@ -37,13 +41,18 @@ func to_save_data() -> Dictionary:
 	return {
 		"nickname": _nickname,
 		"selected_icon": _selected_icon,
-		"first_launch": _first_launch
+		"first_launch": _first_launch,
+		"created_at": _created_at
 	}
 
 func from_save_data(data: Dictionary) -> void:
 	_nickname = data.get("nickname", "")
 	_selected_icon = data.get("selected_icon", "default")
 	_first_launch = data.get("first_launch", true)
+	_created_at = data.get("created_at", 0)
+	if _created_at == 0:
+		_created_at = int(Time.get_unix_time_from_system())
+		_save_to_save_manager()
 
 func _load_from_save() -> void:
 	var data = SaveManager.get_player_profile()

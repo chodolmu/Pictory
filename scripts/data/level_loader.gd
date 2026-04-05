@@ -22,7 +22,7 @@ const GIMMICK_TYPE_MAP: Dictionary = {
 }
 
 const REQUIRED_FIELDS: Array[String] = [
-	"stage_id", "grid_size", "num_colors", "turn_limit", "goal", "star_thresholds"
+	"stage_id", "grid_size", "num_colors", "turn_limit", "goal"
 ]
 
 # ─────────────────────────────────────────
@@ -128,11 +128,6 @@ func _parse_json(json_data: Dictionary):
 	var goal = json_data.get("goal", {})
 	config.goal_type = goal.get("type", "destroy_blocks")
 	config.goal_target_count = goal.get("target_count", 100)
-
-	var raw_thresholds = json_data.get("star_thresholds", [3, 6, 10])
-	config.star_thresholds.clear()
-	for v in raw_thresholds:
-		config.star_thresholds.append(int(v))
 
 	var cq = json_data.get("color_queue_config", {})
 	config.color_queue_stride = cq.get("stride", 3)

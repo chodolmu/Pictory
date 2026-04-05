@@ -1,0 +1,822 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pictory - Gimmick Prototypes (Playable)</title>
+<style>
+:root {
+  --bg: #0f1117;
+  --card: #1a1d27;
+  --accent: #6c5ce7;
+  --accent2: #00cec9;
+  --danger: #e17055;
+  --warn: #fdcb6e;
+  --success: #00b894;
+  --text: #dfe6e9;
+  --dim: #636e72;
+  --border: #2d3436;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:var(--bg);color:var(--text);font-family:'Pretendard',-apple-system,sans-serif;padding:20px;line-height:1.6;}
+.container{max-width:600px;margin:0 auto;}
+header{text-align:center;margin-bottom:32px;}
+header h1{font-size:1.8em;background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+header p{color:var(--dim);font-size:0.9em;}
+
+.mode-bar{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin-bottom:24px;}
+.mode-btn{
+  background:var(--card);border:1px solid var(--border);border-radius:10px;
+  padding:7px 12px;color:var(--text);cursor:pointer;font-size:0.78em;font-weight:600;
+  transition:all 0.2s;
+}
+.mode-btn:hover{border-color:var(--accent);}
+.mode-btn.active{background:var(--accent);border-color:var(--accent);color:#fff;}
+
+.game-area{
+  background:var(--card);border:1px solid var(--border);border-radius:16px;
+  padding:20px;margin-bottom:20px;
+}
+.hud{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:8px;}
+.hud-item{
+  background:rgba(0,0,0,0.3);border-radius:8px;padding:5px 10px;
+  font-size:0.8em;display:flex;align-items:center;gap:5px;
+}
+.hud-val{font-weight:700;color:var(--warn);}
+
+.queue-area{display:flex;align-items:center;gap:8px;margin-bottom:14px;justify-content:center;}
+.queue-label{font-size:0.72em;color:var(--dim);font-weight:600;}
+.queue-cell{
+  width:34px;height:34px;border-radius:7px;display:flex;align-items:center;justify-content:center;
+  font-weight:700;font-size:0.7em;transition:transform 0.2s;
+}
+.queue-cell.active{transform:scale(1.15);border:2px solid rgba(255,255,255,0.5);}
+
+.info-bar{
+  background:rgba(0,0,0,0.3);border-radius:10px;padding:10px 14px;
+  font-size:0.82em;color:var(--dim);margin-bottom:14px;text-align:center;
+}
+.info-bar strong{color:var(--accent2);}
+
+.grid-wrap{display:flex;justify-content:center;margin-bottom:12px;}
+.grid{display:inline-grid;gap:4px;}
+.cell{
+  width:52px;height:52px;border-radius:10px;display:flex;align-items:center;justify-content:center;
+  font-size:0.65em;font-weight:700;cursor:pointer;position:relative;
+  transition:transform 0.12s,opacity 0.3s;user-select:none;border:2px solid transparent;
+}
+.cell:hover{transform:scale(1.08);}
+.cell:active{transform:scale(0.95);}
+
+.cell .ov{
+  position:absolute;inset:0;border-radius:8px;display:flex;align-items:center;justify-content:center;
+  font-size:1em;pointer-events:none;
+}
+
+.result-overlay{
+  position:fixed;inset:0;background:rgba(0,0,0,0.7);display:none;align-items:center;justify-content:center;z-index:100;
+}
+.result-overlay.show{display:flex;}
+.result-box{
+  background:var(--card);border-radius:20px;padding:40px;text-align:center;max-width:320px;
+  border:1px solid var(--border);
+}
+.result-box h2{font-size:1.6em;margin-bottom:12px;}
+.result-box p{color:var(--dim);margin-bottom:20px;font-size:0.9em;}
+.result-box button{
+  background:var(--accent);color:#fff;border:none;border-radius:10px;
+  padding:10px 28px;font-size:1em;cursor:pointer;font-weight:600;
+}
+.result-box button:hover{opacity:0.9;}
+
+.legend{
+  background:rgba(0,0,0,0.25);border-radius:10px;padding:12px 16px;
+  font-size:0.78em;color:var(--dim);margin-bottom:12px;
+}
+.legend strong{color:var(--text);}
+.legend-row{display:flex;gap:12px;flex-wrap:wrap;margin-top:6px;}
+.legend-item{display:flex;align-items:center;gap:4px;}
+.legend-swatch{width:18px;height:18px;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:0.7em;}
+</style>
+</head>
+<body>
+<div class="container">
+
+<header>
+  <h1>Gimmick Prototypes</h1>
+  <p>Each mode showcases a specific gimmick. Tap to flood-fill, complete rows/cols to destroy.</p>
+</header>
+
+<div class="mode-bar" id="modeBar"></div>
+
+<div class="game-area" id="gameArea">
+  <div class="hud" id="hud"></div>
+  <div class="queue-area" id="queueArea"></div>
+  <div class="info-bar" id="infoBar"></div>
+  <div class="legend" id="legend"></div>
+  <div class="grid-wrap"><div class="grid" id="grid"></div></div>
+</div>
+
+<div class="result-overlay" id="resultOverlay">
+  <div class="result-box">
+    <h2 id="resultTitle"></h2>
+    <p id="resultMsg"></p>
+    <button onclick="restartMode()">Retry</button>
+  </div>
+</div>
+
+</div>
+
+<script>
+const COLS=6, ROWS=6;
+const COLORS=['#e74c3c','#3498db','#27ae60','#f39c12','#9b59b6'];
+const CLR_NAMES=['Red','Blue','Green','Orange','Purple'];
+
+let board=[], queue=[], turns=0, maxTurns=15, mode=null, gameOver=false, gs={};
+
+const MODES=[
+  {id:'ice',     name:'Ice',     icon:'\u{1F9CA}', desc:'Break all <strong>ice</strong> (hit 2x to shatter)', legend:'Ice has durability. Destroying a line through ice reduces durability by 1.'},
+  {id:'locked',  name:'Locked',  icon:'\u{1F512}', desc:'Clear all rows despite <strong>locked</strong> cells (cant recolor)', legend:'Locked cells keep their color during BFS. You must match the row TO their color.'},
+  {id:'stone',   name:'Stone',   icon:'\u{1FAA8}', desc:'Destroy <strong>20</strong> blocks around the stones', legend:'Stone blocks BFS, cant be destroyed or recolored. Work around it.'},
+  {id:'curtain', name:'Curtain', icon:'\u{1F3AD}', desc:'Destroy <strong>20</strong> blocks &mdash; some cells are <strong>hidden</strong>', legend:'Curtain hides the cell color. BFS into it reveals and recolors it.'},
+  {id:'taint',   name:'Taint',   icon:'\u2623\uFE0F', desc:'Purify all <strong>taint</strong> before it spreads!', legend:'Taint spreads +1 each turn. BFS adjacent to taint purifies it.'},
+  {id:'bomb',    name:'Bomb',    icon:'\u{1F4A3}', desc:'Defuse all <strong>bombs</strong> before countdown hits 0', legend:'Bombs count down each turn. At 0 they scramble 3x3 area = FAIL.'},
+  {id:'chain',   name:'Chain',   icon:'\u26D3\uFE0F', desc:'Free the <strong>chained</strong> cells by destroying adjacent lines', legend:'Chained cells can be recolored but NOT destroyed. Destroy an adjacent line to free them.'},
+  {id:'wall',    name:'Wall',    icon:'\u{1F9F1}', desc:'Destroy <strong>20</strong> blocks &mdash; walls block BFS between cells', legend:'Red borders = walls. BFS cannot cross a wall. Destroy adjacent lines to break walls (dur 2).'},
+  {id:'crack',   name:'Crack',   icon:'\u{1F4A5}', desc:'Destroy <strong>25</strong> blocks &mdash; cracked cells spawn ice when destroyed', legend:'When a cracked cell is destroyed, it spawns Ice(dur=1) on up to 4 neighbors.'},
+  {id:'anchor',  name:'Anchor',  icon:'\u2693', desc:'Destroy <strong>20</strong> blocks &mdash; anchored cells dont fall', legend:'Anchored cells are pinned. They dont drop during gravity, creating gaps below.'},
+  {id:'fade',    name:'Fade',    icon:'\u23F3', desc:'Destroy <strong>20</strong> blocks &mdash; faded cells revert color after 2 turns', legend:'Faded cells remember their original color. 2 turns after recolor, they snap back.'},
+  {id:'mixed',   name:'Mixed!',  icon:'\u{1F525}', desc:'Destroy <strong>30</strong> blocks with multiple gimmicks combined', legend:'Ice + Taint + Bomb + Locked. Good luck.'},
+];
+
+function init(){
+  const bar=document.getElementById('modeBar');
+  bar.innerHTML='';
+  MODES.forEach(m=>{
+    const b=document.createElement('div');
+    b.className='mode-btn';
+    b.textContent=m.icon+' '+m.name;
+    b.onclick=()=>startMode(m.id);
+    bar.appendChild(b);
+  });
+  startMode('ice');
+}
+
+function startMode(id){
+  mode=id; gameOver=false; turns=0;
+  document.getElementById('resultOverlay').classList.remove('show');
+  document.querySelectorAll('.mode-btn').forEach((b,i)=>b.classList.toggle('active',MODES[i].id===id));
+
+  const numC=4;
+  initBoard(numC); initQueue(numC);
+  gs={destroyed:0};
+
+  switch(id){
+    case 'ice':
+      maxTurns=14; gs.target=8; gs.broken=0; placeGimmick('ice',8,{dur:2}); break;
+    case 'locked':
+      maxTurns=12; gs.target=20;
+      // Place locked cells in specific rows to make it a puzzle
+      for(let r of [1,3,4]){
+        let c=Math.floor(Math.random()*COLS);
+        board[r][c].gimmick='locked'; board[r][c].gData={origColor:board[r][c].color};
+      }
+      break;
+    case 'stone':
+      maxTurns=14; gs.target=20;
+      placeStones(4);
+      break;
+    case 'curtain':
+      maxTurns=14; gs.target=20;
+      placeGimmick('curtain',8,{});
+      break;
+    case 'taint':
+      maxTurns=16;
+      placeTaintCells(4);
+      break;
+    case 'bomb':
+      maxTurns=12;
+      placeBombCells(3);
+      break;
+    case 'chain':
+      maxTurns=14; gs.target=20;
+      placeGimmick('chain',4,{freed:false});
+      break;
+    case 'wall':
+      maxTurns=14; gs.target=20;
+      placeWalls(6);
+      break;
+    case 'crack':
+      maxTurns=14; gs.target=25;
+      placeGimmick('crack',5,{});
+      break;
+    case 'anchor':
+      maxTurns=14; gs.target=20;
+      placeGimmick('anchor',4,{});
+      break;
+    case 'fade':
+      maxTurns=14; gs.target=20;
+      placeGimmick('fade',6,{origColor:-1,counter:-1});
+      // Set original colors
+      for(let r=0;r<ROWS;r++) for(let c=0;c<COLS;c++){
+        if(board[r][c].gimmick==='fade') board[r][c].gData.origColor=board[r][c].color;
+      }
+      break;
+    case 'mixed':
+      maxTurns=18; gs.target=30;
+      placeGimmick('ice',3,{dur:2});
+      placeTaintCells(2);
+      placeBombCells(2);
+      for(let i=0;i<2;i++){
+        let r,c; do{r=Math.floor(Math.random()*ROWS);c=Math.floor(Math.random()*COLS);}while(board[r][c].gimmick);
+        board[r][c].gimmick='locked'; board[r][c].gData={origColor:board[r][c].color};
+      }
+      break;
+  }
+  render();
+}
+
+function restartMode(){startMode(mode);}
+
+function initBoard(n){
+  board=[];
+  // walls stored separately
+  window._walls = {};
+  for(let r=0;r<ROWS;r++){
+    board[r]=[];
+    for(let c=0;c<COLS;c++) board[r][c]={color:Math.floor(Math.random()*n),gimmick:null,gData:{},painted:false};
+  }
+}
+function initQueue(n){queue=[];for(let i=0;i<5;i++)queue.push(Math.floor(Math.random()*n));}
+function advQueue(){queue.shift();queue.push(Math.floor(Math.random()*4));}
+
+function placeGimmick(type,n,data){
+  let placed=0;
+  while(placed<n){
+    let r=Math.floor(Math.random()*ROWS),c=Math.floor(Math.random()*COLS);
+    if(!board[r][c].gimmick){board[r][c].gimmick=type;board[r][c].gData={...data};placed++;}
+  }
+}
+function placeStones(n){
+  let placed=0;
+  while(placed<n){
+    let r=1+Math.floor(Math.random()*(ROWS-2)),c=Math.floor(Math.random()*COLS);
+    if(!board[r][c].gimmick){board[r][c].gimmick='stone';board[r][c].color=-1;placed++;}
+  }
+}
+function placeTaintCells(n){
+  let placed=0;
+  while(placed<n){
+    let r=Math.floor(Math.random()*ROWS),c=Math.floor(Math.random()*COLS);
+    if(!board[r][c].gimmick&&board[r][c].color>=0){board[r][c].gimmick='taint';board[r][c].color=-2;placed++;}
+  }
+}
+function placeBombCells(n){
+  let placed=0;
+  while(placed<n){
+    let r=1+Math.floor(Math.random()*(ROWS-1)),c=Math.floor(Math.random()*COLS);
+    if(!board[r][c].gimmick){board[r][c].gimmick='bomb';board[r][c].gData={timer:4+Math.floor(Math.random()*2)};placed++;}
+  }
+}
+function placeWalls(n){
+  let placed=0;
+  window._walls={};
+  while(placed<n){
+    let r=Math.floor(Math.random()*ROWS),c=Math.floor(Math.random()*(COLS-1));
+    const k=r+','+c+',R'; // right wall of cell (r,c)
+    if(!window._walls[k]){window._walls[k]={dur:2};placed++;}
+  }
+}
+
+// Wall check
+function hasWall(r1,c1,r2,c2){
+  if(!window._walls) return false;
+  // Horizontal adjacency (wall on right side)
+  if(r1===r2){
+    const minC=Math.min(c1,c2);
+    return !!window._walls[r1+','+minC+',R'];
+  }
+  // Vertical adjacency (wall on bottom side)
+  if(c1===c2){
+    const minR=Math.min(r1,r2);
+    return !!window._walls[minR+','+c1+',B'];
+  }
+  return false;
+}
+
+// ============================================================
+// BFS
+// ============================================================
+function floodFill(r,c,newColor){
+  const cell=board[r][c];
+  if(cell.color<0) return [];
+  if(cell.gimmick==='stone') return [];
+  if(cell.gimmick==='taint') return [];
+  if(cell.gimmick==='locked') return [];
+
+  const oldColor=cell.color;
+  if(oldColor===newColor) return [];
+
+  // Step 1: Find connected group of ONLY oldColor
+  const visited=new Set(), stack=[[r,c]], group=[];
+  while(stack.length){
+    const [cr,cc]=stack.pop();
+    const key=cr*100+cc;
+    if(visited.has(key)) continue;
+    visited.add(key);
+    const cl=board[cr][cc];
+    if(cl.color!==oldColor) continue;
+    if(cl.gimmick==='stone'||cl.gimmick==='taint'||cl.gimmick==='locked') continue;
+
+    group.push([cr,cc]);
+    [[0,1],[0,-1],[1,0],[-1,0]].forEach(([dr,dc])=>{
+      const nr=cr+dr,nc=cc+dc;
+      if(nr<0||nr>=ROWS||nc<0||nc>=COLS) return;
+      if(visited.has(nr*100+nc)) return;
+      if(hasWall(cr,cc,nr,nc)) return;
+      const nb=board[nr][nc];
+      if(nb.color===oldColor && nb.gimmick!=='stone' && nb.gimmick!=='taint' && nb.gimmick!=='locked') stack.push([nr,nc]);
+    });
+  }
+  if(group.length===0) return [];
+
+  // Step 2: Recolor group to newColor + apply gimmick effects
+  group.forEach(([gr,gc])=>{
+    const cl=board[gr][gc];
+    cl.color=newColor;
+    cl.painted=true;
+    if(cl.gimmick==='curtain') cl.gimmick=null;
+    if(cl.gimmick==='fade'){
+      cl.gData.counter = (newColor!==cl.gData.origColor) ? 2 : -1;
+    }
+  });
+
+  // Step 3: Merge — expand into adjacent newColor cells (flood union)
+  const merged=new Set();
+  const mergeStack=[];
+  group.forEach(([gr,gc])=>{ mergeStack.push([gr,gc]); merged.add(gr*100+gc); });
+  while(mergeStack.length){
+    const [cr,cc]=mergeStack.pop();
+    [[0,1],[0,-1],[1,0],[-1,0]].forEach(([dr,dc])=>{
+      const nr=cr+dr,nc=cc+dc,nk=nr*100+nc;
+      if(nr<0||nr>=ROWS||nc<0||nc>=COLS) return;
+      if(merged.has(nk)) return;
+      if(hasWall(cr,cc,nr,nc)) return;
+      const nb=board[nr][nc];
+      if(nb.color===newColor && nb.gimmick!=='stone' && nb.gimmick!=='taint' && nb.gimmick!=='locked'){
+        merged.add(nk);
+        mergeStack.push([nr,nc]);
+      }
+    });
+  }
+
+  // Step 4: Taint purify (adjacent to merged region)
+  merged.forEach(key=>{
+    const gr=Math.floor(key/100),gc=key%100;
+    [[0,1],[0,-1],[1,0],[-1,0]].forEach(([dr,dc])=>{
+      const nr=gr+dr,nc=gc+dc;
+      if(nr>=0&&nr<ROWS&&nc>=0&&nc<COLS && board[nr][nc].gimmick==='taint'){
+        board[nr][nc].gimmick=null; board[nr][nc].color=newColor;
+      }
+    });
+  });
+  return group;
+}
+
+// ============================================================
+// LINE CHECK & DESTROY
+// ============================================================
+function checkLines(){
+  const lines=[];
+  for(let r=0;r<ROWS;r++){
+    let ok=true,clr=-1;
+    for(let c=0;c<COLS;c++){
+      const cc=board[r][c].color;
+      if(cc<0){ok=false;break;}
+      if(board[r][c].gimmick==='stone'){ok=false;break;}
+      // Locked cells contribute their fixed color
+      if(clr===-1) clr=cc;
+      else if(cc!==clr){ok=false;break;}
+    }
+    if(ok&&clr>=0) lines.push({axis:'row',index:r});
+  }
+  for(let c=0;c<COLS;c++){
+    let ok=true,clr=-1;
+    for(let r=0;r<ROWS;r++){
+      const cc=board[r][c].color;
+      if(cc<0){ok=false;break;}
+      if(board[r][c].gimmick==='stone'){ok=false;break;}
+      if(clr===-1) clr=cc;
+      else if(cc!==clr){ok=false;break;}
+    }
+    if(ok&&clr>=0) lines.push({axis:'col',index:c});
+  }
+  return lines;
+}
+
+function destroyLines(lines){
+  const cells=new Set();
+  lines.forEach(l=>{
+    if(l.axis==='row') for(let c=0;c<COLS;c++) cells.add(l.index*100+c);
+    else for(let r=0;r<ROWS;r++) cells.add(r*100+l.index);
+  });
+
+  let count=0;
+  cells.forEach(key=>{
+    const r=Math.floor(key/100),c=key%100;
+    const cell=board[r][c];
+    if(cell.color<0 && cell.gimmick!=='chain') return;
+
+    // Ice: reduce durability
+    if(cell.gimmick==='ice'){
+      cell.gData.dur--;
+      if(cell.gData.dur<=0){cell.gimmick=null; gs.broken=(gs.broken||0)+1;}
+      return;
+    }
+    // Chain: adjacent destroy frees it
+    if(cell.gimmick==='chain' && !cell.gData.freed){
+      // Chains can't be destroyed directly — they need adjacent line destroy
+      return;
+    }
+    // Bomb: defused by line destroy
+    if(cell.gimmick==='bomb'){cell.gimmick=null;cell.gData={};}
+    // Locked: destroyed normally by line
+    if(cell.gimmick==='locked'){cell.gimmick=null;}
+    // Crack: spawn ice on neighbors
+    if(cell.gimmick==='crack'){
+      [[0,1],[0,-1],[1,0],[-1,0]].forEach(([dr,dc])=>{
+        const nr=r+dr,nc=c+dc;
+        if(nr>=0&&nr<ROWS&&nc>=0&&nc<COLS){
+          const nb=board[nr][nc];
+          if(nb.color>=0 && !nb.gimmick && !cells.has(nr*100+nc)){
+            nb.gimmick='ice'; nb.gData={dur:1};
+          }
+        }
+      });
+    }
+    // Anchor: destroyed normally (anchor effect is in gravity)
+    // Fade: destroyed normally
+
+    cell.color=-1; cell.gimmick=null; cell.gData={}; cell.painted=false;
+    count++;
+  });
+
+  // Free chains adjacent to destroyed cells
+  cells.forEach(key=>{
+    const r=Math.floor(key/100),c=key%100;
+    [[0,1],[0,-1],[1,0],[-1,0]].forEach(([dr,dc])=>{
+      const nr=r+dr,nc=c+dc;
+      if(nr>=0&&nr<ROWS&&nc>=0&&nc<COLS && board[nr][nc].gimmick==='chain'){
+        board[nr][nc].gData.freed=true;
+        board[nr][nc].gimmick=null; // Free it
+      }
+    });
+  });
+
+  // Wall damage from adjacent line destroys
+  if(window._walls){
+    cells.forEach(key=>{
+      const r=Math.floor(key/100),c=key%100;
+      // Check all walls touching this cell
+      const wk1=r+','+c+',R'; // right of this cell
+      const wk2=r+','+(c-1)+',R'; // left (=right of c-1)
+      const wk3=r+','+c+',B'; // bottom
+      const wk4=(r-1)+','+c+',B'; // top (=bottom of r-1)
+      [wk1,wk2,wk3,wk4].forEach(k=>{
+        if(window._walls[k]){
+          window._walls[k].dur--;
+          if(window._walls[k].dur<=0) delete window._walls[k];
+        }
+      });
+    });
+  }
+
+  return count;
+}
+
+function gravity(){
+  for(let c=0;c<COLS;c++){
+    // Split column into segments separated by anchors/stones
+    // Each segment drops independently
+    const segments = []; // [{startRow, endRow}]
+    let segStart = 0;
+    for(let r=0;r<ROWS;r++){
+      const g = board[r][c].gimmick;
+      if(g==='anchor' || g==='stone'){
+        if(r > segStart) segments.push({start:segStart, end:r-1});
+        segments.push(null); // marker for fixed cell
+        segStart = r+1;
+      }
+    }
+    if(segStart < ROWS) segments.push({start:segStart, end:ROWS-1});
+
+    segments.forEach(seg=>{
+      if(!seg) return; // fixed cell, skip
+      // Collect occupied cells in this segment (bottom to top)
+      const occupied = [];
+      for(let r=seg.end;r>=seg.start;r--){
+        const cell = board[r][c];
+        const isOccupied = cell.color>=0 || cell.gimmick==='taint';
+        if(isOccupied){
+          occupied.push({color:cell.color, gimmick:cell.gimmick, gData:{...cell.gData}, painted:cell.painted});
+        }
+      }
+      // Place from bottom of segment upward
+      const numC = 4;
+      for(let r=seg.end;r>=seg.start;r--){
+        const idx = seg.end - r;
+        if(idx < occupied.length){
+          board[r][c] = occupied[idx];
+        } else {
+          board[r][c] = {color:Math.floor(Math.random()*numC), gimmick:null, gData:{}, painted:false};
+        }
+      }
+    });
+  }
+}
+
+// ============================================================
+// TURN
+// ============================================================
+function onCellClick(r,c){
+  if(gameOver) return;
+  const cell=board[r][c];
+  if(cell.color<0) return;
+  if(cell.gimmick==='stone'||cell.gimmick==='taint') return;
+  if(cell.gimmick==='locked') return;
+
+  const newColor=queue[0];
+  if(cell.color===newColor) return;
+
+  const group=floodFill(r,c,newColor);
+  if(group.length===0) return;
+
+  advQueue(); turns++;
+
+  // Chain destroy loop
+  let chainCount=0, totalDest=0;
+  let looping=true;
+  while(looping){
+    const lines=checkLines();
+    if(!lines.length){looping=false;break;}
+    chainCount++;
+    totalDest+=destroyLines(lines);
+    gravity();
+  }
+  gs.destroyed+=totalDest;
+
+  // Bomb countdown
+  let exploded=false;
+  for(let r2=0;r2<ROWS;r2++) for(let c2=0;c2<COLS;c2++){
+    if(board[r2][c2].gimmick==='bomb'){
+      board[r2][c2].gData.timer--;
+      if(board[r2][c2].gData.timer<=0){
+        exploded=true;
+        for(let dr=-1;dr<=1;dr++) for(let dc=-1;dc<=1;dc++){
+          const nr=r2+dr,nc=c2+dc;
+          if(nr>=0&&nr<ROWS&&nc>=0&&nc<COLS&&board[nr][nc].color>=0){
+            board[nr][nc].color=Math.floor(Math.random()*4);
+          }
+        }
+        board[r2][c2].gimmick=null;board[r2][c2].gData={};
+      }
+    }
+  }
+
+  // Taint spread
+  if(mode==='taint'||mode==='mixed'||mode==='survival'){
+    spreadTaint();
+  }
+
+  // Fade revert
+  for(let r2=0;r2<ROWS;r2++) for(let c2=0;c2<COLS;c2++){
+    const cl=board[r2][c2];
+    if(cl.gimmick==='fade' && cl.gData.counter>0){
+      cl.gData.counter--;
+      if(cl.gData.counter===0){
+        cl.color=cl.gData.origColor;
+        cl.gData.counter=-1;
+      }
+    }
+  }
+
+  render();
+
+  if(exploded && (mode==='bomb'||mode==='mixed')){
+    setTimeout(()=>endGame(false,'A bomb exploded!'),100);
+    return;
+  }
+
+  setTimeout(()=>checkEnd(),50);
+}
+
+function spreadTaint(){
+  const newT=[];
+  for(let r=0;r<ROWS;r++) for(let c=0;c<COLS;c++){
+    if(board[r][c].gimmick==='taint'){
+      const dirs=[[0,1],[0,-1],[1,0],[-1,0]];
+      const valid=dirs.filter(([dr,dc])=>{
+        const nr=r+dr,nc=c+dc;
+        return nr>=0&&nr<ROWS&&nc>=0&&nc<COLS&&board[nr][nc].color>=0&&!board[nr][nc].gimmick;
+      });
+      if(valid.length){
+        const [dr,dc]=valid[Math.floor(Math.random()*valid.length)];
+        newT.push([r+dr,c+dc]);
+      }
+    }
+  }
+  const used=new Set();
+  newT.forEach(([r,c])=>{
+    const k=r*100+c;
+    if(!used.has(k)){used.add(k);board[r][c].gimmick='taint';board[r][c].color=-2;}
+  });
+}
+
+function checkEnd(){
+  if(gameOver) return;
+  switch(mode){
+    case 'ice':
+      if((gs.broken||0)>=gs.target) return endGame(true,'All ice shattered!');
+      if(turns>=maxTurns) return endGame(false,(gs.broken||0)+'/'+gs.target+' ice');
+      break;
+    case 'locked': case 'stone': case 'curtain': case 'wall': case 'crack': case 'anchor': case 'fade':
+      if(gs.destroyed>=gs.target) return endGame(true,gs.destroyed+' blocks destroyed!');
+      if(turns>=maxTurns) return endGame(false,gs.destroyed+'/'+gs.target);
+      break;
+    case 'taint': {
+      let has=false;
+      for(let r=0;r<ROWS;r++) for(let c=0;c<COLS;c++) if(board[r][c].gimmick==='taint') has=true;
+      if(!has) return endGame(true,'Purified!');
+      let tc=0; for(let r=0;r<ROWS;r++) for(let c=0;c<COLS;c++) if(board[r][c].gimmick==='taint') tc++;
+      if(tc/(ROWS*COLS)>0.55) return endGame(false,'Taint overwhelmed!');
+      if(turns>=maxTurns) return endGame(false,'Taint remains');
+      break;
+    }
+    case 'bomb': {
+      let has=false;
+      for(let r=0;r<ROWS;r++) for(let c=0;c<COLS;c++) if(board[r][c].gimmick==='bomb') has=true;
+      if(!has) return endGame(true,'All bombs defused!');
+      if(turns>=maxTurns) return endGame(false,'Bombs remain!');
+      break;
+    }
+    case 'chain':
+      if(gs.destroyed>=gs.target) return endGame(true,gs.destroyed+' blocks!');
+      if(turns>=maxTurns) return endGame(false,gs.destroyed+'/'+gs.target);
+      break;
+    case 'mixed':
+      if(gs.destroyed>=gs.target) return endGame(true,'Mixed clear! '+gs.destroyed+' blocks');
+      let tc=0; for(let r=0;r<ROWS;r++) for(let c=0;c<COLS;c++) if(board[r][c].gimmick==='taint') tc++;
+      if(tc/(ROWS*COLS)>0.55) return endGame(false,'Taint overwhelmed!');
+      if(turns>=maxTurns) return endGame(false,gs.destroyed+'/'+gs.target);
+      break;
+  }
+}
+
+function endGame(win,msg){
+  gameOver=true;
+  document.getElementById('resultTitle').textContent=win?'Clear!':'Failed';
+  document.getElementById('resultTitle').style.color=win?'var(--success)':'var(--danger)';
+  document.getElementById('resultMsg').textContent=msg;
+  document.getElementById('resultOverlay').classList.add('show');
+}
+
+// ============================================================
+// RENDER
+// ============================================================
+function render(){
+  renderHud(); renderQueue(); renderInfo(); renderLegend(); renderGrid();
+}
+
+function renderHud(){
+  const h=document.getElementById('hud');
+  let html=`<div class="hud-item">Turn <span class="hud-val">${turns}/${maxTurns}</span></div>`;
+  switch(mode){
+    case 'ice':
+      html+=`<div class="hud-item">\u{1F9CA} <span class="hud-val">${gs.broken||0}/${gs.target}</span></div>`; break;
+    case 'taint': {
+      let tc=0; for(let r=0;r<ROWS;r++) for(let c=0;c<COLS;c++) if(board[r][c].gimmick==='taint') tc++;
+      html+=`<div class="hud-item">\u2623\uFE0F <span class="hud-val">${tc} cells</span></div>`; break;
+    }
+    case 'bomb': {
+      let bc=0; for(let r=0;r<ROWS;r++) for(let c=0;c<COLS;c++) if(board[r][c].gimmick==='bomb') bc++;
+      html+=`<div class="hud-item">\u{1F4A3} <span class="hud-val">${bc}</span></div>`; break;
+    }
+    case 'mixed': {
+      let tc=0,bc=0,ic=0;
+      for(let r=0;r<ROWS;r++) for(let c=0;c<COLS;c++){
+        if(board[r][c].gimmick==='taint') tc++;
+        if(board[r][c].gimmick==='bomb') bc++;
+        if(board[r][c].gimmick==='ice') ic++;
+      }
+      html+=`<div class="hud-item">\u{1F4A5} <span class="hud-val">${gs.destroyed}/${gs.target}</span></div>`;
+      html+=`<div class="hud-item">\u2623\uFE0F${tc} \u{1F4A3}${bc} \u{1F9CA}${ic}</div>`;
+      break;
+    }
+    default:
+      html+=`<div class="hud-item">\u{1F4A5} <span class="hud-val">${gs.destroyed}/${gs.target||'?'}</span></div>`;
+  }
+  h.innerHTML=html;
+}
+
+function renderQueue(){
+  const q=document.getElementById('queueArea');
+  let html='<div class="queue-label">NEXT</div>';
+  queue.forEach((c,i)=>{
+    html+=`<div class="queue-cell ${i===0?'active':''}" style="background:${COLORS[c]};${i>0?'opacity:0.5;':''}">${i===0?'\u25C0':''}</div>`;
+  });
+  q.innerHTML=html;
+}
+
+function renderInfo(){
+  const m=MODES.find(x=>x.id===mode);
+  document.getElementById('infoBar').innerHTML=m.icon+' '+m.desc;
+}
+
+function renderLegend(){
+  const m=MODES.find(x=>x.id===mode);
+  const el=document.getElementById('legend');
+  let html=`<strong>How it works:</strong> ${m.legend}<div class="legend-row">`;
+  const items={
+    ice:['<div class="legend-swatch" style="background:rgba(52,152,219,0.5);border:1px solid #3498db;">2</div>','Ice (dur)'],
+    locked:['<div class="legend-swatch" style="background:rgba(0,0,0,0.5);">\u{1F512}</div>','Locked'],
+    stone:['<div class="legend-swatch" style="background:#555;border:1px solid #333;">\u{1FAA8}</div>','Stone'],
+    curtain:['<div class="legend-swatch" style="background:rgba(50,50,80,0.9);">?</div>','Curtain'],
+    taint:['<div class="legend-swatch" style="background:#1a0a2e;border:1px solid #8e44ad;">\u2623</div>','Taint'],
+    bomb:['<div class="legend-swatch" style="background:rgba(231,76,60,0.3);border:1px solid #e74c3c;">4</div>','Bomb'],
+    chain:['<div class="legend-swatch" style="border:2px dashed #f1c40f;background:rgba(0,0,0,0.3);">\u26D3</div>','Chain'],
+    wall:['<div class="legend-swatch" style="border-right:3px solid #e74c3c;background:var(--card);"></div>','Wall'],
+    crack:['<div class="legend-swatch" style="background:rgba(149,165,166,0.4);border:1px solid #95a5a6;">\u{1F4A5}</div>','Crack'],
+    anchor:['<div class="legend-swatch" style="border-bottom:3px solid #fff;background:var(--card);">\u2693</div>','Anchor'],
+    fade:['<div class="legend-swatch" style="background:repeating-linear-gradient(45deg,transparent,transparent 2px,rgba(255,255,255,0.1) 2px,rgba(255,255,255,0.1) 4px);">\u23F3</div>','Fade'],
+  };
+  if(mode==='mixed'){
+    ['ice','taint','bomb','locked'].forEach(k=>{
+      html+=`<div class="legend-item">${items[k][0]}<span>${items[k][1]}</span></div>`;
+    });
+  } else if(items[mode]){
+    html+=`<div class="legend-item">${items[mode][0]}<span>${items[mode][1]}</span></div>`;
+  }
+  html+='</div>';
+  el.innerHTML=html;
+}
+
+function renderGrid(){
+  const g=document.getElementById('grid');
+  g.style.gridTemplateColumns=`repeat(${COLS},52px)`;
+  let html='';
+  for(let r=0;r<ROWS;r++){
+    for(let c=0;c<COLS;c++){
+      const cell=board[r][c];
+      let style='',inner='',ovHtml='',extra='';
+
+      // Base color
+      if(cell.gimmick==='stone'){
+        style='background:#555;border:2px solid #333;cursor:default;';
+        inner='\u{1FAA8}';
+      } else if(cell.gimmick==='taint'){
+        style='background:#1a0a2e;border:2px solid #8e44ad;';
+        inner='\u2623';
+      } else if(cell.color>=0){
+        style=`background:${COLORS[cell.color]};`;
+      } else {
+        style='background:rgba(255,255,255,0.03);';
+      }
+
+      // Gimmick overlays
+      if(cell.gimmick==='ice'){
+        ovHtml=`<div class="ov" style="background:rgba(52,152,219,0.4);border:2px solid rgba(52,152,219,0.7);">${cell.gData.dur}</div>`;
+      } else if(cell.gimmick==='locked'){
+        ovHtml=`<div class="ov" style="background:rgba(0,0,0,0.5);">\u{1F512}</div>`;
+      } else if(cell.gimmick==='curtain'){
+        style='background:rgba(50,50,80,0.92);';
+        inner='?';
+      } else if(cell.gimmick==='bomb'){
+        ovHtml=`<div class="ov" style="background:rgba(231,76,60,0.25);border:2px solid rgba(231,76,60,0.6);">${cell.gData.timer}</div>`;
+      } else if(cell.gimmick==='chain'){
+        ovHtml=`<div class="ov" style="border:2px dashed rgba(241,196,15,0.7);background:rgba(0,0,0,0.2);">\u26D3</div>`;
+      } else if(cell.gimmick==='crack'){
+        ovHtml=`<div class="ov" style="background:rgba(149,165,166,0.3);border:2px solid rgba(149,165,166,0.5);">\u{1F4A5}</div>`;
+      } else if(cell.gimmick==='anchor'){
+        extra='border-bottom:3px solid rgba(255,255,255,0.6);';
+        ovHtml=`<div class="ov" style="font-size:0.9em;opacity:0.7;">\u2693</div>`;
+      } else if(cell.gimmick==='fade'){
+        const cnt=cell.gData.counter;
+        ovHtml=`<div class="ov" style="background:repeating-linear-gradient(45deg,transparent,transparent 3px,rgba(255,255,255,0.08) 3px,rgba(255,255,255,0.08) 6px);font-size:0.8em;">${cnt>0?cnt:'\u23F3'}</div>`;
+      }
+
+      // Wall rendering (right border)
+      let wallStyle='';
+      if(window._walls && window._walls[r+','+c+',R']){
+        wallStyle='border-right:4px solid #e74c3c !important;border-top-right-radius:2px;border-bottom-right-radius:2px;';
+      }
+
+      html+=`<div class="cell" style="${style}${extra}${wallStyle}" onclick="onCellClick(${r},${c})">${inner}${ovHtml}</div>`;
+    }
+  }
+  g.innerHTML=html;
+}
+
+init();
+</script>
+</body>
+</html>

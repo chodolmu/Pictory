@@ -9,37 +9,65 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 script = ExtResource("1")
 
-[node name="VBox" type="VBoxContainer" parent="."]
-layout_mode = 1
+[node name="BgRect" type="ColorRect" parent="."]
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
+color = Color(0.08, 0.08, 0.14, 1)
+
+[node name="MarginContainer" type="MarginContainer" parent="."]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+theme_override_constants/margin_left = 16
+theme_override_constants/margin_right = 16
+theme_override_constants/margin_top = 12
+theme_override_constants/margin_bottom = 16
+
+[node name="VBox" type="VBoxContainer" parent="MarginContainer"]
+layout_mode = 2
+size_flags_vertical = 3
 theme_override_constants/separation = 12
 
-[node name="Scroll" type="ScrollContainer" parent="VBox"]
+[node name="TopBar" type="HBoxContainer" parent="MarginContainer/VBox"]
+custom_minimum_size = Vector2(0, 48)
+theme_override_constants/separation = 8
+
+[node name="BackButton" type="Button" parent="MarginContainer/VBox/TopBar"]
+custom_minimum_size = Vector2(48, 48)
+text = "←"
+theme_override_font_sizes/font_size = 20
+
+[node name="TitleLabel" type="Label" parent="MarginContainer/VBox/TopBar"]
+text = "패션"
+size_flags_horizontal = 3
+vertical_alignment = 1
+theme_override_font_sizes/font_size = 20
+
+[node name="Scroll" type="ScrollContainer" parent="MarginContainer/VBox"]
 size_flags_vertical = 3
 
-[node name="Grid" type="GridContainer" parent="VBox/Scroll"]
+[node name="Grid" type="GridContainer" parent="MarginContainer/VBox/Scroll"]
 size_flags_horizontal = 3
 columns = 3
 theme_override_constants/h_separation = 8
 theme_override_constants/v_separation = 8
 
-[node name="DetailPanel" type="PanelContainer" parent="VBox"]
+[node name="DetailPanel" type="PanelContainer" parent="MarginContainer/VBox"]
 custom_minimum_size = Vector2(0, 120)
 
-[node name="VBox" type="VBoxContainer" parent="VBox/DetailPanel"]
+[node name="VBox" type="VBoxContainer" parent="MarginContainer/VBox/DetailPanel"]
 theme_override_constants/separation = 8
 
-[node name="NameLabel" type="Label" parent="VBox/DetailPanel/VBox"]
+[node name="NameLabel" type="Label" parent="MarginContainer/VBox/DetailPanel/VBox"]
 text = "아이콘을 선택하세요"
 theme_override_font_sizes/font_size = 18
 
-[node name="UnlockLabel" type="Label" parent="VBox/DetailPanel/VBox"]
+[node name="UnlockLabel" type="Label" parent="MarginContainer/VBox/DetailPanel/VBox"]
 text = ""
 theme_override_font_sizes/font_size = 14
 theme_override_colors/font_color = Color(0.75, 0.75, 0.75, 1)
 
-[node name="ApplyButton" type="Button" parent="VBox/DetailPanel/VBox"]
+[node name="ApplyButton" type="Button" parent="MarginContainer/VBox/DetailPanel/VBox"]
 custom_minimum_size = Vector2(120, 40)
 text = "적용"

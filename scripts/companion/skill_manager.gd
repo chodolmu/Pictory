@@ -13,10 +13,7 @@ signal skill_result_ready(actions: Array)
 enum TargetType {
 	NONE,
 	COLOR,
-	COLOR_PAIR,
-	CELL,
 	ROW_OR_COL,
-	CELL_AND_COLOR,
 }
 
 # 슬롯 구조: { imagen_id, skill_id, cooldown_max, cooldown_remaining, is_ready }
@@ -26,7 +23,7 @@ var skill_slots: Array[Dictionary] = []
 var _grid = null
 var _color_queue = null
 var _turn_manager = null
-var _current_mode = null  # "story" | "infinity"
+var _current_mode = null
 var _game_manager = null
 
 var _is_activating: bool = false
@@ -165,24 +162,16 @@ func is_activating() -> bool:
 
 func _get_target_type(skill_id: String) -> int:
 	match skill_id:
-		"K1": return TargetType.COLOR_PAIR
-		"K2": return TargetType.CELL_AND_COLOR
-		"K3": return TargetType.COLOR_PAIR
 		"K4": return TargetType.COLOR
 		"K5": return TargetType.ROW_OR_COL
 		_:    return TargetType.NONE
 
 func _create_skill(skill_id: String):
 	match skill_id:
-		"K1": return preload("res://scripts/companion/skills/skill_color_storm.gd").new()
-		"K2": return preload("res://scripts/companion/skills/skill_rainbow_wave.gd").new()
-		"K3": return preload("res://scripts/companion/skills/skill_color_swap.gd").new()
 		"K4": return preload("res://scripts/companion/skills/skill_color_bomb.gd").new()
 		"K5": return preload("res://scripts/companion/skills/skill_row_clear.gd").new()
 		"K6": return preload("res://scripts/companion/skills/skill_undo.gd").new()
 		"K7": return preload("res://scripts/companion/skills/skill_future_eye.gd").new()
 		"K8": return preload("res://scripts/companion/skills/skill_shuffle.gd").new()
 		"K9": return preload("res://scripts/companion/skills/skill_queue_flip.gd").new()
-		"K10": return preload("res://scripts/companion/skills/skill_times_breath.gd").new()
-		"K11": return preload("res://scripts/companion/skills/skill_time_stop.gd").new()
 		_: return null

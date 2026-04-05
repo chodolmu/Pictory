@@ -22,4 +22,4 @@ func _on_confirm() -> void:
 	var nickname = _nickname_edit.text.strip_edges()
 	PlayerProfile.set_nickname(nickname)
 	PlayerProfile.set_first_launch(false)
-	SceneManager.change_scene("res://scenes/main/stage_select.tscn")
+	SceneManager.change_scene("res://scenes/main/main_menu.tscn")

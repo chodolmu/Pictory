@@ -1,25 +1,30 @@
 extends Control
 ## CollectionTabImagen — 이마젠 동료 편성 탭.
 
-@onready var _count_label: Label = $VBox/CountLabel
-@onready var _party_slot_0: Control = $VBox/PartySlots/Slot0
-@onready var _party_slot_1: Control = $VBox/PartySlots/Slot1
-@onready var _grid: GridContainer = $VBox/Scroll/Grid
-@onready var _detail_panel: Control = $VBox/DetailPanel
-@onready var _detail_name: Label = $VBox/DetailPanel/VBox/NameLabel
-@onready var _detail_attr: Label = $VBox/DetailPanel/VBox/AttrLabel
-@onready var _detail_skill: Label = $VBox/DetailPanel/VBox/SkillLabel
-@onready var _detail_desc: Label = $VBox/DetailPanel/VBox/DescLabel
-@onready var _assign_btn: Button = $VBox/DetailPanel/VBox/Buttons/AssignButton
-@onready var _unassign_btn: Button = $VBox/DetailPanel/VBox/Buttons/UnassignButton
+@onready var _back_btn: Button = $MarginContainer/VBox/TopBar/BackButton
+@onready var _count_label: Label = $MarginContainer/VBox/CountLabel
+@onready var _party_slot_0: Control = $MarginContainer/VBox/PartySlots/Slot0
+@onready var _party_slot_1: Control = $MarginContainer/VBox/PartySlots/Slot1
+@onready var _grid: GridContainer = $MarginContainer/VBox/Scroll/Grid
+@onready var _detail_panel: Control = $MarginContainer/VBox/DetailPanel
+@onready var _detail_name: Label = $MarginContainer/VBox/DetailPanel/VBox/NameLabel
+@onready var _detail_attr: Label = $MarginContainer/VBox/DetailPanel/VBox/AttrLabel
+@onready var _detail_skill: Label = $MarginContainer/VBox/DetailPanel/VBox/SkillLabel
+@onready var _detail_desc: Label = $MarginContainer/VBox/DetailPanel/VBox/DescLabel
+@onready var _assign_btn: Button = $MarginContainer/VBox/DetailPanel/VBox/Buttons/AssignButton
+@onready var _unassign_btn: Button = $MarginContainer/VBox/DetailPanel/VBox/Buttons/UnassignButton
 
 var _selected_imagen_id: String = ""
 
 func _ready() -> void:
+	_back_btn.pressed.connect(_on_back)
 	_assign_btn.pressed.connect(_on_assign)
 	_unassign_btn.pressed.connect(_on_unassign)
 	_detail_panel.visible = false
 	_refresh()
+
+func _on_back() -> void:
+	SceneManager.change_scene("res://scenes/main/main_menu.tscn")
 
 func _refresh() -> void:
 	_refresh_count()
@@ -92,14 +97,14 @@ func _on_imagen_selected(imagen_id: String, is_unlocked: bool) -> void:
 	var in_party = imagen_id in party
 	_assign_btn.visible = not in_party
 	_unassign_btn.visible = in_party
-	_assign_btn.disabled = (party.size() >= 2 and not in_party)
+	_assign_btn.disabled = (party.size() >= PartyManager.MAX_PARTY_SIZE and not in_party)
 	_detail_panel.visible = true
 
 func _on_assign() -> void:
 	if _selected_imagen_id == "":
 		return
 	var party = PartyManager.selected_party.duplicate()
-	if _selected_imagen_id not in party and party.size() < 2:
+	if _selected_imagen_id not in party and party.size() < PartyManager.MAX_PARTY_SIZE:
 		party.append(_selected_imagen_id)
 		PartyManager.set_party(party)
 	_refresh()
@@ -113,3 +118,11 @@ func _on_unassign() -> void:
 	PartyManager.set_party(party)
 	_refresh()
 	_on_imagen_selected(_selected_imagen_id, true)
+
+func _unhandled_input(event: InputEvent) -> void:
+	if event is InputEventKey and event.pressed and event.keycode == KEY_ESCAPE:
+		SceneManager.change_scene("res://scenes/main/main_menu.tscn")
+
+func _notification(what: int) -> void:
+	if what == NOTIFICATION_WM_GO_BACK_REQUEST:
+		SceneManager.change_scene("res://scenes/main/main_menu.tscn")

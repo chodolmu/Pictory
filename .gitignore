@@ -13,3 +13,14 @@ export_presets.cfg
 # OS
 .DS_Store
 Thumbs.db
+
+# Build
+Build/
+
+# MCP / Claude
+.claude/
+godot-mcp.config.json
+test_bridge.gd
+test_bridge.gd.uid
+tmp_screenshot*.png
+_mcp_capture_screenshot.gd

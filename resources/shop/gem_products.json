@@ -1,0 +1,6 @@
+[
+	{"id": "gem_100", "gems": 100, "price_krw": 1200},
+	{"id": "gem_500", "gems": 500, "price_krw": 5900},
+	{"id": "gem_1200", "gems": 1200, "price_krw": 11000},
+	{"id": "gem_3000", "gems": 3000, "price_krw": 25000}
+]

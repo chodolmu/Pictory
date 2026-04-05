@@ -3,7 +3,7 @@ extends Node
 ## 게임 진행 데이터를 user://save_data.json 에 저장/로드.
 
 const SAVE_PATH := "user://save_data.json"
-const SAVE_VERSION := 1
+const SAVE_VERSION := 2
 
 var _data: Dictionary = {}
 
@@ -15,38 +15,34 @@ func _ready() -> void:
 func get_stage_data(stage_id: String) -> Dictionary:
 	return _data.get("stages", {}).get(stage_id, {})
 
-func save_stage_result(stage_id: String, stars: int, score: int) -> void:
+func save_stage_result(stage_id: String) -> void:
 	if not _data.has("stages"):
 		_data["stages"] = {}
-	var existing = _data["stages"].get(stage_id, {"cleared": false, "stars": 0, "best_score": 0})
-	_data["stages"][stage_id] = {
-		"cleared": true,
-		"stars": maxi(existing.get("stars", 0), stars),
-		"best_score": maxi(existing.get("best_score", 0), score)
-	}
+	_data["stages"][stage_id] = {"cleared": true}
 	_save()
 
 func is_stage_cleared(stage_id: String) -> bool:
 	return get_stage_data(stage_id).get("cleared", false)
 
-func get_stage_stars(stage_id: String) -> int:
-	return get_stage_data(stage_id).get("stars", 0)
-
-# ─── Currency ─────────────────────────────────────────────
-
-func get_currency() -> int:
-	return _data.get("currency", 0)
-
-func add_currency(amount: int) -> void:
-	_data["currency"] = get_currency() + amount
-	_save()
-
-func spend_currency(amount: int) -> bool:
-	if get_currency() >= amount:
-		_data["currency"] = get_currency() - amount
-		_save()
-		return true
-	return false
+func get_highest_cleared_stage() -> String:
+	## 가장 높은 클리어 스테이지 ID 반환 (예: "ch03_s07")
+	var stages: Dictionary = _data.get("stages", {})
+	var best_id: String = ""
+	var best_ch: int = 0
+	var best_s: int = 0
+	for stage_id in stages:
+		if not stages[stage_id].get("cleared", false):
+			continue
+		var parts = str(stage_id).split("_")
+		if parts.size() < 2:
+			continue
+		var ch = parts[0].substr(2).to_int()
+		var s = parts[1].substr(1).to_int()
+		if ch > best_ch or (ch == best_ch and s > best_s):
+			best_ch = ch
+			best_s = s
+			best_id = stage_id
+	return best_id
 
 # ─── Chapter Unlock ───────────────────────────────────────
 
@@ -63,20 +59,27 @@ func unlock_chapter(chapter: int) -> void:
 		_data["chapters_unlocked"] = unlocked
 		_save()
 
-# ─── Infinity Mode ────────────────────────────────────────
 
-func get_infinity_high_score() -> int:
-	return _data.get("infinity", {}).get("high_score", 0)
+# ─── Stars (스티커북 재화) ────────────────────────────────
 
-func save_infinity_result(score: int) -> bool:
-	if not _data.has("infinity"):
-		_data["infinity"] = {"high_score": 0, "total_plays": 0}
-	_data["infinity"]["total_plays"] = _data["infinity"].get("total_plays", 0) + 1
-	var is_new_record = score > _data["infinity"].get("high_score", 0)
-	if is_new_record:
-		_data["infinity"]["high_score"] = score
+func get_stars() -> int:
+	return _data.get("stars", 0)
+
+func save_stars(amount: int) -> void:
+	_data["stars"] = amount
 	_save()
-	return is_new_record
+
+# ─── Sticker Progress ────────────────────────────────────
+
+func get_sticker_progress(chapter: int) -> Array:
+	## 챕터별 컬러 복구된 오브젝트 인덱스 배열 반환.
+	return _data.get("sticker_progress", {}).get(str(chapter), [])
+
+func save_sticker_progress(chapter: int, indices: Array) -> void:
+	if not _data.has("sticker_progress"):
+		_data["sticker_progress"] = {}
+	_data["sticker_progress"][str(chapter)] = indices
+	_save()
 
 # ─── Settings ─────────────────────────────────────────────
 
@@ -123,18 +126,42 @@ func _save() -> void:
 func _create_default_data() -> Dictionary:
 	return {
 		"version": SAVE_VERSION,
-		"currency": 0,
 		"stages": {},
 		"chapters_unlocked": [1],
-		"infinity": {"high_score": 0, "total_plays": 0},
+		"gems": 0,
+		"stars": 0,
+		"sticker_progress": {},
+		"hearts": {"current": 5, "last_recovery": Time.get_unix_time_from_system()},
 		"settings": {"bgm_volume": 80, "se_volume": 80},
-		"player_profile": {"nickname": "", "selected_icon": "default", "first_launch": true}
+		"player_profile": {"nickname": "", "selected_icon": "default", "first_launch": true, "created_at": Time.get_unix_time_from_system()}
 	}
 
 func _migrate_if_needed() -> void:
 	var file_version = _data.get("version", 0)
-	if file_version < SAVE_VERSION:
-		_data["version"] = SAVE_VERSION
+	if file_version < 2:
+		# v1 → v2: currency→gems 이관, 불필요 필드 제거
+		if _data.has("currency"):
+			_data["gems"] = _data.get("gems", 0) + _data.get("currency", 0)
+			_data.erase("currency")
+		_data.erase("infinity")
+		_data.erase("stamina")
+		_data.erase("ad")
+		_data.erase("shop_history")
+		# stages에서 stars/best_score 제거
+		var stages = _data.get("stages", {})
+		for stage_id in stages:
+			var s = stages[stage_id]
+			if s is Dictionary:
+				stages[stage_id] = {"cleared": s.get("cleared", s.get("stars", 0) > 0)}
+		# hearts 초기화
+		if not _data.has("hearts"):
+			_data["hearts"] = {"current": 5, "last_recovery": Time.get_unix_time_from_system()}
+		# player_profile에 created_at 추가
+		var profile = _data.get("player_profile", {})
+		if not profile.has("created_at"):
+			profile["created_at"] = Time.get_unix_time_from_system()
+			_data["player_profile"] = profile
+		_data["version"] = 2
 	# 클리어 기록 기반 챕터 자동 해금
 	_sync_chapters_from_clears()
 	_save()
@@ -146,15 +173,13 @@ func _sync_chapters_from_clears() -> void:
 	var stages: Dictionary = _data.get("stages", {})
 	for stage_id in stages:
 		var save = stages[stage_id]
-		if save is Dictionary and save.get("stars", 0) > 0:
-			# stage_id 형식: "ch01_s01" → 챕터 번호 추출
+		if save is Dictionary and save.get("cleared", false):
 			var parts = str(stage_id).split("_")
 			if parts.size() >= 1 and parts[0].begins_with("ch"):
 				var ch_num = parts[0].substr(2).to_int()
 				if ch_num > 0 and ch_num not in unlocked:
 					unlocked.append(ch_num)
 					changed = true
-				# 이전 챕터들도 해금
 				for c in range(1, ch_num):
 					if c not in unlocked:
 						unlocked.append(c)
@@ -167,31 +192,22 @@ func reset_all_data() -> void:
 	_data = _create_default_data()
 	_save()
 
-# ─── Stamina ──────────────────────────────────────────────
+# ─── Gems ─────────────────────────────────────────────────
 
-func get_stamina_data() -> Dictionary:
-	return _data.get("stamina", {})
+func get_gems() -> int:
+	return _data.get("gems", 0)
 
-func save_stamina_data(data: Dictionary) -> void:
-	_data["stamina"] = data.duplicate()
+func save_gems(amount: int) -> void:
+	_data["gems"] = amount
 	_save()
 
-# ─── Ad ───────────────────────────────────────────────────
+# ─── Hearts ───────────────────────────────────────────────
 
-func get_ad_data() -> Dictionary:
-	return _data.get("ad", {})
+func get_hearts_data() -> Dictionary:
+	return _data.get("hearts", {"current": 5, "last_recovery": Time.get_unix_time_from_system()})
 
-func save_ad_data(data: Dictionary) -> void:
-	_data["ad"] = data.duplicate()
-	_save()
-
-# ─── Shop History ─────────────────────────────────────────
-
-func get_shop_history() -> Dictionary:
-	return _data.get("shop_history", {})
-
-func save_shop_history(data: Dictionary) -> void:
-	_data["shop_history"] = data.duplicate(true)
+func save_hearts_data(data: Dictionary) -> void:
+	_data["hearts"] = data.duplicate()
 	_save()
 
 # ─── Imagen / Party ───────────────────────────────────────────────

@@ -2,7 +2,7 @@ class_name PartySelect
 extends VBoxContainer
 
 ## 편성 UI 컴포넌트.
-## stage_confirm_popup 또는 infinity_confirm_popup에 포함.
+## stage_confirm_popup 또는 stage_preview_popup에 포함.
 
 signal party_updated(party_ids: Array[String])
 
@@ -14,7 +14,7 @@ signal party_updated(party_ids: Array[String])
 @onready var _info_cd: Label = $InfoPanel/VBox/CooldownInfo
 
 var _mode: String = "story"
-var _slots: Array[String] = ["", ""]  # 최대 2슬롯
+var _slots: Array[String] = ["", "", ""]  # 최대 3슬롯
 
 # ─────────────────────────────────────────
 # 초기화
@@ -22,11 +22,11 @@ var _slots: Array[String] = ["", ""]  # 최대 2슬롯
 
 func setup(mode: String) -> void:
 	_mode = mode
-	_slots = ["", ""]
+	_slots = ["", "", ""]
 
 	# 저장된 파티 복원
 	var saved = PartyManager.selected_party
-	for i in range(mini(saved.size(), 2)):
+	for i in range(mini(saved.size(), 3)):
 		_slots[i] = saved[i]
 
 	_refresh_slots()
@@ -38,7 +38,7 @@ func setup(mode: String) -> void:
 # ─────────────────────────────────────────
 
 func _refresh_slots() -> void:
-	for i in range(2):
+	for i in range(3):
 		var slot_panel = _slot_container.get_child(i) if i < _slot_container.get_child_count() else null
 		if slot_panel == null:
 			continue
@@ -113,16 +113,11 @@ func _create_card(data: ImagenData) -> Control:
 	vbox.add_child(skill_lbl)
 
 	var unlocked = ImagenDatabase.is_unlocked(data.id)
-	var mode_ok = _is_mode_compatible(data)
 
 	if not unlocked:
 		# 미해금: 어둡게
 		icon_rect.color = Color(0.15, 0.15, 0.15)
 		panel.modulate = Color(0.5, 0.5, 0.5)
-	elif not mode_ok:
-		# 모드 비호환
-		icon_rect.color = data.get_color()
-		panel.modulate = Color(0.6, 0.6, 0.6)
 	else:
 		icon_rect.color = data.get_color()
 
@@ -137,21 +132,15 @@ func _create_card(data: ImagenData) -> Control:
 
 	return panel
 
-func _is_mode_compatible(data: ImagenData) -> bool:
-	if _mode == "story" and data.skill_id == "K11":
-		return false
-	if _mode == "infinity" and data.skill_id == "K10":
-		return false
-	return true
 
 # ─────────────────────────────────────────
 # 이벤트
 # ─────────────────────────────────────────
 
 func _on_card_pressed(data: ImagenData) -> void:
-	if _slots[0] == data.id or _slots[1] == data.id:
+	if data.id in _slots:
 		return  # 중복 방지
-	for i in range(2):
+	for i in range(3):
 		if _slots[i].is_empty():
 			_slots[i] = data.id
 			_refresh_slots()

@@ -69,16 +69,6 @@ func update_destroyed(count: int) -> void:
 		progress_label.text = "%d / %d" % [_total_destroyed, _goal]
 		_update_bar_color()
 
-func setup_infinity_timer(time_limit: float) -> void:
-	progress_bar.max_value = time_limit
-	progress_bar.value = time_limit
-	progress_label.text = "%d s" % int(time_limit)
-
-func update_timer(remaining: float) -> void:
-	progress_bar.value = remaining
-	turn_label.text = "Time: %ds" % int(remaining)
-	progress_label.text = "%d s" % int(remaining)
-	_update_bar_color()
 
 func show_chain(chain_count: int) -> void:
 	if not _get_chain_label():
@@ -118,4 +108,4 @@ func _update_bar_color() -> void:
 		progress_bar.add_theme_stylebox_override("fill", style)
 
 func _on_back_pressed() -> void:
-	SceneManager.change_scene("res://scenes/main/stage_select.tscn")
+	SceneManager.change_scene("res://scenes/main/main_menu.tscn")

@@ -1,17 +1,22 @@
 extends Control
 ## CollectionTabIcon — 플레이어 아이콘 탭.
 
-@onready var _grid: GridContainer = $VBox/Scroll/Grid
-@onready var _detail_name: Label = $VBox/DetailPanel/VBox/NameLabel
-@onready var _detail_unlock: Label = $VBox/DetailPanel/VBox/UnlockLabel
-@onready var _apply_btn: Button = $VBox/DetailPanel/VBox/ApplyButton
+@onready var _back_btn: Button = $MarginContainer/VBox/TopBar/BackButton
+@onready var _grid: GridContainer = $MarginContainer/VBox/Scroll/Grid
+@onready var _detail_name: Label = $MarginContainer/VBox/DetailPanel/VBox/NameLabel
+@onready var _detail_unlock: Label = $MarginContainer/VBox/DetailPanel/VBox/UnlockLabel
+@onready var _apply_btn: Button = $MarginContainer/VBox/DetailPanel/VBox/ApplyButton
 
 var _selected_icon_id: String = ""
 
 func _ready() -> void:
+	_back_btn.pressed.connect(_on_back)
 	_apply_btn.pressed.connect(_on_apply)
 	_apply_btn.disabled = true
 	_refresh_grid()
+
+func _on_back() -> void:
+	SceneManager.change_scene("res://scenes/main/main_menu.tscn")
 
 func _refresh_grid() -> void:
 	for child in _grid.get_children():
@@ -77,3 +82,11 @@ func _format_condition(cond: Dictionary) -> String:
 		"story_progress":
 			return "스토리 진행 시 해금"
 	return "조건 불명"
+
+func _unhandled_input(event: InputEvent) -> void:
+	if event is InputEventKey and event.pressed and event.keycode == KEY_ESCAPE:
+		SceneManager.change_scene("res://scenes/main/main_menu.tscn")
+
+func _notification(what: int) -> void:
+	if what == NOTIFICATION_WM_GO_BACK_REQUEST:
+		SceneManager.change_scene("res://scenes/main/main_menu.tscn")

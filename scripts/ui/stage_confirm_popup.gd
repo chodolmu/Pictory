@@ -80,12 +80,5 @@ func _on_dim_input(event: InputEvent) -> void:
 		hide_popup()
 
 func _update_best_stars(stage_id: String) -> void:
-	var save = SaveManager.get_stage_data(stage_id)
-	var stars = save.get("stars", 0) if not save.is_empty() else 0
-	_best_stars_label.text = "최고 기록: " + _stars_to_string(stars)
-
-func _stars_to_string(count: int) -> String:
-	var s = ""
-	for i in range(3):
-		s += "★" if i < count else "☆"
-	return s
+	var cleared = SaveManager.is_stage_cleared(stage_id)
+	_best_stars_label.text = "클리어 완료" if cleared else "미클리어"

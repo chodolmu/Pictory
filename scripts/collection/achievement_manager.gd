@@ -18,7 +18,6 @@ var _stats: Dictionary = {
 	"total_destroyed": 0,
 	"max_chain": 0,
 	"imagen_count": 0,
-	"infinity_score": 0,
 	"combo_count": 0,
 	"cleared_chapters": [],
 	"achievement_count": 0,
@@ -115,12 +114,6 @@ func on_imagen_unlocked() -> void:
 	_save_stats()
 	_check_by_type("imagen_count")
 
-func on_infinity_score(score: int) -> void:
-	if score > _stats["infinity_score"]:
-		_stats["infinity_score"] = score
-	_save_stats()
-	_check_by_type("infinity_score")
-
 func on_combo(count: int) -> void:
 	_stats["combo_count"] += count
 	_save_stats()
@@ -166,8 +159,6 @@ func _check_condition(condition: Dictionary) -> bool:
 			return _stats["max_chain"] >= condition.get("count", 0)
 		"imagen_count":
 			return _stats["imagen_count"] >= condition.get("count", 0)
-		"infinity_score":
-			return _stats["infinity_score"] >= condition.get("score", 0)
 		"combo_count":
 			return _stats["combo_count"] >= condition.get("count", 0)
 		"speed_clear":

@@ -1,0 +1,71 @@
+[gd_scene load_steps=2 format=3 uid="uid://profile_popup"]
+
+[ext_resource type="Script" path="res://scripts/ui/profile_popup.gd" id="1_pp"]
+
+[node name="ProfilePopup" type="CanvasLayer"]
+layer = 10
+script = ExtResource("1_pp")
+
+[node name="Overlay" type="ColorRect" parent="."]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+color = Color(0, 0, 0, 0.5)
+mouse_filter = 1
+
+[node name="PanelContainer" type="PanelContainer" parent="."]
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -150.0
+offset_top = -200.0
+offset_right = 150.0
+offset_bottom = 200.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="VBox" type="VBoxContainer" parent="PanelContainer"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+theme_override_constants/separation = 12
+
+[node name="TitleLabel" type="Label" parent="PanelContainer/VBox"]
+text = "프로필"
+horizontal_alignment = 1
+theme_override_font_sizes/font_size = 20
+
+[node name="IconPanel" type="Panel" parent="PanelContainer/VBox"]
+custom_minimum_size = Vector2(64, 64)
+size_flags_horizontal = 4
+
+[node name="NicknameLabel" type="Label" parent="PanelContainer/VBox"]
+text = "닉네임"
+horizontal_alignment = 1
+theme_override_font_sizes/font_size = 18
+
+[node name="EditNicknameButton" type="Button" parent="PanelContainer/VBox"]
+text = "닉네임 변경"
+
+[node name="NicknameEdit" type="LineEdit" parent="PanelContainer/VBox"]
+placeholder_text = "새 닉네임 입력"
+visible = false
+
+[node name="HSeparator" type="HSeparator" parent="PanelContainer/VBox"]
+
+[node name="InfoContainer" type="VBoxContainer" parent="PanelContainer/VBox"]
+theme_override_constants/separation = 6
+
+[node name="CreatedLabel" type="Label" parent="PanelContainer/VBox/InfoContainer"]
+text = "가입일: -"
+theme_override_font_sizes/font_size = 14
+
+[node name="HighestLabel" type="Label" parent="PanelContainer/VBox/InfoContainer"]
+text = "최고 클리어: -"
+theme_override_font_sizes/font_size = 14
+
+[node name="CloseButton" type="Button" parent="PanelContainer/VBox"]
+custom_minimum_size = Vector2(0, 44)
+text = "닫기"

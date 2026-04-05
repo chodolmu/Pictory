@@ -9,102 +9,118 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 script = ExtResource("1")
 
-[node name="VBox" type="VBoxContainer" parent="."]
-layout_mode = 1
+[node name="BgRect" type="ColorRect" parent="."]
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
+color = Color(0.08, 0.08, 0.14, 1)
+
+[node name="MarginContainer" type="MarginContainer" parent="."]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+theme_override_constants/margin_left = 16
+theme_override_constants/margin_right = 16
+theme_override_constants/margin_top = 12
+theme_override_constants/margin_bottom = 16
+
+[node name="VBox" type="VBoxContainer" parent="MarginContainer"]
+layout_mode = 2
+size_flags_vertical = 3
 theme_override_constants/separation = 8
 
-[node name="CountLabel" type="Label" parent="VBox"]
+[node name="TopBar" type="HBoxContainer" parent="MarginContainer/VBox"]
+custom_minimum_size = Vector2(0, 48)
+theme_override_constants/separation = 8
+
+[node name="BackButton" type="Button" parent="MarginContainer/VBox/TopBar"]
+custom_minimum_size = Vector2(48, 48)
+text = "←"
+theme_override_font_sizes/font_size = 20
+
+[node name="TitleLabel" type="Label" parent="MarginContainer/VBox/TopBar"]
+text = "동료"
+size_flags_horizontal = 3
+vertical_alignment = 1
+theme_override_font_sizes/font_size = 20
+
+[node name="CountLabel" type="Label" parent="MarginContainer/VBox"]
 text = "수집: 0 / 0 마리"
 theme_override_font_sizes/font_size = 16
 horizontal_alignment = 1
 
-[node name="PartySlots" type="HBoxContainer" parent="VBox"]
+[node name="PartySlots" type="HBoxContainer" parent="MarginContainer/VBox"]
 custom_minimum_size = Vector2(0, 80)
 alignment = 1
 theme_override_constants/separation = 12
 
-[node name="Slot0" type="PanelContainer" parent="VBox/PartySlots"]
+[node name="Slot0" type="PanelContainer" parent="MarginContainer/VBox/PartySlots"]
 custom_minimum_size = Vector2(100, 72)
 
-[node name="Label" type="Label" parent="VBox/PartySlots/Slot0"]
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
+[node name="Label" type="Label" parent="MarginContainer/VBox/PartySlots/Slot0"]
+layout_mode = 2
 text = "비어 있음"
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="Preview" type="Control" parent="VBox/PartySlots/Slot0"]
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
+[node name="Preview" type="Control" parent="MarginContainer/VBox/PartySlots/Slot0"]
+layout_mode = 2
 modulate = Color(0.5, 0.5, 0.5, 0.5)
 
-[node name="Slot1" type="PanelContainer" parent="VBox/PartySlots"]
+[node name="Slot1" type="PanelContainer" parent="MarginContainer/VBox/PartySlots"]
 custom_minimum_size = Vector2(100, 72)
 
-[node name="Label" type="Label" parent="VBox/PartySlots/Slot1"]
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
+[node name="Label" type="Label" parent="MarginContainer/VBox/PartySlots/Slot1"]
+layout_mode = 2
 text = "비어 있음"
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="Preview" type="Control" parent="VBox/PartySlots/Slot1"]
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
+[node name="Preview" type="Control" parent="MarginContainer/VBox/PartySlots/Slot1"]
+layout_mode = 2
 modulate = Color(0.5, 0.5, 0.5, 0.5)
 
-[node name="Scroll" type="ScrollContainer" parent="VBox"]
+[node name="Scroll" type="ScrollContainer" parent="MarginContainer/VBox"]
 size_flags_vertical = 3
 
-[node name="Grid" type="GridContainer" parent="VBox/Scroll"]
+[node name="Grid" type="GridContainer" parent="MarginContainer/VBox/Scroll"]
 size_flags_horizontal = 3
 columns = 3
 theme_override_constants/h_separation = 8
 theme_override_constants/v_separation = 8
 
-[node name="DetailPanel" type="PanelContainer" parent="VBox"]
+[node name="DetailPanel" type="PanelContainer" parent="MarginContainer/VBox"]
 visible = false
 
-[node name="VBox" type="VBoxContainer" parent="VBox/DetailPanel"]
+[node name="VBox" type="VBoxContainer" parent="MarginContainer/VBox/DetailPanel"]
 theme_override_constants/separation = 6
 
-[node name="NameLabel" type="Label" parent="VBox/DetailPanel/VBox"]
+[node name="NameLabel" type="Label" parent="MarginContainer/VBox/DetailPanel/VBox"]
 text = ""
 theme_override_font_sizes/font_size = 18
 
-[node name="AttrLabel" type="Label" parent="VBox/DetailPanel/VBox"]
+[node name="AttrLabel" type="Label" parent="MarginContainer/VBox/DetailPanel/VBox"]
 text = ""
 theme_override_font_sizes/font_size = 14
 
-[node name="SkillLabel" type="Label" parent="VBox/DetailPanel/VBox"]
+[node name="SkillLabel" type="Label" parent="MarginContainer/VBox/DetailPanel/VBox"]
 text = ""
 theme_override_font_sizes/font_size = 14
 
-[node name="DescLabel" type="Label" parent="VBox/DetailPanel/VBox"]
+[node name="DescLabel" type="Label" parent="MarginContainer/VBox/DetailPanel/VBox"]
 text = ""
 theme_override_font_sizes/font_size = 13
 theme_override_colors/font_color = Color(0.75, 0.75, 0.75, 1)
 autowrap_mode = 3
 
-[node name="Buttons" type="HBoxContainer" parent="VBox/DetailPanel/VBox"]
+[node name="Buttons" type="HBoxContainer" parent="MarginContainer/VBox/DetailPanel/VBox"]
 theme_override_constants/separation = 12
 
-[node name="AssignButton" type="Button" parent="VBox/DetailPanel/VBox/Buttons"]
+[node name="AssignButton" type="Button" parent="MarginContainer/VBox/DetailPanel/VBox/Buttons"]
 custom_minimum_size = Vector2(100, 36)
 text = "편성"
 
-[node name="UnassignButton" type="Button" parent="VBox/DetailPanel/VBox/Buttons"]
+[node name="UnassignButton" type="Button" parent="MarginContainer/VBox/DetailPanel/VBox/Buttons"]
 visible = false
 custom_minimum_size = Vector2(100, 36)
 text = "편성 해제"

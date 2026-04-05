@@ -139,7 +139,7 @@ func _on_dialogue_done() -> void:
 	_go_next()
 
 func _on_exit_requested() -> void:
-	SceneManager.change_scene("res://scenes/main/stage_select.tscn")
+	SceneManager.change_scene("res://scenes/main/main_menu.tscn")
 
 func _go_next() -> void:
 	var dtype: String = _params.get("type", "pre")

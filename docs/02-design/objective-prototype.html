@@ -1,0 +1,1026 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pictory - Objective Prototypes (Playable)</title>
+<style>
+:root {
+  --bg: #0f1117;
+  --card: #1a1d27;
+  --accent: #6c5ce7;
+  --accent2: #00cec9;
+  --danger: #e17055;
+  --warn: #fdcb6e;
+  --success: #00b894;
+  --text: #dfe6e9;
+  --dim: #636e72;
+  --border: #2d3436;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:var(--bg);color:var(--text);font-family:'Pretendard',-apple-system,sans-serif;padding:20px;line-height:1.6;}
+.container{max-width:600px;margin:0 auto;}
+header{text-align:center;margin-bottom:32px;}
+header h1{font-size:1.8em;background:linear-gradient(135deg,var(--warn),var(--danger));-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+header p{color:var(--dim);font-size:0.9em;}
+
+/* Mode selector */
+.mode-bar{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-bottom:24px;}
+.mode-btn{
+  background:var(--card);border:1px solid var(--border);border-radius:10px;
+  padding:8px 14px;color:var(--text);cursor:pointer;font-size:0.82em;font-weight:600;
+  transition:all 0.2s;
+}
+.mode-btn:hover{border-color:var(--accent);}
+.mode-btn.active{background:var(--accent);border-color:var(--accent);color:#fff;}
+
+/* Game area */
+.game-area{
+  background:var(--card);border:1px solid var(--border);border-radius:16px;
+  padding:20px;margin-bottom:20px;
+}
+
+/* HUD */
+.hud{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:8px;}
+.hud-item{
+  background:rgba(0,0,0,0.3);border-radius:8px;padding:6px 12px;
+  font-size:0.82em;display:flex;align-items:center;gap:6px;
+}
+.hud-val{font-weight:700;color:var(--warn);}
+.hud-label{color:var(--dim);}
+
+/* Queue */
+.queue-area{display:flex;align-items:center;gap:8px;margin-bottom:16px;justify-content:center;}
+.queue-label{font-size:0.75em;color:var(--dim);font-weight:600;}
+.queue-cell{
+  width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;
+  font-weight:700;font-size:0.75em;transition:transform 0.2s;
+}
+.queue-cell:first-of-type{transform:scale(1.15);border:2px solid rgba(255,255,255,0.5);}
+
+/* Grid */
+.grid-wrap{display:flex;justify-content:center;margin-bottom:12px;}
+.grid{display:inline-grid;gap:4px;}
+
+/*
+  Each cell is wrapped in a .cell-slot (position:relative, overflow:hidden)
+  so we can animate the inner .cell-inner vertically for gravity.
+*/
+.cell-slot{
+  width:52px;height:52px;position:relative;overflow:hidden;
+  border-radius:10px;
+}
+.cell-inner{
+  width:52px;height:52px;border-radius:10px;display:flex;align-items:center;justify-content:center;
+  font-size:0.7em;font-weight:700;cursor:pointer;position:absolute;left:0;top:0;
+  user-select:none;border:2px solid transparent;
+  will-change: transform, opacity;
+}
+.cell-inner:hover{transform:scale(1.08);}
+.cell-inner:active{transform:scale(0.95);}
+
+/* Animation classes */
+/* BFS recolor pop */
+@keyframes colorPop {
+  0%   { transform: scale(1); }
+  50%  { transform: scale(1.18); }
+  100% { transform: scale(1); }
+}
+.anim-pop {
+  animation: colorPop 0.15s ease-out forwards;
+}
+
+/* Line destroy: shrink + fade */
+@keyframes destroyCell {
+  0%   { transform: scale(1);   opacity: 1; }
+  100% { transform: scale(0.2); opacity: 0; }
+}
+.anim-destroy {
+  animation: destroyCell 0.25s ease-in forwards;
+  pointer-events: none;
+}
+
+/* New cell fade-in from above */
+@keyframes fallIn {
+  0%   { transform: translateY(-100%); opacity: 0; }
+  60%  { opacity: 1; }
+  100% { transform: translateY(0);    opacity: 1; }
+}
+.anim-fall {
+  animation: fallIn 0.2s ease-out forwards;
+}
+
+/* Colors */
+.clr-0{background:#e74c3c;} .clr-1{background:#3498db;} .clr-2{background:#27ae60;}
+.clr-3{background:#f39c12;} .clr-4{background:#9b59b6;}
+.clr-stone{background:#555;border:2px solid #333;cursor:default;}
+.clr-taint{background:#1a0a2e;border:2px solid #8e44ad;}
+
+/* Overlays */
+.cell-inner .ov{
+  position:absolute;inset:0;border-radius:8px;display:flex;align-items:center;justify-content:center;
+  font-size:1em;pointer-events:none;
+}
+.ov-ice{background:rgba(52,152,219,0.4);border:2px solid rgba(52,152,219,0.7);}
+.ov-goal{border:2px solid var(--warn);box-shadow:0 0 8px rgba(253,203,110,0.4);}
+.ov-collect{border:2px solid var(--success);background:rgba(0,184,148,0.15);}
+.ov-drop{background:rgba(108,92,231,0.25);border:2px solid rgba(108,92,231,0.6);}
+.ov-paint{border:2px solid rgba(0,206,201,0.5);box-shadow:inset 0 0 6px rgba(0,206,201,0.2);}
+.ov-bomb{background:rgba(231,76,60,0.2);border:2px solid rgba(231,76,60,0.6);}
+
+.bottom-line .cell-slot:last-child,
+.grid-wrap .bottom-row .cell-slot{border-bottom:3px solid var(--success);}
+
+/* Info bar */
+.info-bar{
+  background:rgba(0,0,0,0.3);border-radius:10px;padding:12px 16px;
+  font-size:0.82em;color:var(--dim);margin-bottom:12px;text-align:center;
+}
+.info-bar strong{color:var(--accent2);}
+
+/* Animating state: block pointer events on grid */
+.grid.animating { pointer-events: none; }
+
+/* Result overlay */
+.result-overlay{
+  position:fixed;inset:0;background:rgba(0,0,0,0.7);display:flex;align-items:center;justify-content:center;
+  z-index:100;display:none;
+}
+.result-overlay.show{display:flex;}
+.result-box{
+  background:var(--card);border-radius:20px;padding:40px;text-align:center;max-width:320px;
+  border:1px solid var(--border);
+}
+.result-box h2{font-size:1.6em;margin-bottom:12px;}
+.result-box p{color:var(--dim);margin-bottom:20px;}
+.result-box button{
+  background:var(--accent);color:#fff;border:none;border-radius:10px;
+  padding:10px 28px;font-size:1em;cursor:pointer;font-weight:600;
+}
+.result-box button:hover{opacity:0.9;}
+
+/* Design note */
+.design-note{
+  background:rgba(108,92,231,0.08);border:1px solid rgba(108,92,231,0.2);border-radius:12px;
+  padding:16px;margin-bottom:20px;font-size:0.85em;
+}
+.design-note h3{color:var(--accent);font-size:0.9em;margin-bottom:6px;}
+.design-note p{color:var(--dim);}
+</style>
+</head>
+<body>
+<div class="container">
+
+<header>
+  <h1>Objective Prototypes</h1>
+  <p>Playable demos for each objective type. Tap to flood-fill, complete lines to destroy.</p>
+</header>
+
+<div class="design-note">
+  <h3>Design Direction: Casual &amp; Intuitive</h3>
+  <p>
+    "Tap the color, watch it spread, lines go boom."
+    Strategy emerges naturally from the board state, not from complex planning.
+    The fun is in the chain reactions and satisfying clears, not in calculating optimal moves.
+  </p>
+</div>
+
+<div class="mode-bar" id="modeBar"></div>
+
+<div class="game-area" id="gameArea">
+  <div class="hud" id="hud"></div>
+  <div class="queue-area" id="queueArea"></div>
+  <div class="info-bar" id="infoBar"></div>
+  <div class="grid-wrap"><div class="grid" id="grid"></div></div>
+</div>
+
+<div class="result-overlay" id="resultOverlay">
+  <div class="result-box">
+    <h2 id="resultTitle"></h2>
+    <p id="resultMsg"></p>
+    <button onclick="restartCurrentMode()">Retry</button>
+  </div>
+</div>
+
+</div>
+
+<script>
+// ============================================================
+// ENGINE
+// ============================================================
+const COLS = 6, ROWS = 6;
+const COLORS = ['#e74c3c','#3498db','#27ae60','#f39c12','#9b59b6'];
+const CLR_NAMES = ['Red','Blue','Green','Orange','Purple'];
+
+let board = [];       // board[r][c] = {color, gimmick, gData, painted}
+let queue = [];
+let turns = 0;
+let maxTurns = 12;
+let mode = null;
+let goalState = {};
+let gameOver = false;
+let isAnimating = false;  // animation lock
+
+// Modes
+const MODES = [
+  {id:'destroy',     name:'Block Destroy',    icon:'\u{1F4A5}', desc:'Destroy <strong>{n}</strong> blocks'},
+  {id:'color_dom',   name:'Color Domination', icon:'\u{1F3A8}', desc:'Fill <strong>{p}%</strong> of the board with <strong style="color:{clr}">{clrName}</strong>'},
+  {id:'target_line', name:'Target Lines',     icon:'\u{1F3AF}', desc:'Destroy the <strong>highlighted</strong> rows'},
+  {id:'collect',     name:'Collect Items',    icon:'\u{1F48E}', desc:'Collect <strong>{n}</strong> gems by destroying their cells'},
+  {id:'drop_down',   name:'Drop Down',        icon:'\u2B07\uFE0F', desc:'Drop gems to the <strong>green bottom line</strong>'},
+  {id:'break_ice',   name:'Break Ice',        icon:'\u{1F9CA}', desc:'Break all <strong>{n}</strong> ice blocks'},
+  {id:'purify',      name:'Purify Taint',     icon:'\u2623\uFE0F', desc:'Remove all <strong>taint</strong> from the board'},
+  {id:'defuse',      name:'Defuse Bombs',     icon:'\u{1F4A3}', desc:'Defuse all bombs before they explode'},
+  {id:'big_flood',   name:'Big Flood',        icon:'\u{1F30A}', desc:'Flood <strong>{n}+</strong> cells in a single tap'},
+  {id:'chain',       name:'Chain Combo',      icon:'\u26A1', desc:'Achieve a <strong>{n}-chain</strong> combo'},
+  {id:'multi',       name:'Multi-Goal',       icon:'\u{1F4CB}', desc:'Break <strong>{a}</strong> ice AND destroy <strong>{b}</strong> blocks'},
+  {id:'survival',    name:'Survival',         icon:'\u{1F6E1}\uFE0F', desc:'Survive <strong>{n}</strong> turns. Taint over 50% = fail'},
+];
+
+// ============================================================
+// UTILITIES
+// ============================================================
+function wait(ms){ return new Promise(r => setTimeout(r, ms)); }
+
+// ============================================================
+// INIT
+// ============================================================
+function init(){
+  const bar = document.getElementById('modeBar');
+  bar.innerHTML = '';
+  MODES.forEach(m => {
+    const b = document.createElement('div');
+    b.className = 'mode-btn';
+    b.textContent = m.icon + ' ' + m.name;
+    b.onclick = () => startMode(m.id);
+    bar.appendChild(b);
+  });
+  startMode('destroy');
+}
+
+function startMode(id){
+  mode = id;
+  gameOver = false;
+  isAnimating = false;
+  document.getElementById('resultOverlay').classList.remove('show');
+
+  document.querySelectorAll('.mode-btn').forEach((b,i)=>{
+    b.classList.toggle('active', MODES[i].id === id);
+  });
+
+  const numColors = (id === 'chain') ? 3 : 4;
+  initBoard(numColors);
+  initQueue(numColors);
+  turns = 0;
+
+  goalState = {};
+  switch(id){
+    case 'destroy':
+      maxTurns = 15; goalState.target = 30; goalState.destroyed = 0; break;
+    case 'color_dom':
+      maxTurns = 12; goalState.targetColor = 1; goalState.targetPercent = 60; break;
+    case 'target_line':
+      maxTurns = 10;
+      goalState.targetRows = [1, 3, 4];
+      goalState.cleared = new Set();
+      break;
+    case 'collect':
+      maxTurns = 14; goalState.target = 5; goalState.collected = 0;
+      placeCollectibles(5);
+      break;
+    case 'drop_down':
+      maxTurns = 16; goalState.target = 3; goalState.dropped = 0;
+      placeDropItems(3);
+      break;
+    case 'break_ice':
+      maxTurns = 12; goalState.target = 8; goalState.broken = 0;
+      placeIce(8);
+      break;
+    case 'purify':
+      maxTurns = 14;
+      placeTaint(4);
+      break;
+    case 'defuse':
+      maxTurns = 12;
+      placeBombs(3);
+      break;
+    case 'big_flood':
+      maxTurns = 10; goalState.minSize = 10; goalState.achieved = false; break;
+    case 'chain':
+      maxTurns = 10; goalState.targetChain = 3; goalState.maxChain = 0; break;
+    case 'multi':
+      maxTurns = 14;
+      goalState.iceTarget = 5; goalState.iceBroken = 0;
+      goalState.blockTarget = 20; goalState.blocksDestroyed = 0;
+      placeIce(5);
+      break;
+    case 'survival':
+      maxTurns = 15; goalState.survived = 0;
+      placeTaint(2);
+      break;
+  }
+  render();
+}
+
+function restartCurrentMode(){ startMode(mode); }
+
+function initBoard(numC){
+  board = [];
+  for(let r=0;r<ROWS;r++){
+    board[r]=[];
+    for(let c=0;c<COLS;c++){
+      board[r][c] = {color: Math.floor(Math.random()*numC), gimmick:null, gData:{}, painted:false};
+    }
+  }
+}
+
+function initQueue(numC){
+  queue = [];
+  for(let i=0;i<5;i++) queue.push(Math.floor(Math.random()*numC));
+}
+
+function advanceQueue(){
+  const numC = (mode==='chain') ? 3 : 4;
+  queue.shift();
+  queue.push(Math.floor(Math.random()*numC));
+}
+
+function placeCollectibles(n){
+  let placed = 0;
+  while(placed < n){
+    let r=Math.floor(Math.random()*ROWS), c=Math.floor(Math.random()*COLS);
+    if(!board[r][c].gimmick){ board[r][c].gimmick='collect'; placed++; }
+  }
+}
+
+function placeDropItems(n){
+  let placed = 0;
+  while(placed < n){
+    let c = Math.floor(Math.random()*COLS);
+    if(!board[0][c].gimmick){ board[0][c].gimmick='drop'; board[0][c].color=-1; placed++; }
+  }
+}
+
+function placeIce(n){
+  let placed = 0;
+  while(placed < n){
+    let r=Math.floor(Math.random()*ROWS), c=Math.floor(Math.random()*COLS);
+    if(!board[r][c].gimmick){ board[r][c].gimmick='ice'; board[r][c].gData={dur:2}; placed++; }
+  }
+}
+
+function placeTaint(n){
+  let placed = 0;
+  while(placed < n){
+    let r=Math.floor(Math.random()*ROWS), c=Math.floor(Math.random()*COLS);
+    if(!board[r][c].gimmick && board[r][c].color >= 0){
+      board[r][c].gimmick='taint'; board[r][c].color=-2; placed++;
+    }
+  }
+}
+
+function placeBombs(n){
+  let placed = 0;
+  while(placed < n){
+    let r=1+Math.floor(Math.random()*(ROWS-1)), c=Math.floor(Math.random()*COLS);
+    if(!board[r][c].gimmick){
+      board[r][c].gimmick='bomb'; board[r][c].gData={timer: 4 + Math.floor(Math.random()*3)};
+      placed++;
+    }
+  }
+}
+
+// ============================================================
+// BFS FLOOD FILL
+// ============================================================
+function floodFill(r, c, newColor){
+  const oldColor = board[r][c].color;
+  if(oldColor < 0 || oldColor === newColor) return [];
+
+  // Step 1: Find connected group of oldColor (BFS only on oldColor)
+  const visited = new Set();
+  const stack = [[r,c]];
+  const group = [];
+  while(stack.length){
+    const [cr,cc] = stack.pop();
+    const key = cr*100+cc;
+    if(visited.has(key)) continue;
+    visited.add(key);
+    const cell = board[cr][cc];
+    if(cell.color !== oldColor) continue;
+    if(cell.gimmick === 'taint') continue;
+    group.push([cr,cc]);
+    [[0,1],[0,-1],[1,0],[-1,0]].forEach(([dr,dc])=>{
+      const nr=cr+dr, nc=cc+dc;
+      if(nr>=0&&nr<ROWS&&nc>=0&&nc<COLS && !visited.has(nr*100+nc)){
+        const nb = board[nr][nc];
+        if(nb.color === oldColor && nb.gimmick !== 'taint') stack.push([nr,nc]);
+      }
+    });
+  }
+  if(group.length === 0) return [];
+
+  // Step 2: Recolor the group to newColor
+  group.forEach(([gr,gc])=>{
+    board[gr][gc].color = newColor;
+    board[gr][gc].painted = true;
+  });
+
+  // Step 3: Merge — find all newColor cells connected to this group (flood union)
+  const merged = new Set();
+  const mergeStack = [];
+  group.forEach(([gr,gc])=>{ mergeStack.push([gr,gc]); merged.add(gr*100+gc); });
+  while(mergeStack.length){
+    const [cr,cc] = mergeStack.pop();
+    [[0,1],[0,-1],[1,0],[-1,0]].forEach(([dr,dc])=>{
+      const nr=cr+dr, nc=cc+dc;
+      const nk=nr*100+nc;
+      if(nr>=0&&nr<ROWS&&nc>=0&&nc<COLS && !merged.has(nk)){
+        const nb = board[nr][nc];
+        if(nb.color === newColor && nb.gimmick !== 'taint'){
+          merged.add(nk);
+          mergeStack.push([nr,nc]);
+        }
+      }
+    });
+  }
+
+  // Step 4: Taint purify — any cell adjacent to the merged region
+  if(mode==='purify' || mode==='survival'){
+    merged.forEach(key=>{
+      const gr=Math.floor(key/100), gc=key%100;
+      [[0,1],[0,-1],[1,0],[-1,0]].forEach(([dr,dc])=>{
+        const nr=gr+dr, nc=gc+dc;
+        if(nr>=0&&nr<ROWS&&nc>=0&&nc<COLS){
+          if(board[nr][nc].gimmick==='taint'){
+            board[nr][nc].gimmick=null; board[nr][nc].color=newColor; board[nr][nc].painted=true;
+          }
+        }
+      });
+    });
+  }
+
+  return group;
+}
+
+// ============================================================
+// LINE CHECK & DESTROY
+// ============================================================
+function checkLines(){
+  const lines = [];
+  // Rows
+  for(let r=0;r<ROWS;r++){
+    let valid = true, clr = -1;
+    for(let c=0;c<COLS;c++){
+      const cc = board[r][c].color;
+      if(cc < 0){ valid=false; break; }
+      if(clr===-1) clr=cc;
+      else if(cc!==clr){ valid=false; break; }
+    }
+    if(valid && clr>=0) lines.push({axis:'row', index:r, color:clr});
+  }
+  // Cols
+  for(let c=0;c<COLS;c++){
+    let valid = true, clr = -1;
+    for(let r=0;r<ROWS;r++){
+      const cc = board[r][c].color;
+      if(cc < 0){ valid=false; break; }
+      if(clr===-1) clr=cc;
+      else if(cc!==clr){ valid=false; break; }
+    }
+    if(valid && clr>=0) lines.push({axis:'col', index:c, color:clr});
+  }
+  return lines;
+}
+
+// Returns the set of cell keys that will be destroyed (for animation)
+function getDestroyedKeys(lines){
+  const destroyed = new Set();
+  lines.forEach(l => {
+    if(l.axis==='row'){
+      for(let c=0;c<COLS;c++) destroyed.add(l.index*100+c);
+    } else {
+      for(let r=0;r<ROWS;r++) destroyed.add(r*100+l.index);
+    }
+  });
+  return destroyed;
+}
+
+function destroyLines(lines){
+  const destroyed = getDestroyedKeys(lines);
+
+  let count = 0;
+  destroyed.forEach(key => {
+    const r = Math.floor(key/100), c = key%100;
+    const cell = board[r][c];
+    if(cell.color < 0 && cell.gimmick !== 'drop') return;
+
+    // Gimmick effects
+    if(cell.gimmick === 'ice'){
+      cell.gData.dur--;
+      if(cell.gData.dur <= 0){
+        cell.gimmick = null;
+        if(mode==='break_ice' || mode==='multi') goalState.iceBroken = (goalState.iceBroken||0)+1;
+      }
+      return; // Ice absorbs the hit, cell survives
+    }
+    if(cell.gimmick === 'collect'){
+      goalState.collected = (goalState.collected||0)+1;
+      cell.gimmick = null;
+    }
+    if(cell.gimmick === 'bomb'){
+      cell.gimmick = null; cell.gData = {};
+    }
+
+    // Drop items don't get destroyed, they just fall
+    if(cell.gimmick === 'drop') return;
+
+    cell.color = -1;
+    cell.gimmick = null;
+    cell.gData = {};
+    cell.painted = false;
+    count++;
+  });
+
+  // Target line tracking
+  if(mode==='target_line'){
+    lines.forEach(l => {
+      if(l.axis==='row' && goalState.targetRows.includes(l.index)){
+        goalState.cleared.add(l.index);
+      }
+    });
+  }
+
+  return count;
+}
+
+function gravity(){
+  for(let c=0;c<COLS;c++){
+    // Collect non-empty cells from bottom to top
+    const col = [];
+    for(let r=ROWS-1;r>=0;r--){
+      const cell = board[r][c];
+      const isOccupied = cell.color >= 0 || cell.gimmick === 'drop' || cell.gimmick === 'taint';
+      if(isOccupied){
+        col.push({color:cell.color, gimmick:cell.gimmick, gData:{...cell.gData}, painted:cell.painted});
+      }
+    }
+    // Place them from bottom up
+    const numC = (mode==='chain') ? 3 : 4;
+    for(let r=ROWS-1;r>=0;r--){
+      const idx = (ROWS-1) - r;
+      if(idx < col.length){
+        board[r][c] = col[idx];
+      } else {
+        // Fill with new random cell (flagged as new for fall animation)
+        board[r][c] = {color: Math.floor(Math.random()*numC), gimmick:null, gData:{}, painted:false, isNew:true};
+      }
+    }
+  }
+
+  // Drop items: check if reached bottom
+  if(mode==='drop_down'){
+    for(let c=0;c<COLS;c++){
+      if(board[ROWS-1][c].gimmick==='drop'){
+        goalState.dropped = (goalState.dropped||0)+1;
+        board[ROWS-1][c] = {color:Math.floor(Math.random()*4), gimmick:null, gData:{}, painted:false};
+      }
+    }
+  }
+}
+
+// ============================================================
+// TURN LOGIC (async)
+// ============================================================
+async function onCellClick(r, c){
+  if(gameOver || isAnimating) return;
+  const cell = board[r][c];
+  if(cell.color < 0) return;
+  if(cell.gimmick === 'taint') return;
+
+  const newColor = queue[0];
+  if(cell.color === newColor) return;
+
+  const group = floodFill(r, c, newColor);
+  if(group.length === 0) return;
+
+  // Lock input
+  isAnimating = true;
+  setGridAnimating(true);
+
+  // Big flood check
+  if(mode==='big_flood' && group.length >= goalState.minSize){
+    goalState.achieved = true;
+  }
+
+  advanceQueue();
+  turns++;
+
+  // 1) BFS recolor pop animation
+  await animateRecolor(group);
+
+  // 2) Chain loop with animations
+  let chainCount = 0;
+  let totalDestroyed = 0;
+  let keepGoing = true;
+
+  while(keepGoing){
+    const lines = checkLines();
+    if(lines.length === 0){ keepGoing=false; break; }
+
+    const destroyedKeys = getDestroyedKeys(lines);
+
+    // Animate destroy
+    await animateDestroy(destroyedKeys);
+
+    // Apply destroy to board state
+    const d = destroyLines(lines);
+    totalDestroyed += d;
+    chainCount++;
+
+    // Short pause before gravity
+    await wait(60);
+
+    // Apply gravity to board state, then animate fall
+    gravity();
+    await animateGravity();
+  }
+
+  // Track stats
+  if(mode==='destroy') goalState.destroyed += totalDestroyed;
+  if(mode==='multi') goalState.blocksDestroyed += totalDestroyed;
+  if(mode==='chain') goalState.maxChain = Math.max(goalState.maxChain, chainCount);
+  if(mode==='survival') goalState.survived = turns;
+
+  // Bomb tick
+  if(mode==='defuse'){
+    let exploded = false;
+    for(let r2=0;r2<ROWS;r2++) for(let c2=0;c2<COLS;c2++){
+      if(board[r2][c2].gimmick==='bomb'){
+        board[r2][c2].gData.timer--;
+        if(board[r2][c2].gData.timer <= 0){
+          exploded = true;
+          for(let dr=-1;dr<=1;dr++) for(let dc=-1;dc<=1;dc++){
+            const nr=r2+dr,nc=c2+dc;
+            if(nr>=0&&nr<ROWS&&nc>=0&&nc<COLS){
+              board[nr][nc].color = Math.floor(Math.random()*4);
+            }
+          }
+          board[r2][c2].gimmick=null; board[r2][c2].gData={};
+        }
+      }
+    }
+    if(exploded){
+      setGridAnimating(false);
+      isAnimating = false;
+      endGame(false, 'A bomb exploded!');
+      render();
+      return;
+    }
+  }
+
+  // Taint spread
+  if(mode==='purify' || mode==='survival'){
+    spreadTaint();
+  }
+
+  // Final render
+  render();
+
+  setGridAnimating(false);
+  isAnimating = false;
+
+  // Check win/lose
+  checkEndCondition();
+}
+
+function spreadTaint(){
+  const newTaints = [];
+  for(let r=0;r<ROWS;r++) for(let c=0;c<COLS;c++){
+    if(board[r][c].gimmick==='taint'){
+      const dirs = [[0,1],[0,-1],[1,0],[-1,0]];
+      const valid = dirs.filter(([dr,dc])=>{
+        const nr=r+dr,nc=c+dc;
+        return nr>=0&&nr<ROWS&&nc>=0&&nc<COLS && board[nr][nc].color>=0 && board[nr][nc].gimmick!=='taint';
+      });
+      if(valid.length > 0){
+        const [dr,dc] = valid[Math.floor(Math.random()*valid.length)];
+        newTaints.push([r+dr, c+dc]);
+      }
+    }
+  }
+  const applied = new Set();
+  newTaints.forEach(([r,c])=>{
+    const k = r*100+c;
+    if(!applied.has(k)){
+      applied.add(k);
+      board[r][c].gimmick='taint'; board[r][c].color=-2;
+    }
+  });
+}
+
+function checkEndCondition(){
+  if(gameOver) return;
+  switch(mode){
+    case 'destroy':
+      if(goalState.destroyed >= goalState.target) return endGame(true,'Destroyed '+goalState.destroyed+' blocks!');
+      if(turns>=maxTurns) return endGame(false,'Only '+goalState.destroyed+'/'+goalState.target);
+      break;
+    case 'color_dom': {
+      let cnt=0, total=0;
+      for(let r=0;r<ROWS;r++) for(let c=0;c<COLS;c++){
+        if(board[r][c].color>=0) total++;
+        if(board[r][c].color===goalState.targetColor) cnt++;
+      }
+      const pct = total>0 ? Math.round(cnt/total*100) : 0;
+      if(pct >= goalState.targetPercent) return endGame(true, pct+'% dominated!');
+      if(turns>=maxTurns) return endGame(false, pct+'% / '+goalState.targetPercent+'%');
+      break;
+    }
+    case 'target_line':
+      if(goalState.cleared.size >= goalState.targetRows.length) return endGame(true,'All target rows cleared!');
+      if(turns>=maxTurns) return endGame(false, goalState.cleared.size+'/'+goalState.targetRows.length+' rows');
+      break;
+    case 'collect':
+      if(goalState.collected >= goalState.target) return endGame(true, goalState.collected+' gems collected!');
+      if(turns>=maxTurns) return endGame(false, goalState.collected+'/'+goalState.target+' gems');
+      break;
+    case 'drop_down':
+      if(goalState.dropped >= goalState.target) return endGame(true, goalState.dropped+' gems dropped!');
+      if(turns>=maxTurns) return endGame(false, goalState.dropped+'/'+goalState.target+' dropped');
+      break;
+    case 'break_ice':
+      if((goalState.iceBroken||0) >= goalState.target) return endGame(true, 'All ice broken!');
+      if(turns>=maxTurns) return endGame(false, (goalState.iceBroken||0)+'/'+goalState.target+' ice');
+      break;
+    case 'purify': {
+      let hasTaint = false;
+      for(let r=0;r<ROWS;r++) for(let c=0;c<COLS;c++) if(board[r][c].gimmick==='taint') hasTaint=true;
+      if(!hasTaint) return endGame(true, 'Purified!');
+      let taintCnt=0, total2=ROWS*COLS;
+      for(let r=0;r<ROWS;r++) for(let c=0;c<COLS;c++) if(board[r][c].gimmick==='taint') taintCnt++;
+      if(taintCnt/total2 > 0.6) return endGame(false, 'Taint overwhelmed the board!');
+      if(turns>=maxTurns) return endGame(false, 'Taint still remains');
+      break;
+    }
+    case 'defuse': {
+      let hasBomb = false;
+      for(let r=0;r<ROWS;r++) for(let c=0;c<COLS;c++) if(board[r][c].gimmick==='bomb') hasBomb=true;
+      if(!hasBomb) return endGame(true, 'All bombs defused!');
+      if(turns>=maxTurns) return endGame(false, 'Bombs remain!');
+      break;
+    }
+    case 'big_flood':
+      if(goalState.achieved) return endGame(true, 'Massive flood!');
+      if(turns>=maxTurns) return endGame(false, 'No big flood achieved');
+      break;
+    case 'chain':
+      if(goalState.maxChain >= goalState.targetChain) return endGame(true, goalState.maxChain+'-chain!');
+      if(turns>=maxTurns) return endGame(false, 'Max chain: '+goalState.maxChain);
+      break;
+    case 'multi':
+      if((goalState.iceBroken||0)>=goalState.iceTarget && goalState.blocksDestroyed>=goalState.blockTarget)
+        return endGame(true, 'Both goals done!');
+      if(turns>=maxTurns) return endGame(false, 'Ice: '+(goalState.iceBroken||0)+'/'+goalState.iceTarget+', Blocks: '+goalState.blocksDestroyed+'/'+goalState.blockTarget);
+      break;
+    case 'survival': {
+      let tc=0;
+      for(let r=0;r<ROWS;r++) for(let c=0;c<COLS;c++) if(board[r][c].gimmick==='taint') tc++;
+      if(tc/(ROWS*COLS) > 0.5) return endGame(false, 'Taint exceeded 50%!');
+      if(turns>=maxTurns) return endGame(true, 'Survived '+turns+' turns!');
+      break;
+    }
+  }
+}
+
+function endGame(win, msg){
+  gameOver = true;
+  const ov = document.getElementById('resultOverlay');
+  document.getElementById('resultTitle').textContent = win ? 'Clear!' : 'Failed';
+  document.getElementById('resultTitle').style.color = win ? 'var(--success)' : 'var(--danger)';
+  document.getElementById('resultMsg').textContent = msg;
+  ov.classList.add('show');
+}
+
+// ============================================================
+// ANIMATIONS
+// ============================================================
+
+function setGridAnimating(on){
+  const g = document.getElementById('grid');
+  if(g) g.classList.toggle('animating', on);
+}
+
+// Animate BFS recolor: add pop class to group cells, wait
+async function animateRecolor(group){
+  const g = document.getElementById('grid');
+  if(!g) return;
+  group.forEach(([r,c])=>{
+    const el = getCellInner(r,c);
+    if(!el) return;
+    // Update color immediately then pop
+    const cell = board[r][c];
+    el.style.background = COLORS[cell.color];
+    el.classList.remove('anim-pop');
+    void el.offsetWidth; // reflow
+    el.classList.add('anim-pop');
+  });
+  await wait(180);
+  group.forEach(([r,c])=>{
+    const el = getCellInner(r,c);
+    if(el) el.classList.remove('anim-pop');
+  });
+}
+
+// Animate line destroy: add destroy class to cells, wait, then re-render
+async function animateDestroy(destroyedKeys){
+  destroyedKeys.forEach(key=>{
+    const r=Math.floor(key/100), c=key%100;
+    const el = getCellInner(r,c);
+    if(!el) return;
+    el.classList.add('anim-destroy');
+  });
+  await wait(280);
+}
+
+// Animate gravity: after gravity() has been applied to board,
+// new cells slide in from above, existing cells stay (already at correct position after render).
+async function animateGravity(){
+  // Full re-render first (so cells are at their new positions)
+  render();
+  // Then apply fall animation to cells marked isNew
+  const g = document.getElementById('grid');
+  if(!g) return;
+  for(let r=0;r<ROWS;r++){
+    for(let c=0;c<COLS;c++){
+      if(board[r][c].isNew){
+        const el = getCellInner(r,c);
+        if(el){
+          el.classList.add('anim-fall');
+        }
+        // Clear the flag
+        board[r][c].isNew = false;
+      }
+    }
+  }
+  await wait(220);
+  // Clean up animation classes
+  for(let r=0;r<ROWS;r++){
+    for(let c=0;c<COLS;c++){
+      const el = getCellInner(r,c);
+      if(el) el.classList.remove('anim-fall');
+    }
+  }
+}
+
+// Get the .cell-inner element for a given board position
+function getCellInner(r, c){
+  const g = document.getElementById('grid');
+  if(!g) return null;
+  const idx = r * COLS + c;
+  const slot = g.children[idx];
+  if(!slot) return null;
+  return slot.querySelector('.cell-inner');
+}
+
+// ============================================================
+// RENDER
+// ============================================================
+function render(){
+  renderHud();
+  renderQueue();
+  renderInfo();
+  renderGrid();
+}
+
+function renderHud(){
+  const h = document.getElementById('hud');
+  let html = `<div class="hud-item"><span class="hud-label">Turn</span> <span class="hud-val">${turns}/${maxTurns}</span></div>`;
+  switch(mode){
+    case 'destroy':
+      html += `<div class="hud-item">\u{1F4A5} <span class="hud-val">${goalState.destroyed}/${goalState.target}</span></div>`; break;
+    case 'color_dom': {
+      let cnt=0,total=0;
+      for(let r=0;r<ROWS;r++) for(let c=0;c<COLS;c++){
+        if(board[r][c].color>=0) total++;
+        if(board[r][c].color===goalState.targetColor) cnt++;
+      }
+      const pct = total>0 ? Math.round(cnt/total*100) : 0;
+      html += `<div class="hud-item"><span style="color:${COLORS[goalState.targetColor]};">\u25CF</span> <span class="hud-val">${pct}%/${goalState.targetPercent}%</span></div>`;
+      break;
+    }
+    case 'target_line':
+      html += `<div class="hud-item">\u{1F3AF} <span class="hud-val">${goalState.cleared.size}/${goalState.targetRows.length}</span></div>`; break;
+    case 'collect':
+      html += `<div class="hud-item">\u{1F48E} <span class="hud-val">${goalState.collected||0}/${goalState.target}</span></div>`; break;
+    case 'drop_down':
+      html += `<div class="hud-item">\u2B07\uFE0F <span class="hud-val">${goalState.dropped||0}/${goalState.target}</span></div>`; break;
+    case 'break_ice':
+      html += `<div class="hud-item">\u{1F9CA} <span class="hud-val">${goalState.iceBroken||0}/${goalState.target}</span></div>`; break;
+    case 'purify': case 'survival': {
+      let tc=0; for(let r=0;r<ROWS;r++) for(let c=0;c<COLS;c++) if(board[r][c].gimmick==='taint') tc++;
+      const pct=Math.round(tc/(ROWS*COLS)*100);
+      html += `<div class="hud-item">\u2623\uFE0F <span class="hud-val">${tc} (${pct}%)</span></div>`;
+      if(mode==='survival') html += `<div class="hud-item">\u{1F6E1}\uFE0F <span class="hud-val">${turns}/${maxTurns}</span></div>`;
+      break;
+    }
+    case 'defuse': {
+      let bc=0; for(let r=0;r<ROWS;r++) for(let c=0;c<COLS;c++) if(board[r][c].gimmick==='bomb') bc++;
+      html += `<div class="hud-item">\u{1F4A3} <span class="hud-val">${bc} remaining</span></div>`;
+      break;
+    }
+    case 'big_flood':
+      html += `<div class="hud-item">\u{1F30A} <span class="hud-val">${goalState.achieved?'\u2713':'Target '+goalState.minSize+'+'}</span></div>`; break;
+    case 'chain':
+      html += `<div class="hud-item">\u26A1 <span class="hud-val">Best: ${goalState.maxChain} / Need: ${goalState.targetChain}</span></div>`; break;
+    case 'multi':
+      html += `<div class="hud-item">\u{1F9CA} <span class="hud-val">${goalState.iceBroken||0}/${goalState.iceTarget}</span></div>`;
+      html += `<div class="hud-item">\u{1F4A5} <span class="hud-val">${goalState.blocksDestroyed}/${goalState.blockTarget}</span></div>`;
+      break;
+  }
+  h.innerHTML = html;
+}
+
+function renderQueue(){
+  const q = document.getElementById('queueArea');
+  let html = '<div class="queue-label">NEXT</div>';
+  queue.forEach((c,i) => {
+    html += `<div class="queue-cell" style="background:${COLORS[c]};${i===0?'':'opacity:0.6;'}">${i===0?'\u25C0':''}</div>`;
+  });
+  q.innerHTML = html;
+}
+
+function renderInfo(){
+  const info = document.getElementById('infoBar');
+  const m = MODES.find(x=>x.id===mode);
+  let desc = m.desc;
+  desc = desc.replace('{n}', goalState.target||goalState.minSize||goalState.targetChain||goalState.survived||maxTurns||'?');
+  desc = desc.replace('{p}', goalState.targetPercent||'?');
+  desc = desc.replace('{clr}', goalState.targetColor!==undefined ? COLORS[goalState.targetColor] : '');
+  desc = desc.replace('{clrName}', goalState.targetColor!==undefined ? CLR_NAMES[goalState.targetColor] : '');
+  desc = desc.replace('{a}', goalState.iceTarget||'?');
+  desc = desc.replace('{b}', goalState.blockTarget||'?');
+  info.innerHTML = m.icon + ' ' + desc;
+}
+
+function renderGrid(){
+  const g = document.getElementById('grid');
+  g.style.gridTemplateColumns = `repeat(${COLS}, 52px)`;
+  let html = '';
+  for(let r=0;r<ROWS;r++){
+    for(let c=0;c<COLS;c++){
+      const cell = board[r][c];
+      let innerCls = 'cell-inner';
+      let style = '';
+      let inner = '';
+
+      if(cell.gimmick === 'taint'){
+        innerCls += ' clr-taint';
+        inner = '\u2623';
+      } else if(cell.color >= 0){
+        style = `background:${COLORS[cell.color]};`;
+      } else if(cell.gimmick === 'drop'){
+        style = 'background:rgba(108,92,231,0.3);border:2px solid rgba(108,92,231,0.6);';
+        inner = '\u{1F48E}';
+      } else {
+        style = 'background:rgba(255,255,255,0.03);cursor:default;';
+      }
+
+      // Overlays
+      let ov = '';
+      if(cell.gimmick === 'ice'){
+        ov = `<div class="ov ov-ice">${cell.gData.dur}</div>`;
+      } else if(cell.gimmick === 'collect'){
+        ov = `<div class="ov ov-collect">\u{1F48E}</div>`;
+      } else if(cell.gimmick === 'bomb'){
+        ov = `<div class="ov ov-bomb">${cell.gData.timer}</div>`;
+      }
+
+      // Color domination paint marker
+      if(mode==='color_dom' && cell.color===goalState.targetColor){
+        ov += `<div class="ov ov-paint"></div>`;
+      }
+
+      // Target line highlight
+      if(mode==='target_line' && goalState.targetRows.includes(r) && !goalState.cleared.has(r)){
+        ov += `<div class="ov ov-goal"></div>`;
+      }
+
+      // Drop down: bottom row slot gets a border
+      const slotStyle = (mode==='drop_down' && r===ROWS-1)
+        ? 'style="border-bottom:3px solid var(--success);"'
+        : '';
+
+      html += `<div class="cell-slot" ${slotStyle}><div class="${innerCls}" style="${style}" onclick="onCellClick(${r},${c})">${inner}${ov}</div></div>`;
+    }
+  }
+  g.innerHTML = html;
+}
+
+// ============================================================
+// INIT
+// ============================================================
+init();
+</script>
+</body>
+</html>

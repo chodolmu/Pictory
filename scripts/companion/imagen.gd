@@ -24,15 +24,10 @@ func get_color() -> Color:
 
 func get_skill_name() -> String:
 	match skill_id:
-		"K1":  return "단색폭풍"
-		"K2":  return "무지개파동"
-		"K3":  return "컬러스왑"
 		"K4":  return "컬러봄"
 		"K5":  return "행청소"
 		"K6":  return "되감기"
 		"K7":  return "미래의눈"
 		"K8":  return "셔플"
 		"K9":  return "큐뒤집기"
-		"K10": return "시간의숨결"
-		"K11": return "시간정지"
 		_:     return skill_id

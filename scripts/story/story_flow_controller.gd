@@ -109,13 +109,8 @@ func _show_post_dialogue() -> void:
 
 func _show_result(result: Dictionary) -> void:
 	current_state = FlowState.RESULT
-	# 결과를 stage_select로 전달하며, 결과 팝업은 stage_select에서 처리
-	SceneManager.change_scene("res://scenes/main/stage_select.tscn", {
-		"show_result": true,
-		"result": result,
-		"chapter": chapter,
-		"stage": stage
-	})
+	# 결과 팝업은 game_manager에서 처리, 여기서는 메인화면으로 복귀
+	SceneManager.change_scene("res://scenes/main/main_menu.tscn")
 
 # ─────────────────────────────────────────
 # 내부 유틸

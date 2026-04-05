@@ -2,7 +2,7 @@ extends Node
 ## PartyManager — Autoload 싱글턴.
 ## 편성(파티) 상태를 저장하고 씬 전환 후에도 유지.
 
-const MAX_PARTY_SIZE = 2
+const MAX_PARTY_SIZE = 3
 
 var selected_party: Array[String] = []  # imagen_id 배열
 

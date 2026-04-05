@@ -1,0 +1,1388 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pictory - Objective System Design</title>
+<style>
+  :root {
+    --bg: #0f1117;
+    --card: #1a1d27;
+    --card-hover: #222633;
+    --accent: #6c5ce7;
+    --accent2: #00cec9;
+    --danger: #e17055;
+    --warn: #fdcb6e;
+    --success: #00b894;
+    --text: #dfe6e9;
+    --text-dim: #636e72;
+    --border: #2d3436;
+    --cell-size: 44px;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    line-height: 1.7;
+    padding: 40px 20px;
+  }
+  .container { max-width: 1100px; margin: 0 auto; }
+
+  header { text-align: center; margin-bottom: 48px; }
+  header h1 {
+    font-size: 2.4em;
+    background: linear-gradient(135deg, var(--warn), var(--danger));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 8px;
+  }
+  header p { color: var(--text-dim); font-size: 1.05em; }
+
+  /* Status quo */
+  .status-quo {
+    background: rgba(225,112,85,0.08);
+    border: 1px solid rgba(225,112,85,0.25);
+    border-radius: 16px;
+    padding: 28px;
+    margin-bottom: 48px;
+    display: flex;
+    gap: 24px;
+    align-items: center;
+  }
+  .status-quo .icon { font-size: 3em; flex-shrink:0; }
+  .status-quo h2 { color: var(--danger); font-size: 1.1em; margin-bottom: 6px; }
+  .status-quo p { font-size: 0.92em; color: var(--text-dim); }
+  .status-quo code {
+    background: rgba(225,112,85,0.15);
+    padding: 2px 8px;
+    border-radius: 4px;
+    color: var(--danger);
+    font-size: 0.9em;
+  }
+  @media (max-width: 600px) { .status-quo { flex-direction: column; text-align: center; } }
+
+  /* Core mechanic reminder */
+  .core-box {
+    background: linear-gradient(135deg, rgba(108,92,231,0.1), rgba(0,206,201,0.06));
+    border: 1px solid rgba(108,92,231,0.25);
+    border-radius: 16px;
+    padding: 28px;
+    margin-bottom: 48px;
+  }
+  .core-box h2 { color: var(--accent); margin-bottom: 14px; }
+  .core-flow {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+    justify-content: center;
+  }
+  .core-step {
+    background: rgba(0,0,0,0.3);
+    padding: 10px 16px;
+    border-radius: 10px;
+    font-size: 0.88em;
+    font-weight: 600;
+    text-align: center;
+  }
+  .core-arrow { color: var(--accent); font-size: 1.2em; }
+  .core-note {
+    margin-top: 16px;
+    font-size: 0.85em;
+    color: var(--text-dim);
+    text-align: center;
+  }
+
+  /* Section */
+  .section { margin-bottom: 56px; }
+  .section > h2 {
+    font-size: 1.4em;
+    margin-bottom: 8px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid var(--border);
+  }
+  .section > .subtitle {
+    color: var(--text-dim);
+    font-size: 0.9em;
+    margin-bottom: 20px;
+  }
+
+  /* Objective Cards */
+  .obj-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 24px;
+    margin-bottom: 20px;
+    transition: background 0.2s;
+  }
+  .obj-card:hover { background: var(--card-hover); }
+  .obj-card.is-new { border-color: rgba(0,206,201,0.3); }
+
+  .obj-header {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+  }
+  .obj-icon {
+    width: 52px; height: 52px;
+    border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.5em;
+    flex-shrink: 0;
+  }
+  .obj-header h3 { font-size: 1.15em; flex: 1; }
+  .obj-tag {
+    font-size: 0.7em;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-weight: 600;
+  }
+  .tag-source { background: rgba(108,92,231,0.2); color: #a29bfe; }
+  .tag-impl { font-size: 0.7em; padding: 3px 10px; border-radius: 20px; font-weight: 600; }
+  .impl-easy { background: rgba(0,184,148,0.2); color: #55efc4; }
+  .impl-medium { background: rgba(253,203,110,0.2); color: #ffeaa7; }
+  .impl-hard { background: rgba(225,112,85,0.2); color: #fab1a0; }
+  .tag-priority { font-size: 0.7em; padding: 3px 10px; border-radius: 20px; font-weight: 700; }
+  .pri-1 { background: rgba(225,112,85,0.25); color: #e17055; }
+  .pri-2 { background: rgba(253,203,110,0.2); color: #fdcb6e; }
+  .pri-3 { background: rgba(149,165,166,0.2); color: #b2bec3; }
+
+  .obj-body { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  @media (max-width: 700px) { .obj-body { grid-template-columns: 1fr; } }
+
+  .obj-desc h4 {
+    font-size: 0.8em;
+    color: var(--accent2);
+    margin-bottom: 8px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+  .obj-desc ul { padding-left: 18px; }
+  .obj-desc li { margin-bottom: 4px; font-size: 0.9em; }
+  .obj-desc p { font-size: 0.9em; color: var(--text-dim); }
+  .obj-json {
+    margin-top: 10px;
+    background: rgba(0,0,0,0.35);
+    border-radius: 8px;
+    padding: 12px;
+    font-family: 'Fira Code', 'Consolas', monospace;
+    font-size: 0.78em;
+    color: #81ecec;
+    white-space: pre;
+    overflow-x: auto;
+    line-height: 1.5;
+  }
+
+  /* Demo area */
+  .demo-area {
+    background: rgba(0,0,0,0.35);
+    border-radius: 12px;
+    padding: 16px;
+  }
+  .demo-area h4 {
+    font-size: 0.8em;
+    color: var(--warn);
+    margin-bottom: 10px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+  .demo-steps { margin-top: 10px; }
+  .demo-step {
+    font-size: 0.82em;
+    padding: 5px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+    display: flex;
+    gap: 8px;
+  }
+  .demo-step:last-child { border-bottom: none; }
+  .step-num { color: var(--accent); font-weight: 700; min-width: 24px; }
+  .step-good { color: var(--success); }
+  .step-bad { color: var(--danger); }
+
+  /* Mini Grid */
+  .mini-grid {
+    display: inline-grid;
+    gap: 3px;
+    margin: 6px auto;
+  }
+  .mini-grid.g5 { grid-template-columns: repeat(5, var(--cell-size)); }
+  .mini-grid.g6 { grid-template-columns: repeat(6, var(--cell-size)); }
+  .cell {
+    width: var(--cell-size); height: var(--cell-size);
+    border-radius: 7px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.65em; font-weight: 700;
+    position: relative;
+    border: 2px solid transparent;
+  }
+  .c-red { background: #e74c3c; }
+  .c-blue { background: #3498db; }
+  .c-green { background: #27ae60; }
+  .c-yellow { background: #f1c40f; color: #333; }
+  .c-purple { background: #9b59b6; }
+  .c-empty { background: rgba(255,255,255,0.03); border: 1px dashed rgba(255,255,255,0.1); }
+  .c-taint { background: #1a0a2e; border: 2px solid #8e44ad; }
+
+  .cell .ov {
+    position: absolute; inset: 0;
+    border-radius: 5px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.1em;
+    pointer-events: none;
+  }
+  .ov-ice { background: rgba(52,152,219,0.4); border: 2px solid rgba(52,152,219,0.7); }
+  .ov-lock { background: rgba(0,0,0,0.5); }
+  .ov-bomb { background: rgba(231,76,60,0.25); border: 2px solid rgba(231,76,60,0.6); }
+  .ov-goal { border: 2px solid var(--warn); box-shadow: 0 0 6px rgba(253,203,110,0.4); }
+  .ov-collect { border: 2px solid var(--success); background: rgba(0,184,148,0.15); }
+  .ov-zone { background: rgba(253,203,110,0.12); border: 2px dashed rgba(253,203,110,0.5); }
+  .ov-drop { background: rgba(108,92,231,0.2); border: 2px solid rgba(108,92,231,0.5); }
+  .ov-paint { border: 2px solid rgba(0,206,201,0.6); box-shadow: inset 0 0 8px rgba(0,206,201,0.2); }
+
+  .highlight { box-shadow: 0 0 0 3px rgba(253,203,110,0.7); }
+
+  /* HUD mockup */
+  .hud-mock {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    margin: 10px 0;
+    flex-wrap: wrap;
+  }
+  .hud-item {
+    background: rgba(0,0,0,0.4);
+    border-radius: 8px;
+    padding: 6px 12px;
+    font-size: 0.75em;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .hud-item .hi-icon { font-size: 1.2em; }
+  .hud-item .hi-val { font-weight: 700; color: var(--warn); }
+
+  /* Priority matrix */
+  .priority-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 16px;
+    margin-top: 16px;
+  }
+  .pri-group {
+    background: var(--card);
+    border-radius: 12px;
+    padding: 20px;
+    border: 1px solid var(--border);
+  }
+  .pri-group h3 { font-size: 1em; margin-bottom: 12px; }
+  .pri-group ul { padding-left: 18px; }
+  .pri-group li { font-size: 0.88em; margin-bottom: 6px; }
+  .pri-group li strong { color: var(--text); }
+
+  /* Comparison */
+  .compare-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.85em;
+    margin-top: 16px;
+  }
+  .compare-table th {
+    text-align: left;
+    padding: 10px;
+    border-bottom: 2px solid var(--border);
+    color: var(--accent2);
+    font-size: 0.8em;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .compare-table td {
+    padding: 8px 10px;
+    border-bottom: 1px solid var(--border);
+    vertical-align: top;
+  }
+  .compare-table tr:last-child td { border-bottom: none; }
+</style>
+</head>
+<body>
+<div class="container">
+
+<header>
+  <h1>Pictory Objective System</h1>
+  <p>Color-Flood Mechanic &times; Diverse Goals &mdash; "Same Core, Infinite Variety"</p>
+</header>
+
+<!-- ============================================================ -->
+<!-- STATUS QUO -->
+<!-- ============================================================ -->
+<div class="status-quo">
+  <div class="icon">&#x26A0;&#xFE0F;</div>
+  <div>
+    <h2>Current: Single Objective</h2>
+    <p>
+      50개 스테이지 전부 <code>"type": "destroy_blocks"</code> 하나뿐.
+      Royal Match는 30개 이상의 목표 타입을 조합합니다.
+      Pictory의 컬러플러드 메커니즘은 다양한 목표를 만들 수 있는 잠재력이 충분합니다.
+    </p>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- CORE MECHANIC REMINDER -->
+<!-- ============================================================ -->
+<div class="core-box">
+  <h2>Core Mechanic Decomposition</h2>
+  <p style="color:var(--text-dim); margin-bottom:14px; font-size:0.9em;">각 단계에서 "무엇을 세고, 무엇을 요구할 수 있는가"가 목표 설계의 출발점입니다.</p>
+  <div class="core-flow">
+    <div class="core-step">&#x1F446; Touch<br><span style="color:var(--accent2); font-size:0.8em;">셀 선택</span></div>
+    <div class="core-arrow">&rarr;</div>
+    <div class="core-step">&#x1F30A; BFS Recolor<br><span style="color:var(--accent2); font-size:0.8em;">영역 칠하기</span></div>
+    <div class="core-arrow">&rarr;</div>
+    <div class="core-step">&#x2705; Line Check<br><span style="color:var(--accent2); font-size:0.8em;">행/열 완성 판정</span></div>
+    <div class="core-arrow">&rarr;</div>
+    <div class="core-step">&#x1F4A5; Destroy<br><span style="color:var(--accent2); font-size:0.8em;">파괴 + 기믹</span></div>
+    <div class="core-arrow">&rarr;</div>
+    <div class="core-step">&#x2B07;&#xFE0F; Gravity<br><span style="color:var(--accent2); font-size:0.8em;">낙하 + 보충</span></div>
+    <div class="core-arrow">&rarr;</div>
+    <div class="core-step">&#x1F503; Chain<br><span style="color:var(--accent2); font-size:0.8em;">연쇄 반복</span></div>
+  </div>
+  <div class="core-note">이 6단계 각각에서 "셀 수 있는 것"이 곧 목표가 됩니다.</div>
+</div>
+
+<!-- ============================================================ -->
+<!-- CATEGORY A: BFS RECOLOR -->
+<!-- ============================================================ -->
+<section class="section">
+  <h2>A. BFS Recolor에서 파생되는 목표</h2>
+  <p class="subtitle">"칠하기" 자체를 목표로 &mdash; Pictory만의 독자적 목표 유형</p>
+
+  <!-- A1: Color Domination -->
+  <div class="obj-card is-new">
+    <div class="obj-header">
+      <div class="obj-icon" style="background:rgba(52,152,219,0.2);">&#x1F3A8;</div>
+      <h3>Color Domination <span style="color:var(--text-dim); font-weight:400;">&mdash; 색 지배</span></h3>
+      <span class="obj-tag tag-source">BFS</span>
+      <span class="tag-impl impl-easy">Easy Impl</span>
+      <span class="tag-priority pri-1">P1</span>
+    </div>
+    <div class="obj-body">
+      <div class="obj-desc">
+        <h4>Rule</h4>
+        <ul>
+          <li>보드의 <strong>X% 이상</strong>을 지정 색으로 만들기</li>
+          <li>파괴가 아닌 <strong>"칠하기"가 목표</strong></li>
+          <li>라인이 완성되면 파괴되어 진행도가 리셋될 수 있음 &rarr; 긴장감</li>
+          <li>파괴를 피하면서 칠해야 할 수도 있는 역설적 상황</li>
+        </ul>
+        <h4 style="margin-top:12px;">JSON Schema</h4>
+        <div class="obj-json">{
+  "goal": {
+    "type": "color_domination",
+    "target_color": 1,
+    "target_percent": 70
+  }
+}</div>
+      </div>
+      <div class="demo-area">
+        <h4>Example: "보드 70%를 파란색으로"</h4>
+        <div class="hud-mock">
+          <div class="hud-item"><span class="hi-icon">&#x1F535;</span> Blue <span class="hi-val">12/18 (67%)</span></div>
+          <div class="hud-item"><span class="hi-icon">&#x1F4C0;</span> Turns <span class="hi-val">4</span></div>
+        </div>
+        <div class="mini-grid g5">
+          <div class="cell c-blue"><div class="ov ov-paint"></div></div>
+          <div class="cell c-blue"><div class="ov ov-paint"></div></div>
+          <div class="cell c-red"></div>
+          <div class="cell c-blue"><div class="ov ov-paint"></div></div>
+          <div class="cell c-blue"><div class="ov ov-paint"></div></div>
+          <div class="cell c-blue"><div class="ov ov-paint"></div></div>
+          <div class="cell c-green"></div>
+          <div class="cell c-blue"><div class="ov ov-paint"></div></div>
+          <div class="cell c-blue"><div class="ov ov-paint"></div></div>
+          <div class="cell c-red"></div>
+          <div class="cell c-green"></div>
+          <div class="cell c-blue"><div class="ov ov-paint"></div></div>
+          <div class="cell c-blue"><div class="ov ov-paint"></div></div>
+          <div class="cell c-blue"><div class="ov ov-paint"></div></div>
+          <div class="cell c-green"></div>
+          <div class="cell c-blue"><div class="ov ov-paint"></div></div>
+          <div class="cell c-red"></div>
+          <div class="cell c-blue"><div class="ov ov-paint"></div></div>
+          <div class="cell c-green"></div>
+          <div class="cell c-red"></div>
+          <div class="cell c-red"></div>
+          <div class="cell c-blue"><div class="ov ov-paint"></div></div>
+          <div class="cell c-green"></div>
+          <div class="cell c-blue"><div class="ov ov-paint"></div></div>
+          <div class="cell c-blue"><div class="ov ov-paint"></div></div>
+        </div>
+        <div class="demo-steps">
+          <div class="demo-step"><span class="step-num">&#x1F914;</span> 2행이 거의 파란색인데 완성되면 파괴됨!</div>
+          <div class="demo-step"><span class="step-num">&#x1F4A1;</span> 일부러 행 완성을 피하면서 칠해야 하는 딜레마</div>
+          <div class="demo-step"><span class="step-num step-good">&#x2713;</span> 파란 15/25칸 이상 달성 시 클리어</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- A2: Paint All -->
+  <div class="obj-card is-new">
+    <div class="obj-header">
+      <div class="obj-icon" style="background:rgba(0,206,201,0.2);">&#x1F58C;&#xFE0F;</div>
+      <h3>Paint All <span style="color:var(--text-dim); font-weight:400;">&mdash; 전체 칠하기</span></h3>
+      <span class="obj-tag tag-source">BFS</span>
+      <span class="tag-impl impl-easy">Easy Impl</span>
+      <span class="tag-priority pri-2">P2</span>
+    </div>
+    <div class="obj-body">
+      <div class="obj-desc">
+        <h4>Rule</h4>
+        <ul>
+          <li>모든 활성 셀을 <strong>최소 1번 이상</strong> BFS 리컬러</li>
+          <li>각 셀에 "칠해짐" 플래그 &mdash; 한 번 칠해지면 체크</li>
+          <li>구석이나 고립된 셀을 찾아서 칠하는 탐색 퍼즐</li>
+          <li>돌(Stone) 뒤의 셀, 잠금(Locked) 셀이 난관</li>
+        </ul>
+        <div class="obj-json">{
+  "goal": {
+    "type": "paint_all"
+  }
+}</div>
+      </div>
+      <div class="demo-area">
+        <h4>Example: "모든 칸을 한 번씩 칠하라"</h4>
+        <div class="mini-grid g5">
+          <div class="cell c-blue"><div class="ov ov-paint"></div></div>
+          <div class="cell c-red"><div class="ov ov-paint"></div></div>
+          <div class="cell c-green"></div>
+          <div class="cell c-blue"><div class="ov ov-paint"></div></div>
+          <div class="cell c-red"></div>
+          <div class="cell c-green"><div class="ov ov-paint"></div></div>
+          <div class="cell c-empty" style="background:#555;border:2px solid #333;">&#x1FAA8;</div>
+          <div class="cell c-yellow" style="font-size:0.6em;">&#x2753;</div>
+          <div class="cell c-empty" style="background:#555;border:2px solid #333;">&#x1FAA8;</div>
+          <div class="cell c-red"><div class="ov ov-paint"></div></div>
+          <div class="cell c-blue"><div class="ov ov-paint"></div></div>
+          <div class="cell c-red"><div class="ov ov-paint"></div></div>
+          <div class="cell c-green"></div>
+          <div class="cell c-blue"><div class="ov ov-paint"></div></div>
+          <div class="cell c-green"><div class="ov ov-paint"></div></div>
+        </div>
+        <div class="demo-steps">
+          <div class="demo-step"><span class="step-num">!</span> 돌 사이에 끼인 노란 셀 &mdash; BFS가 닿기 어려움</div>
+          <div class="demo-step"><span class="step-num">&#x1F4A1;</span> 위/아래에서 우회 루트로 칠해야 함</div>
+          <div class="demo-step"><span class="step-num step-good">&#x2713;</span> 미칠함 셀 0개 달성 시 클리어</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- A3: Big Flood -->
+  <div class="obj-card is-new">
+    <div class="obj-header">
+      <div class="obj-icon" style="background:rgba(108,92,231,0.2);">&#x1F30A;</div>
+      <h3>Big Flood <span style="color:var(--text-dim); font-weight:400;">&mdash; 대홍수</span></h3>
+      <span class="obj-tag tag-source">BFS</span>
+      <span class="tag-impl impl-easy">Easy Impl</span>
+      <span class="tag-priority pri-2">P2</span>
+    </div>
+    <div class="obj-body">
+      <div class="obj-desc">
+        <h4>Rule</h4>
+        <ul>
+          <li><strong>한 번의 BFS로 N칸 이상</strong> 리컬러 달성</li>
+          <li>작은 영역을 여러 번 칠하는 대신, 큰 영역을 만들어야 함</li>
+          <li>미리 같은 색 영역을 넓게 준비하는 전략적 플레이</li>
+          <li>"N번 달성" 또는 "한 번이라도 달성" 변형 가능</li>
+        </ul>
+        <div class="obj-json">{
+  "goal": {
+    "type": "big_flood",
+    "min_size": 12,
+    "required_times": 1
+  }
+}</div>
+      </div>
+      <div class="demo-area">
+        <h4>Example: "한 번에 12칸 이상 칠하기"</h4>
+        <div class="mini-grid g5">
+          <div class="cell c-red"></div>
+          <div class="cell c-red"></div>
+          <div class="cell c-red"></div>
+          <div class="cell c-blue"></div>
+          <div class="cell c-red"></div>
+          <div class="cell c-red"></div>
+          <div class="cell c-green"></div>
+          <div class="cell c-red"></div>
+          <div class="cell c-red"></div>
+          <div class="cell c-red"></div>
+          <div class="cell c-blue"></div>
+          <div class="cell c-red"></div>
+          <div class="cell c-green"></div>
+          <div class="cell c-red"></div>
+          <div class="cell c-blue"></div>
+          <div class="cell c-red"></div>
+          <div class="cell c-red"></div>
+          <div class="cell c-red"></div>
+          <div class="cell c-red"></div>
+          <div class="cell c-green"></div>
+        </div>
+        <div class="demo-steps">
+          <div class="demo-step"><span class="step-num">&#x1F4A1;</span> 빨간 영역이 파편화되어 있음 (3+3+2+...)</div>
+          <div class="demo-step"><span class="step-num">1</span> 먼저 파란/초록을 빨간으로 칠해서 영역 연결</div>
+          <div class="demo-step"><span class="step-num">2</span> 큰 빨간 영역을 다른 색으로 한 번에 BFS!</div>
+          <div class="demo-step"><span class="step-num step-good">&#x2713;</span> 12칸 이상 달성 시 클리어</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</section>
+
+<!-- ============================================================ -->
+<!-- CATEGORY B: LINE DESTROY -->
+<!-- ============================================================ -->
+<section class="section">
+  <h2>B. Line Destroy에서 파생되는 목표</h2>
+  <p class="subtitle">"파괴"의 조건을 다양하게 &mdash; 기존 destroy_blocks의 확장</p>
+
+  <!-- B1: Target Lines -->
+  <div class="obj-card is-new">
+    <div class="obj-header">
+      <div class="obj-icon" style="background:rgba(253,203,110,0.2);">&#x1F3AF;</div>
+      <h3>Target Lines <span style="color:var(--text-dim); font-weight:400;">&mdash; 지정 라인 파괴</span></h3>
+      <span class="obj-tag tag-source">Destroy</span>
+      <span class="tag-impl impl-easy">Easy Impl</span>
+      <span class="tag-priority pri-1">P1</span>
+    </div>
+    <div class="obj-body">
+      <div class="obj-desc">
+        <h4>Rule</h4>
+        <ul>
+          <li><strong>특정 행 또는 열</strong>을 파괴해야 클리어</li>
+          <li>하이라이트된 행/열이 목표로 표시됨</li>
+          <li>아무 행이나 파괴하면 되는 게 아님 &rarr; 정밀한 색 배치 필요</li>
+          <li>여러 지정 라인을 동시에 요구할 수 있음</li>
+        </ul>
+        <div class="obj-json">{
+  "goal": {
+    "type": "target_lines",
+    "targets": [
+      {"axis": "row", "index": 1},
+      {"axis": "row", "index": 3},
+      {"axis": "col", "index": 2}
+    ]
+  }
+}</div>
+      </div>
+      <div class="demo-area">
+        <h4>Example: "2행, 4행, 3열을 파괴하라"</h4>
+        <div class="mini-grid g5">
+          <div class="cell c-red"></div>
+          <div class="cell c-blue"></div>
+          <div class="cell c-green"></div>
+          <div class="cell c-red"></div>
+          <div class="cell c-blue"></div>
+
+          <div class="cell c-blue"><div class="ov ov-goal"></div></div>
+          <div class="cell c-green"><div class="ov ov-goal"></div></div>
+          <div class="cell c-blue"><div class="ov ov-goal"></div></div>
+          <div class="cell c-red"><div class="ov ov-goal"></div></div>
+          <div class="cell c-blue"><div class="ov ov-goal"></div></div>
+
+          <div class="cell c-green"></div>
+          <div class="cell c-red"></div>
+          <div class="cell c-blue"><div class="ov ov-goal"></div></div>
+          <div class="cell c-green"></div>
+          <div class="cell c-red"></div>
+
+          <div class="cell c-red"><div class="ov ov-goal"></div></div>
+          <div class="cell c-blue"><div class="ov ov-goal"></div></div>
+          <div class="cell c-red"><div class="ov ov-goal"></div></div>
+          <div class="cell c-green"><div class="ov ov-goal"></div></div>
+          <div class="cell c-red"><div class="ov ov-goal"></div></div>
+
+          <div class="cell c-blue"></div>
+          <div class="cell c-green"></div>
+          <div class="cell c-red"><div class="ov ov-goal"></div></div>
+          <div class="cell c-blue"></div>
+          <div class="cell c-green"></div>
+        </div>
+        <div class="demo-steps">
+          <div class="demo-step"><span class="step-num">&#x1F4A1;</span> 금테 = 목표 라인. 2행/4행(가로) + 3열(세로)</div>
+          <div class="demo-step"><span class="step-num">1</span> 2행을 파란색으로 통일 &rarr; 파괴! [1/3]</div>
+          <div class="demo-step"><span class="step-num">2</span> 낙하 후 새 배치에서 4행 처리</div>
+          <div class="demo-step"><span class="step-num step-good">&#x2713;</span> 3개 라인 모두 파괴 시 클리어</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- B2: Chain Combo -->
+  <div class="obj-card is-new">
+    <div class="obj-header">
+      <div class="obj-icon" style="background:rgba(162,155,254,0.2);">&#x26A1;</div>
+      <h3>Chain Combo <span style="color:var(--text-dim); font-weight:400;">&mdash; 연쇄 달성</span></h3>
+      <span class="obj-tag tag-source">Destroy</span>
+      <span class="tag-impl impl-easy">Easy Impl</span>
+      <span class="tag-priority pri-2">P2</span>
+    </div>
+    <div class="obj-body">
+      <div class="obj-desc">
+        <h4>Rule</h4>
+        <ul>
+          <li><strong>1액션에서 N연쇄 이상</strong> 달성</li>
+          <li>라인 파괴 &rarr; 낙하 &rarr; 자연스럽게 새 라인 완성의 반복</li>
+          <li>연쇄가 일어나도록 보드를 미리 세팅하는 전략</li>
+          <li>"3연쇄 1회" 또는 "2연쇄 3회" 등 변형</li>
+        </ul>
+        <div class="obj-json">{
+  "goal": {
+    "type": "chain_combo",
+    "min_chain": 3,
+    "required_times": 1
+  }
+}</div>
+      </div>
+      <div class="demo-area">
+        <h4>Example: "3연쇄를 1번 달성하라"</h4>
+        <div class="mini-grid g5">
+          <div class="cell c-green"></div>
+          <div class="cell c-green"></div>
+          <div class="cell c-green"></div>
+          <div class="cell c-green"></div>
+          <div class="cell c-green"></div>
+
+          <div class="cell c-red"></div>
+          <div class="cell c-blue"></div>
+          <div class="cell c-red"></div>
+          <div class="cell c-red"></div>
+          <div class="cell c-red"></div>
+
+          <div class="cell c-blue"></div>
+          <div class="cell c-blue"></div>
+          <div class="cell c-blue"></div>
+          <div class="cell c-blue"></div>
+          <div class="cell c-blue"></div>
+
+          <div class="cell c-red highlight"></div>
+          <div class="cell c-green"></div>
+          <div class="cell c-red"></div>
+          <div class="cell c-red"></div>
+          <div class="cell c-red"></div>
+
+          <div class="cell c-green"></div>
+          <div class="cell c-blue"></div>
+          <div class="cell c-red"></div>
+          <div class="cell c-blue"></div>
+          <div class="cell c-green"></div>
+        </div>
+        <div class="demo-steps">
+          <div class="demo-step"><span class="step-num">1</span> 4행의 초록을 빨강으로 &rarr; 4행 빨강 완성 &rarr; 파괴</div>
+          <div class="demo-step"><span class="step-num">2</span> 낙하 &rarr; 3행(파란) 유지 &rarr; 파괴 (2연쇄)</div>
+          <div class="demo-step"><span class="step-num">3</span> 낙하 &rarr; 1행(초록)이 내려오며 완성 &rarr; 파괴 (3연쇄!)</div>
+          <div class="demo-step"><span class="step-num step-good">&#x2713;</span> 3연쇄 달성! 클리어</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- B3: Color Destroy -->
+  <div class="obj-card is-new">
+    <div class="obj-header">
+      <div class="obj-icon" style="background:rgba(231,76,60,0.2);">&#x1F534;</div>
+      <h3>Color Destroy <span style="color:var(--text-dim); font-weight:400;">&mdash; 색 지정 파괴</span></h3>
+      <span class="obj-tag tag-source">Destroy</span>
+      <span class="tag-impl impl-easy">Easy Impl</span>
+      <span class="tag-priority pri-1">P1</span>
+    </div>
+    <div class="obj-body">
+      <div class="obj-desc">
+        <h4>Rule</h4>
+        <ul>
+          <li><strong>특정 색 블록을 N개 이상 파괴</strong></li>
+          <li>아무 라인이나 터트리는 게 아니라, 목표 색이 포함된 라인을 노려야</li>
+          <li>"파란 블록 15개 파괴" &mdash; 파란색으로 라인을 만들어야 의미 있음</li>
+          <li>다중 색 목표도 가능: "빨강 10개 + 초록 8개"</li>
+        </ul>
+        <div class="obj-json">{
+  "goal": {
+    "type": "color_destroy",
+    "targets": [
+      {"color": 0, "count": 15},
+      {"color": 2, "count": 8}
+    ]
+  }
+}</div>
+      </div>
+      <div class="demo-area">
+        <h4>Example: "파란 블록 15개 파괴"</h4>
+        <div class="hud-mock">
+          <div class="hud-item"><span class="hi-icon">&#x1F535;</span> Blue <span class="hi-val">9 / 15</span></div>
+          <div class="hud-item"><span class="hi-icon">&#x1F4C0;</span> Turns <span class="hi-val">6</span></div>
+        </div>
+        <div class="demo-steps">
+          <div class="demo-step"><span class="step-num">&#x1F4A1;</span> 큐에 파란색이 나오면 &rarr; 파란 라인 완성에 집중</div>
+          <div class="demo-step"><span class="step-num">&#x1F914;</span> 빨간색으로 라인 완성해도 목표에 안 세임</div>
+          <div class="demo-step"><span class="step-num">!</span> 큐 순서 관리가 핵심 전략이 됨</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</section>
+
+<!-- ============================================================ -->
+<!-- CATEGORY C: GIMMICK -->
+<!-- ============================================================ -->
+<section class="section">
+  <h2>C. Gimmick에서 파생되는 목표</h2>
+  <p class="subtitle">기믹 제거 자체가 클리어 조건 &mdash; 기믹 리뉴얼과 시너지</p>
+
+  <!-- C1: Break Ice -->
+  <div class="obj-card is-new">
+    <div class="obj-header">
+      <div class="obj-icon" style="background:rgba(52,152,219,0.2);">&#x1F9CA;</div>
+      <h3>Break All Ice <span style="color:var(--text-dim); font-weight:400;">&mdash; 얼음 전파괴</span></h3>
+      <span class="obj-tag tag-source">Gimmick</span>
+      <span class="tag-impl impl-easy">Easy Impl</span>
+      <span class="tag-priority pri-1">P1</span>
+    </div>
+    <div class="obj-body">
+      <div class="obj-desc">
+        <h4>Rule</h4>
+        <ul>
+          <li>보드의 <strong>모든 얼음을 제거</strong>하면 클리어</li>
+          <li>얼음 내구도 2~3 &rarr; 여러 번 라인에 포함시켜야</li>
+          <li>Royal Match의 "Grass 모두 제거"와 동일 패턴</li>
+          <li>블록 파괴 수는 상관없음 &mdash; 얼음만 깨면 됨</li>
+        </ul>
+        <div class="obj-json">{
+  "goal": {
+    "type": "clear_gimmick",
+    "gimmick": "ICE",
+    "target_count": 8
+  }
+}</div>
+      </div>
+      <div class="demo-area">
+        <h4>Example: "얼음 8개를 모두 깨라"</h4>
+        <div class="mini-grid g5">
+          <div class="cell c-red"><div class="ov ov-ice">2</div></div>
+          <div class="cell c-blue"></div>
+          <div class="cell c-green"><div class="ov ov-ice">2</div></div>
+          <div class="cell c-red"></div>
+          <div class="cell c-blue"><div class="ov ov-ice">1</div></div>
+          <div class="cell c-green"></div>
+          <div class="cell c-red"><div class="ov ov-ice">2</div></div>
+          <div class="cell c-blue"></div>
+          <div class="cell c-green"><div class="ov ov-ice">2</div></div>
+          <div class="cell c-red"></div>
+          <div class="cell c-blue"><div class="ov ov-ice">1</div></div>
+          <div class="cell c-green"></div>
+          <div class="cell c-red"><div class="ov ov-ice">2</div></div>
+          <div class="cell c-blue"></div>
+          <div class="cell c-green"><div class="ov ov-ice">1</div></div>
+        </div>
+        <div class="demo-steps">
+          <div class="demo-step"><span class="step-num">&#x1F4A1;</span> 얼음 8개가 보드 곳곳에 흩어져 있음</div>
+          <div class="demo-step"><span class="step-num">1</span> 얼음칸이 포함된 행/열을 파괴 &rarr; 내구도 -1</div>
+          <div class="demo-step"><span class="step-num">2</span> 내구도 2칸은 2번 파괴해야 &rarr; 턴 관리 중요</div>
+          <div class="demo-step"><span class="step-num step-good">&#x2713;</span> 모든 얼음 내구도 0 시 클리어</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- C2: Defuse Bombs -->
+  <div class="obj-card is-new">
+    <div class="obj-header">
+      <div class="obj-icon" style="background:rgba(231,76,60,0.2);">&#x1F4A3;</div>
+      <h3>Defuse Bombs <span style="color:var(--text-dim); font-weight:400;">&mdash; 폭탄 해체</span></h3>
+      <span class="obj-tag tag-source">Gimmick</span>
+      <span class="tag-impl impl-medium">Medium Impl</span>
+      <span class="tag-priority pri-2">P2</span>
+    </div>
+    <div class="obj-body">
+      <div class="obj-desc">
+        <h4>Rule</h4>
+        <ul>
+          <li>폭탄이 <strong>하나라도 폭발하면 실패</strong></li>
+          <li>모든 폭탄을 카운트다운 안에 파괴해야 클리어</li>
+          <li>폭탄마다 카운트가 다를 수 있음 (3턴, 5턴...)</li>
+          <li>극도의 긴장감 + 우선순위 판단 스테이지</li>
+        </ul>
+        <div class="obj-json">{
+  "goal": {
+    "type": "defuse_bombs",
+    "fail_on_explode": true
+  }
+}</div>
+      </div>
+      <div class="demo-area">
+        <h4>Example: "폭탄을 하나도 터뜨리지 마라"</h4>
+        <div class="mini-grid g5">
+          <div class="cell c-red"></div>
+          <div class="cell c-blue"><div class="ov ov-bomb">5</div></div>
+          <div class="cell c-green"></div>
+          <div class="cell c-red"></div>
+          <div class="cell c-blue"></div>
+          <div class="cell c-green"></div>
+          <div class="cell c-red"></div>
+          <div class="cell c-blue"></div>
+          <div class="cell c-green"></div>
+          <div class="cell c-red"><div class="ov ov-bomb">3</div></div>
+          <div class="cell c-blue"></div>
+          <div class="cell c-green"></div>
+          <div class="cell c-red"></div>
+          <div class="cell c-blue"></div>
+          <div class="cell c-green"><div class="ov ov-bomb">4</div></div>
+        </div>
+        <div class="demo-steps">
+          <div class="demo-step"><span class="step-num step-bad">!</span> 폭탄3(3턴)이 가장 급함!</div>
+          <div class="demo-step"><span class="step-num">1</span> 2행을 먼저 처리해서 폭탄3 제거</div>
+          <div class="demo-step"><span class="step-num">2</span> 다음은 폭탄4 &rarr; 폭탄5 순서로</div>
+          <div class="demo-step"><span class="step-num step-good">&#x2713;</span> 모든 폭탄 제거 + 폭발 0회 시 클리어</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- C3: Purify -->
+  <div class="obj-card is-new">
+    <div class="obj-header">
+      <div class="obj-icon" style="background:rgba(142,68,173,0.2);">&#x2623;&#xFE0F;</div>
+      <h3>Purify <span style="color:var(--text-dim); font-weight:400;">&mdash; 오염 정화</span></h3>
+      <span class="obj-tag tag-source">Gimmick</span>
+      <span class="tag-impl impl-medium">Medium Impl</span>
+      <span class="tag-priority pri-2">P2</span>
+    </div>
+    <div class="obj-body">
+      <div class="obj-desc">
+        <h4>Rule</h4>
+        <ul>
+          <li>보드의 <strong>모든 오염을 제거</strong>하면 클리어</li>
+          <li>오염은 매 턴 증식 &rarr; 빨리 처리하지 않으면 끝없이 늘어남</li>
+          <li>BFS 리컬러로 정화 가능하지만, 오염 확산 속도와 경쟁</li>
+          <li>"N턴 동안 오염 X칸 이하 유지" 변형도 가능 (방어 모드)</li>
+        </ul>
+        <div class="obj-json">{
+  "goal": {
+    "type": "purify_taint",
+    "target_remaining": 0
+  }
+}</div>
+      </div>
+      <div class="demo-area">
+        <h4>Example: "오염을 완전히 제거하라"</h4>
+        <div class="mini-grid g5">
+          <div class="cell c-red"></div>
+          <div class="cell c-blue"></div>
+          <div class="cell c-taint">&#x2623;</div>
+          <div class="cell c-green"></div>
+          <div class="cell c-red"></div>
+          <div class="cell c-green"></div>
+          <div class="cell c-taint">&#x2623;</div>
+          <div class="cell c-taint">&#x2623;</div>
+          <div class="cell c-blue"></div>
+          <div class="cell c-green"></div>
+          <div class="cell c-blue"></div>
+          <div class="cell c-red"></div>
+          <div class="cell c-taint">&#x2623;</div>
+          <div class="cell c-red"></div>
+          <div class="cell c-blue"></div>
+        </div>
+        <div class="demo-steps">
+          <div class="demo-step"><span class="step-num step-bad">!</span> 오염 4칸. 매 턴 +1~2칸씩 증식 중</div>
+          <div class="demo-step"><span class="step-num">1</span> 오염칸을 포함하여 BFS 리컬러 &rarr; 정화</div>
+          <div class="demo-step"><span class="step-num">2</span> 하지만 턴 종료 시 남은 오염이 다시 증식</div>
+          <div class="demo-step"><span class="step-num">&#x1F4A1;</span> 증식보다 빠르게 정화해야 승리</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</section>
+
+<!-- ============================================================ -->
+<!-- CATEGORY D: GRAVITY / BOARD -->
+<!-- ============================================================ -->
+<section class="section">
+  <h2>D. Gravity / Board에서 파생되는 목표</h2>
+  <p class="subtitle">낙하와 보드 구조를 활용한 목표 &mdash; Royal Match King 구출의 Pictory 버전</p>
+
+  <!-- D1: Drop Down -->
+  <div class="obj-card is-new">
+    <div class="obj-header">
+      <div class="obj-icon" style="background:rgba(108,92,231,0.2);">&#x2B07;&#xFE0F;</div>
+      <h3>Drop Down <span style="color:var(--text-dim); font-weight:400;">&mdash; 낙하 수집</span></h3>
+      <span class="obj-tag tag-source">Gravity</span>
+      <span class="tag-impl impl-medium">Medium Impl</span>
+      <span class="tag-priority pri-1">P1</span>
+    </div>
+    <div class="obj-body">
+      <div class="obj-desc">
+        <h4>Rule</h4>
+        <ul>
+          <li>특수 오브젝트를 <strong>맨 아래 행까지 떨어뜨리기</strong></li>
+          <li>오브젝트 아래의 블록을 파괴하면 낙하</li>
+          <li>앵커(Anchor)가 방해 &mdash; 오브젝트 경로를 막음</li>
+          <li>Royal Match의 King 구출, Candy Crush의 Ingredient와 동일 패턴</li>
+        </ul>
+        <div class="obj-json">{
+  "goal": {
+    "type": "drop_down",
+    "items": [
+      {"x": 1, "y": 0},
+      {"x": 3, "y": 0}
+    ]
+  }
+}</div>
+      </div>
+      <div class="demo-area">
+        <h4>Example: "보석 2개를 바닥까지 떨어뜨려라"</h4>
+        <div class="mini-grid g5">
+          <div class="cell c-red"></div>
+          <div class="cell c-blue"><div class="ov ov-drop">&#x1F48E;</div></div>
+          <div class="cell c-green"></div>
+          <div class="cell c-red"><div class="ov ov-drop">&#x1F48E;</div></div>
+          <div class="cell c-blue"></div>
+          <div class="cell c-green"></div>
+          <div class="cell c-red"></div>
+          <div class="cell c-blue"></div>
+          <div class="cell c-green"></div>
+          <div class="cell c-red"></div>
+          <div class="cell c-blue"></div>
+          <div class="cell c-green"></div>
+          <div class="cell c-red"></div>
+          <div class="cell c-blue"></div>
+          <div class="cell c-green"></div>
+          <div class="cell c-red"></div>
+          <div class="cell c-blue"></div>
+          <div class="cell c-green"></div>
+          <div class="cell c-red"></div>
+          <div class="cell c-blue"></div>
+          <div class="cell c-empty" style="border-bottom:3px solid var(--success);"></div>
+          <div class="cell c-empty" style="border-bottom:3px solid var(--success);"></div>
+          <div class="cell c-empty" style="border-bottom:3px solid var(--success);"></div>
+          <div class="cell c-empty" style="border-bottom:3px solid var(--success);"></div>
+          <div class="cell c-empty" style="border-bottom:3px solid var(--success);"></div>
+        </div>
+        <div class="demo-steps">
+          <div class="demo-step"><span class="step-num">&#x1F48E;</span> 보석은 색이 없음. 파괴 불가. 낙하만 함.</div>
+          <div class="demo-step"><span class="step-num">1</span> 보석 아래의 행을 파괴 &rarr; 보석 1칸 낙하</div>
+          <div class="demo-step"><span class="step-num">2</span> 반복해서 아래행을 계속 파괴</div>
+          <div class="demo-step"><span class="step-num step-good">&#x2713;</span> 보석이 초록 라인(바닥)에 도달하면 수집!</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- D2: Clear Zone -->
+  <div class="obj-card is-new">
+    <div class="obj-header">
+      <div class="obj-icon" style="background:rgba(253,203,110,0.2);">&#x1F532;</div>
+      <h3>Clear Zone <span style="color:var(--text-dim); font-weight:400;">&mdash; 영역 비우기</span></h3>
+      <span class="obj-tag tag-source">Board</span>
+      <span class="tag-impl impl-medium">Medium Impl</span>
+      <span class="tag-priority pri-2">P2</span>
+    </div>
+    <div class="obj-body">
+      <div class="obj-desc">
+        <h4>Rule</h4>
+        <ul>
+          <li>보드의 <strong>하이라이트된 영역</strong> 내 모든 셀을 파괴</li>
+          <li>영역 밖은 자유 &mdash; 영역 안의 셀만 파괴하면 됨</li>
+          <li>영역이 비연속적일 수 있음 (좌하단 + 우상단)</li>
+          <li>낙하로 새 블록이 채워지면 다시 파괴해야 할 수도</li>
+        </ul>
+        <div class="obj-json">{
+  "goal": {
+    "type": "clear_zone",
+    "zone": [
+      [1,1],[2,1],[3,1],
+      [1,2],[2,2],[3,2],
+      [1,3],[2,3],[3,3]
+    ]
+  }
+}</div>
+      </div>
+      <div class="demo-area">
+        <h4>Example: "3x3 영역을 비워라"</h4>
+        <div class="mini-grid g5">
+          <div class="cell c-red"></div>
+          <div class="cell c-blue"></div>
+          <div class="cell c-green"></div>
+          <div class="cell c-red"></div>
+          <div class="cell c-blue"></div>
+          <div class="cell c-green"></div>
+          <div class="cell c-red"><div class="ov ov-zone"></div></div>
+          <div class="cell c-blue"><div class="ov ov-zone"></div></div>
+          <div class="cell c-green"><div class="ov ov-zone"></div></div>
+          <div class="cell c-red"></div>
+          <div class="cell c-blue"></div>
+          <div class="cell c-green"><div class="ov ov-zone"></div></div>
+          <div class="cell c-red"><div class="ov ov-zone"></div></div>
+          <div class="cell c-blue"><div class="ov ov-zone"></div></div>
+          <div class="cell c-green"></div>
+          <div class="cell c-red"></div>
+          <div class="cell c-blue"><div class="ov ov-zone"></div></div>
+          <div class="cell c-green"><div class="ov ov-zone"></div></div>
+          <div class="cell c-red"><div class="ov ov-zone"></div></div>
+          <div class="cell c-blue"></div>
+        </div>
+        <div class="demo-steps">
+          <div class="demo-step"><span class="step-num">&#x1F4A1;</span> 점선 테두리 = 목표 영역 (3x3)</div>
+          <div class="demo-step"><span class="step-num">1</span> 영역 내 셀이 포함된 행/열 파괴</div>
+          <div class="demo-step"><span class="step-num">2</span> 낙하로 영역에 새 블록이 채워질 수 있음</div>
+          <div class="demo-step"><span class="step-num step-good">&#x2713;</span> 영역 내 "파괴된 횟수"로 판정 (1회 이상)</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- D3: Collect Items -->
+  <div class="obj-card is-new">
+    <div class="obj-header">
+      <div class="obj-icon" style="background:rgba(0,184,148,0.2);">&#x1F36C;</div>
+      <h3>Collect Items <span style="color:var(--text-dim); font-weight:400;">&mdash; 아이템 수집</span></h3>
+      <span class="obj-tag tag-source">Gravity + Destroy</span>
+      <span class="tag-impl impl-medium">Medium Impl</span>
+      <span class="tag-priority pri-1">P1</span>
+    </div>
+    <div class="obj-body">
+      <div class="obj-desc">
+        <h4>Rule</h4>
+        <ul>
+          <li>보드에 흩어진 <strong>수집 아이템</strong>을 모두 회수</li>
+          <li>아이템이 포함된 셀이 라인 파괴되면 수집됨</li>
+          <li>아이템 자체는 색이 없고 어떤 색 라인에든 포함 가능</li>
+          <li>Candy Crush의 Ingredient, Royal Match의 수집 오브젝트 패턴</li>
+        </ul>
+        <div class="obj-json">{
+  "goal": {
+    "type": "collect_items",
+    "item_type": "gem",
+    "target_count": 5
+  }
+}</div>
+      </div>
+      <div class="demo-area">
+        <h4>Example: "보석 5개를 수집하라"</h4>
+        <div class="mini-grid g5">
+          <div class="cell c-red"><div class="ov ov-collect">&#x1F48E;</div></div>
+          <div class="cell c-blue"></div>
+          <div class="cell c-green"></div>
+          <div class="cell c-red"></div>
+          <div class="cell c-blue"><div class="ov ov-collect">&#x1F48E;</div></div>
+          <div class="cell c-green"></div>
+          <div class="cell c-red"></div>
+          <div class="cell c-blue"><div class="ov ov-collect">&#x1F48E;</div></div>
+          <div class="cell c-green"></div>
+          <div class="cell c-red"></div>
+          <div class="cell c-blue"></div>
+          <div class="cell c-green"><div class="ov ov-collect">&#x1F48E;</div></div>
+          <div class="cell c-red"></div>
+          <div class="cell c-blue"></div>
+          <div class="cell c-green"><div class="ov ov-collect">&#x1F48E;</div></div>
+        </div>
+        <div class="demo-steps">
+          <div class="demo-step"><span class="step-num">&#x1F48E;</span> 보석은 셀 위에 올려진 수집 대상</div>
+          <div class="demo-step"><span class="step-num">1</span> 보석이 있는 셀이 포함된 라인 파괴 &rarr; 수집!</div>
+          <div class="demo-step"><span class="step-num">2</span> 보석은 낙하함 &rarr; 위치가 바뀜</div>
+          <div class="demo-step"><span class="step-num step-good">&#x2713;</span> 5개 모두 수집 시 클리어</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</section>
+
+<!-- ============================================================ -->
+<!-- CATEGORY E: MULTI / BOSS -->
+<!-- ============================================================ -->
+<section class="section">
+  <h2>E. Complex Objectives &mdash; 복합/보스</h2>
+  <p class="subtitle">단일 목표의 조합, 또는 특수 조건 &mdash; 후반 스테이지의 꽃</p>
+
+  <!-- E1: Multi-Goal -->
+  <div class="obj-card is-new">
+    <div class="obj-header">
+      <div class="obj-icon" style="background:rgba(253,203,110,0.2);">&#x1F4CB;</div>
+      <h3>Multi-Goal <span style="color:var(--text-dim); font-weight:400;">&mdash; 복합 목표</span></h3>
+      <span class="obj-tag tag-source">Composite</span>
+      <span class="tag-impl impl-medium">Medium Impl</span>
+      <span class="tag-priority pri-1">P1</span>
+    </div>
+    <div class="obj-body">
+      <div class="obj-desc">
+        <h4>Rule</h4>
+        <ul>
+          <li><strong>2~3개 목표를 동시에 달성</strong>해야 클리어</li>
+          <li>"얼음 6개 깨기 + 블록 20개 파괴" 같은 조합</li>
+          <li>"보석 3개 수집 + 오염 정화" 같은 조합</li>
+          <li>HUD에 여러 목표 진행도가 나란히 표시됨</li>
+          <li>모든 단일 목표를 재료로 사용 가능</li>
+        </ul>
+        <div class="obj-json">{
+  "goal": {
+    "type": "multi",
+    "conditions": [
+      {"type": "clear_gimmick", "gimmick": "ICE", "target_count": 6},
+      {"type": "destroy_blocks", "target_count": 20}
+    ]
+  }
+}</div>
+      </div>
+      <div class="demo-area">
+        <h4>HUD Example</h4>
+        <div class="hud-mock">
+          <div class="hud-item"><span class="hi-icon">&#x1F9CA;</span> Ice <span class="hi-val">4 / 6</span></div>
+          <div class="hud-item"><span class="hi-icon">&#x1F4A5;</span> Blocks <span class="hi-val">14 / 20</span></div>
+          <div class="hud-item"><span class="hi-icon">&#x1F4C0;</span> Turns <span class="hi-val">5</span></div>
+        </div>
+        <div class="demo-steps">
+          <div class="demo-step"><span class="step-num">&#x1F4A1;</span> 두 목표의 우선순위를 매 턴 판단</div>
+          <div class="demo-step"><span class="step-num">&#x1F914;</span> 얼음 깨기에 집중하면 블록 파괴가 부족</div>
+          <div class="demo-step"><span class="step-num">!</span> 얼음이 포함된 라인을 파괴하면 양쪽 모두 진행</div>
+          <div class="demo-step"><span class="step-num step-good">&#x2713;</span> 두 조건 모두 달성해야 클리어</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- E2: Boss Stage -->
+  <div class="obj-card is-new">
+    <div class="obj-header">
+      <div class="obj-icon" style="background:rgba(225,112,85,0.2);">&#x1F479;</div>
+      <h3>Boss Stage <span style="color:var(--text-dim); font-weight:400;">&mdash; 보스전</span></h3>
+      <span class="obj-tag tag-source">Special</span>
+      <span class="tag-impl impl-hard">Hard Impl</span>
+      <span class="tag-priority pri-3">P3</span>
+    </div>
+    <div class="obj-body">
+      <div class="obj-desc">
+        <h4>Rule</h4>
+        <ul>
+          <li>챕터 마지막 스테이지에 등장하는 <strong>보스 셀</strong></li>
+          <li>보스는 HP가 있으며, 라인 파괴로 데미지</li>
+          <li>보스는 매 N턴마다 <strong>방해 행동</strong> (얼음 생성, 셀 잠금 등)</li>
+          <li>보스 HP를 0으로 만들면 클리어</li>
+          <li>파티 스킬이 특히 빛나는 스테이지</li>
+        </ul>
+        <div class="obj-json">{
+  "goal": {
+    "type": "boss",
+    "boss_hp": 30,
+    "boss_action_interval": 3,
+    "boss_actions": ["spawn_ice", "lock_random"]
+  }
+}</div>
+      </div>
+      <div class="demo-area">
+        <h4>Example: Chapter 3 Boss</h4>
+        <div class="hud-mock">
+          <div class="hud-item"><span class="hi-icon">&#x1F479;</span> Boss HP <span class="hi-val">18 / 30</span></div>
+          <div class="hud-item"><span class="hi-icon">&#x26A0;&#xFE0F;</span> Next Attack <span class="hi-val">1 turn</span></div>
+          <div class="hud-item"><span class="hi-icon">&#x1F4C0;</span> Turns <span class="hi-val">8</span></div>
+        </div>
+        <div class="demo-steps">
+          <div class="demo-step"><span class="step-num">&#x1F479;</span> 보스가 보드 상단에 위치 (2~3칸 점유)</div>
+          <div class="demo-step"><span class="step-num">1</span> 라인 파괴 &rarr; 파괴된 블록 수만큼 보스에게 데미지</div>
+          <div class="demo-step"><span class="step-num step-bad">2</span> 3턴마다 보스 공격! 랜덤 셀에 얼음 생성</div>
+          <div class="demo-step"><span class="step-num">3</span> 연쇄 콤보로 대량 파괴 &rarr; 큰 데미지</div>
+          <div class="demo-step"><span class="step-num step-good">&#x2713;</span> HP 0 시 보스 처치, 챕터 클리어!</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- E3: Survival -->
+  <div class="obj-card is-new">
+    <div class="obj-header">
+      <div class="obj-icon" style="background:rgba(0,184,148,0.2);">&#x1F6E1;&#xFE0F;</div>
+      <h3>Survival <span style="color:var(--text-dim); font-weight:400;">&mdash; 생존</span></h3>
+      <span class="obj-tag tag-source">Special</span>
+      <span class="tag-impl impl-medium">Medium Impl</span>
+      <span class="tag-priority pri-3">P3</span>
+    </div>
+    <div class="obj-body">
+      <div class="obj-desc">
+        <h4>Rule</h4>
+        <ul>
+          <li><strong>N턴 동안 생존</strong>하면 클리어</li>
+          <li>매 턴 오염, 폭탄, 얼음이 지속 생성됨</li>
+          <li>보드가 특정 비율 이상 오염/얼음이면 실패</li>
+          <li>공격보다 방어에 집중하는 색다른 플레이</li>
+        </ul>
+        <div class="obj-json">{
+  "goal": {
+    "type": "survival",
+    "survive_turns": 15,
+    "fail_condition": {
+      "taint_percent_over": 60
+    },
+    "per_turn_spawn": [
+      {"gimmick": "TAINT", "count": 1},
+      {"gimmick": "BOMB", "count_every_n": 3}
+    ]
+  }
+}</div>
+      </div>
+      <div class="demo-area">
+        <h4>Example: "15턴 동안 버텨라"</h4>
+        <div class="hud-mock">
+          <div class="hud-item"><span class="hi-icon">&#x1F6E1;&#xFE0F;</span> Survive <span class="hi-val">Turn 8 / 15</span></div>
+          <div class="hud-item"><span class="hi-icon">&#x2623;&#xFE0F;</span> Taint <span class="hi-val">24% / 60%</span></div>
+        </div>
+        <div class="demo-steps">
+          <div class="demo-step"><span class="step-num">1</span> 매 턴 오염 +1칸 자동 생성</div>
+          <div class="demo-step"><span class="step-num">2</span> 3턴마다 폭탄도 추가 등장</div>
+          <div class="demo-step"><span class="step-num step-bad">!</span> 오염이 60% 넘으면 즉시 실패</div>
+          <div class="demo-step"><span class="step-num">&#x1F4A1;</span> 파괴 + 정화를 균형있게 반복</div>
+          <div class="demo-step"><span class="step-num step-good">&#x2713;</span> 15턴 도달 시 클리어</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</section>
+
+<!-- ============================================================ -->
+<!-- PRIORITY MATRIX -->
+<!-- ============================================================ -->
+<section class="section">
+  <h2>Implementation Priority</h2>
+  <p class="subtitle">구현 난이도 + 게임플레이 임팩트 기준 우선순위</p>
+
+  <div class="priority-grid">
+    <div class="pri-group" style="border-color: rgba(225,112,85,0.3);">
+      <h3 style="color: var(--danger);">P1 &mdash; Must Have (Core Variety)</h3>
+      <p style="color:var(--text-dim); font-size:0.82em; margin-bottom:10px;">기존 시스템 최소 수정으로 즉시 적용 가능. 목표 다양성의 기반.</p>
+      <ul>
+        <li><strong>Color Domination</strong> &mdash; Pictory만의 독자 목표</li>
+        <li><strong>Target Lines</strong> &mdash; "아무 행"이 아닌 "지정 행" 파괴</li>
+        <li><strong>Color Destroy</strong> &mdash; 색 지정 파괴로 큐 관리 전략</li>
+        <li><strong>Break All Ice</strong> &mdash; 기믹 제거 목표의 표준</li>
+        <li><strong>Collect Items</strong> &mdash; 수집 오브젝트 시스템</li>
+        <li><strong>Drop Down</strong> &mdash; 낙하 활용 (가장 인기 있는 목표 유형)</li>
+        <li><strong>Multi-Goal</strong> &mdash; 위 목표들을 조합하는 프레임워크</li>
+      </ul>
+    </div>
+
+    <div class="pri-group" style="border-color: rgba(253,203,110,0.3);">
+      <h3 style="color: var(--warn);">P2 &mdash; Should Have (Depth)</h3>
+      <p style="color:var(--text-dim); font-size:0.82em; margin-bottom:10px;">게임에 깊이를 더하는 도전적 목표. P1 구현 후 순차 적용.</p>
+      <ul>
+        <li><strong>Paint All</strong> &mdash; 탐색형 퍼즐 목표</li>
+        <li><strong>Big Flood</strong> &mdash; 대규모 BFS 도전</li>
+        <li><strong>Chain Combo</strong> &mdash; 연쇄 설계 목표</li>
+        <li><strong>Defuse Bombs</strong> &mdash; 긴장감 특화 스테이지</li>
+        <li><strong>Purify</strong> &mdash; 오염 기믹 활용 목표</li>
+        <li><strong>Clear Zone</strong> &mdash; 영역 지정 파괴</li>
+      </ul>
+    </div>
+
+    <div class="pri-group" style="border-color: rgba(149,165,166,0.3);">
+      <h3 style="color: var(--text-dim);">P3 &mdash; Nice to Have (Spectacle)</h3>
+      <p style="color:var(--text-dim); font-size:0.82em; margin-bottom:10px;">구현 비용이 높지만 강한 인상을 주는 스페셜 스테이지.</p>
+      <ul>
+        <li><strong>Boss Stage</strong> &mdash; 챕터 보스전</li>
+        <li><strong>Survival</strong> &mdash; 방어 모드</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- COMPARISON TABLE -->
+<!-- ============================================================ -->
+<section class="section">
+  <h2>Reference: Competitor Objective Comparison</h2>
+  <p class="subtitle">Pictory의 목표가 시장의 다른 게임과 어떻게 대응되는지</p>
+  <table class="compare-table">
+    <thead>
+      <tr>
+        <th>Pictory Objective</th>
+        <th>Royal Match</th>
+        <th>Candy Crush</th>
+        <th>Gardenscapes</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>Color Domination</strong></td>
+        <td style="color:var(--text-dim);">&mdash; (없음)</td>
+        <td style="color:var(--text-dim);">&mdash; (없음)</td>
+        <td style="color:var(--text-dim);">&mdash; (없음)</td>
+      </tr>
+      <tr>
+        <td><strong>Paint All</strong></td>
+        <td>Clear all Grass</td>
+        <td>Clear all Jelly</td>
+        <td>Clear all Grass</td>
+      </tr>
+      <tr>
+        <td><strong>Target Lines</strong></td>
+        <td style="color:var(--text-dim);">&mdash;</td>
+        <td>Order Mode</td>
+        <td style="color:var(--text-dim);">&mdash;</td>
+      </tr>
+      <tr>
+        <td><strong>Break All Ice</strong></td>
+        <td>Clear obstacles</td>
+        <td>Clear Frosting</td>
+        <td>Clear Ice/Stones</td>
+      </tr>
+      <tr>
+        <td><strong>Collect Items</strong></td>
+        <td>Collect King's treasure</td>
+        <td>Collect ingredients</td>
+        <td>Collect items</td>
+      </tr>
+      <tr>
+        <td><strong>Drop Down</strong></td>
+        <td>Save the King!</td>
+        <td>Drop ingredients</td>
+        <td>Drop items</td>
+      </tr>
+      <tr>
+        <td><strong>Color Destroy</strong></td>
+        <td style="color:var(--text-dim);">&mdash;</td>
+        <td>Collect N candies of color</td>
+        <td style="color:var(--text-dim);">&mdash;</td>
+      </tr>
+      <tr>
+        <td><strong>Defuse Bombs</strong></td>
+        <td>Defuse dynamite</td>
+        <td>Candy Bomb levels</td>
+        <td style="color:var(--text-dim);">&mdash;</td>
+      </tr>
+      <tr>
+        <td><strong>Boss Stage</strong></td>
+        <td>King's Nightmare</td>
+        <td style="color:var(--text-dim);">&mdash;</td>
+        <td style="color:var(--text-dim);">&mdash;</td>
+      </tr>
+      <tr style="background: rgba(0,206,201,0.05);">
+        <td><strong>Big Flood</strong></td>
+        <td colspan="3" style="color:var(--accent2); text-align:center;">Pictory Only &mdash; 컬러플러드 메커니즘 고유</td>
+      </tr>
+    </tbody>
+  </table>
+  <p style="color:var(--text-dim); font-size:0.82em; margin-top:12px;">
+    <strong>Color Domination</strong>과 <strong>Big Flood</strong>는 Pictory의 BFS 메커니즘에서만 가능한 독자 목표입니다.
+    다른 매치3 게임에서는 "칠하기" 자체가 존재하지 않기 때문에 이 목표를 만들 수 없습니다.
+  </p>
+</section>
+
+<footer style="text-align: center; color: var(--text-dim); padding: 40px 0 20px; font-size: 0.8em; border-top: 1px solid var(--border);">
+  Pictory Objective System Design &mdash; 2026-04-06 &mdash; "Same Core, Infinite Variety"
+</footer>
+
+</div>
+</body>
+</html>

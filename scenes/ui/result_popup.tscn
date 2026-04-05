@@ -20,9 +20,9 @@ anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
 offset_left = -160.0
-offset_top = -240.0
+offset_top = -180.0
 offset_right = 160.0
-offset_bottom = 240.0
+offset_bottom = 180.0
 grow_horizontal = 2
 grow_vertical = 2
 
@@ -36,50 +36,27 @@ theme_override_constants/separation = 12
 text = "스테이지 클리어!"
 horizontal_alignment = 1
 
-[node name="StarsContainer" type="HBoxContainer" parent="PanelContainer/VBox"]
-alignment = 1
-
-[node name="Star1" type="ColorRect" parent="PanelContainer/VBox/StarsContainer"]
-custom_minimum_size = Vector2(36, 36)
-color = Color(0.4, 0.4, 0.4, 1)
-
-[node name="Star2" type="ColorRect" parent="PanelContainer/VBox/StarsContainer"]
-custom_minimum_size = Vector2(36, 36)
-color = Color(0.4, 0.4, 0.4, 1)
-
-[node name="Star3" type="ColorRect" parent="PanelContainer/VBox/StarsContainer"]
-custom_minimum_size = Vector2(36, 36)
-color = Color(0.4, 0.4, 0.4, 1)
-
-[node name="ScoreLabel" type="Label" parent="PanelContainer/VBox"]
-text = "점수: 0"
+[node name="MessageLabel" type="Label" parent="PanelContainer/VBox"]
+text = ""
 horizontal_alignment = 1
-
-[node name="CurrencyLabel" type="Label" parent="PanelContainer/VBox"]
-text = "획득 재화: +0"
-horizontal_alignment = 1
-
-[node name="DestroyedLabel" type="Label" parent="PanelContainer/VBox"]
-text = "파괴 블록: 0개"
+autowrap_mode = 2
 visible = false
-horizontal_alignment = 1
-
-[node name="HighScoreLabel" type="Label" parent="PanelContainer/VBox"]
-text = "최고 기록: 0"
-visible = false
-horizontal_alignment = 1
 
 [node name="HSeparator" type="HSeparator" parent="PanelContainer/VBox"]
 
-[node name="ButtonContainer" type="HBoxContainer" parent="PanelContainer/VBox"]
+[node name="ButtonContainer" type="VBoxContainer" parent="PanelContainer/VBox"]
 alignment = 1
 theme_override_constants/separation = 8
 
-[node name="NextStageButton" type="Button" parent="PanelContainer/VBox/ButtonContainer"]
-text = "다음 스테이지로"
+[node name="ContinueButton" type="Button" parent="PanelContainer/VBox/ButtonContainer"]
+custom_minimum_size = Vector2(0, 48)
+text = "5턴 추가"
+visible = false
 
 [node name="RetryButton" type="Button" parent="PanelContainer/VBox/ButtonContainer"]
-text = "다시하기"
+custom_minimum_size = Vector2(0, 48)
+text = "재도전"
 
 [node name="MainMenuButton" type="Button" parent="PanelContainer/VBox/ButtonContainer"]
-text = "메인 화면으로"
+custom_minimum_size = Vector2(0, 48)
+text = "로비로 돌아가기"
