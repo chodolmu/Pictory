@@ -8,6 +8,11 @@ static func apply(grid: Grid) -> void:
 	for x in range(grid.grid_size):
 		_compact_column(grid, x)
 	_refill_buffer(grid)
+	# refill 후 buffer의 새 셀을 main area 빈칸으로 내리기 위해 재compact
+	for x in range(grid.grid_size):
+		var segments = _split_into_segments(grid, x)
+		for segment in segments:
+			_compact_segment(grid, x, segment)
 
 ## 이동 목록을 계산하되 실제로 그리드를 변경하지 않는다.
 ## 반환: Array of {from_x, from_y, to_x, to_y, color, gimmick_type, gimmick_data, gimmick_durability}

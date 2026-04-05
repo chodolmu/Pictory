@@ -230,7 +230,7 @@ func _cell_pixel_pos(x: int, y: int) -> Vector2:
 func _cell_color(cell: Cell) -> Color:
 	var base: Color
 	if cell.color < 0 or cell.color >= COLOR_PALETTE.size():
-		base = COLOR_EMPTY
+		base = Color.TRANSPARENT
 	else:
 		base = COLOR_PALETTE[cell.color]
 
