@@ -28,22 +28,60 @@ anchor_bottom = 0.0
 offset_left = 12.0
 offset_top = 8.0
 offset_right = -12.0
-offset_bottom = 52.0
+offset_bottom = 44.0
 theme_override_constants/separation = 8
 
 [node name="BackButton" type="Button" parent="HUD/TopBar"]
-custom_minimum_size = Vector2(48, 44)
+custom_minimum_size = Vector2(44, 36)
 text = "←"
 
 [node name="StageLabel" type="Label" parent="HUD/TopBar"]
 size_flags_horizontal = 3
 vertical_alignment = 1
 text = "Stage 1"
+theme_override_font_sizes/font_size = 14
 
 [node name="TurnLabel" type="Label" parent="HUD/TopBar"]
 vertical_alignment = 1
 horizontal_alignment = 2
 text = "Turns: 30"
+theme_override_font_sizes/font_size = 14
+
+[node name="StatusBar" type="VBoxContainer" parent="HUD"]
+anchors_preset = 10
+anchor_left = 0.0
+anchor_top = 0.0
+anchor_right = 1.0
+anchor_bottom = 0.0
+offset_left = 12.0
+offset_top = 48.0
+offset_right = -12.0
+offset_bottom = 100.0
+theme_override_constants/separation = 2
+
+[node name="ProgressBar" type="ProgressBar" parent="HUD/StatusBar"]
+custom_minimum_size = Vector2(0, 20)
+size_flags_horizontal = 3
+max_value = 100.0
+value = 0.0
+show_percentage = false
+
+[node name="ProgressLabel" type="Label" parent="HUD/StatusBar/ProgressBar"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+text = "0 / 100"
+horizontal_alignment = 1
+vertical_alignment = 1
+theme_override_font_sizes/font_size = 12
+
+[node name="InfoRow" type="HBoxContainer" parent="HUD/StatusBar"]
+size_flags_horizontal = 3
+
+[node name="DestroyedLabel" type="Label" parent="HUD/StatusBar/InfoRow"]
+size_flags_horizontal = 3
+text = "Destroyed: 0"
+theme_override_font_sizes/font_size = 12
 
 [node name="BottomBar" type="VBoxContainer" parent="HUD"]
 anchors_preset = 7
@@ -52,7 +90,7 @@ anchor_top = 1.0
 anchor_right = 1.0
 anchor_bottom = 1.0
 offset_left = 12.0
-offset_top = -100.0
+offset_top = -76.0
 offset_right = -12.0
 offset_bottom = -8.0
 theme_override_constants/separation = 4
@@ -62,28 +100,6 @@ custom_minimum_size = Vector2(200, 64)
 size_flags_horizontal = 3
 clip_contents = false
 script = ExtResource("3_cq")
-
-[node name="ProgressBar" type="ProgressBar" parent="HUD/BottomBar"]
-custom_minimum_size = Vector2(0, 24)
-size_flags_horizontal = 3
-max_value = 100.0
-value = 0.0
-show_percentage = false
-
-[node name="ProgressLabel" type="Label" parent="HUD/BottomBar/ProgressBar"]
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-text = "0 / 100"
-horizontal_alignment = 1
-vertical_alignment = 1
-
-[node name="InfoRow" type="HBoxContainer" parent="HUD/BottomBar"]
-size_flags_horizontal = 3
-
-[node name="DestroyedLabel" type="Label" parent="HUD/BottomBar/InfoRow"]
-size_flags_horizontal = 3
-text = "Destroyed: 0"
 
 [node name="GridView" type="Control" parent="."]
 script = ExtResource("2_gv")

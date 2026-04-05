@@ -5,10 +5,10 @@ extends Control
 
 @onready var stage_label: Label = $TopBar/StageLabel
 @onready var turn_label: Label = $TopBar/TurnLabel
-@onready var destroyed_label: Label = $BottomBar/InfoRow/DestroyedLabel
+@onready var destroyed_label: Label = $StatusBar/InfoRow/DestroyedLabel
 @onready var chain_label: Label = get_node_or_null("../ChainLabel")
-@onready var progress_bar: ProgressBar = $BottomBar/ProgressBar
-@onready var progress_label: Label = $BottomBar/ProgressBar/ProgressLabel
+@onready var progress_bar: ProgressBar = $StatusBar/ProgressBar
+@onready var progress_label: Label = $StatusBar/ProgressBar/ProgressLabel
 @onready var _back_btn: Button = $TopBar/BackButton
 
 var _mode: String = "story"

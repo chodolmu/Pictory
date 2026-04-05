@@ -13,72 +13,64 @@ script = ExtResource("1_ss")
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-color = Color(0.08, 0.08, 0.14, 1)
-
-[node name="FillRect" type="ColorRect" parent="."]
-anchor_left = 0.0
-anchor_top = 1.0
-anchor_right = 1.0
-anchor_bottom = 1.0
-color = Color(0.18, 0.38, 0.28, 0.4)
+color = Color(0.06, 0.06, 0.12, 1)
 
 [node name="MarginContainer" type="MarginContainer" parent="."]
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-theme_override_constants/margin_left = 12
-theme_override_constants/margin_right = 12
-theme_override_constants/margin_top = 8
-theme_override_constants/margin_bottom = 12
+theme_override_constants/margin_left = 0
+theme_override_constants/margin_right = 0
+theme_override_constants/margin_top = 0
+theme_override_constants/margin_bottom = 0
 
 [node name="VBox" type="VBoxContainer" parent="MarginContainer"]
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-theme_override_constants/separation = 8
+theme_override_constants/separation = 0
 
 [node name="Header" type="HBoxContainer" parent="MarginContainer/VBox"]
-custom_minimum_size = Vector2(0, 52)
-theme_override_constants/separation = 8
+custom_minimum_size = Vector2(0, 48)
+theme_override_constants/separation = 4
 
 [node name="BackButton" type="Button" parent="MarginContainer/VBox/Header"]
-custom_minimum_size = Vector2(80, 48)
-text = "← 뒤로"
+custom_minimum_size = Vector2(52, 40)
+text = "←"
 
-[node name="TitleLabel" type="Label" parent="MarginContainer/VBox/Header"]
+[node name="ChapterPrevButton" type="Button" parent="MarginContainer/VBox/Header"]
+custom_minimum_size = Vector2(40, 40)
+text = "◀"
+
+[node name="ChapterLabel" type="Label" parent="MarginContainer/VBox/Header"]
 size_flags_horizontal = 3
 horizontal_alignment = 1
 vertical_alignment = 1
-text = "스테이지 선택"
-theme_override_font_sizes/font_size = 20
+text = "챕터 1"
+theme_override_font_sizes/font_size = 18
+
+[node name="ChapterNextButton" type="Button" parent="MarginContainer/VBox/Header"]
+custom_minimum_size = Vector2(40, 40)
+text = "▶"
 
 [node name="StaminaBarNode" parent="MarginContainer/VBox" instance=ExtResource("3_sb")]
 
-[node name="ChapterScrollContainer" type="ScrollContainer" parent="MarginContainer/VBox"]
-custom_minimum_size = Vector2(0, 48)
-horizontal_scroll_mode = 1
-vertical_scroll_mode = 0
-
-[node name="ChapterTabContainer" type="HBoxContainer" parent="MarginContainer/VBox/ChapterScrollContainer"]
-custom_minimum_size = Vector2(0, 44)
-theme_override_constants/separation = 6
-
-[node name="ScrollContainer" type="ScrollContainer" parent="MarginContainer/VBox"]
+[node name="NodeMapScroll" type="ScrollContainer" parent="MarginContainer/VBox"]
 size_flags_vertical = 3
+horizontal_scroll_mode = 0
+vertical_scroll_mode = 2
 
-[node name="StageGrid" type="GridContainer" parent="MarginContainer/VBox/ScrollContainer"]
-size_flags_horizontal = 3
-columns = 5
-theme_override_constants/h_separation = 8
-theme_override_constants/v_separation = 8
+[node name="NodeMapContainer" type="Control" parent="MarginContainer/VBox/NodeMapScroll"]
+custom_minimum_size = Vector2(390, 900)
 
 [node name="UnlockInfoLabel" type="Label" parent="MarginContainer/VBox"]
 text = ""
 visible = false
 horizontal_alignment = 1
 autowrap_mode = 3
+theme_override_font_sizes/font_size = 13
 
 [node name="UnlockButton" type="Button" parent="MarginContainer/VBox"]
-custom_minimum_size = Vector2(0, 48)
+custom_minimum_size = Vector2(0, 44)
 text = "챕터 해금"
 visible = false
