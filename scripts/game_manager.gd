@@ -253,12 +253,9 @@ func _on_cell_touched(x: int, y: int) -> void:
 	_color_queue_ui.refresh()
 
 	# 3. Chain Combo — 동기식 실행 (await 제거로 _processing stuck 방지)
+	#    ChainCombo.execute() 내부에서 파괴 + Gravity.apply()를 반복 실행함
 	var result = ChainComboScript.execute(_grid)
-
-	# 3.5. 파괴 후 gravity + 리프레시
-	if result.total_destroyed > 0:
-		Gravity.apply(_grid)
-		_grid_view.refresh()
+	_grid_view.refresh()
 
 	var effective = result.effective_destroyed if result.effective_destroyed > 0 else result.total_destroyed
 	_total_destroyed += effective
