@@ -5,11 +5,16 @@ extends RefCounted
 ## S06: 기믹 on_gravity() 훅 통합. 돌/앵커 기준 세그먼트 분할.
 
 static func apply(grid: Grid) -> void:
-	# compact → refill → 재compact → 재refill 을 빈칸이 없을 때까지 반복
-	for _iteration in range(grid.grid_size + 1):
+	# 1차: compact로 빈칸을 위로 올림
+	for x in range(grid.grid_size):
+		_compact_column(grid, x)
+
+	# 2차: refill → compact 사이클을 main area 빈칸이 없을 때까지 반복
+	# buffer가 grid_size행이므로 최대 grid_size번 refill하면 충분
+	for _iteration in range(grid.grid_size):
+		_refill_buffer(grid)
 		for x in range(grid.grid_size):
 			_compact_column(grid, x)
-		_refill_buffer(grid)
 		# main area에 빈칸이 남아있는지 확인
 		var has_empty = false
 		for y in range(grid.grid_size):
@@ -75,13 +80,6 @@ static func _compact_column(grid: Grid, x: int) -> void:
 	var segments = _split_into_segments(grid, x)
 
 	for segment in segments:
-		_compact_segment(grid, x, segment)
-
-	_refill_empty_in_buffer(grid, x)
-
-	# buffer를 채운 뒤 다시 compact — buffer의 새 셀이 main area 빈칸으로 내려오도록
-	var segments2 = _split_into_segments(grid, x)
-	for segment in segments2:
 		_compact_segment(grid, x, segment)
 
 static func _split_into_segments(grid: Grid, x: int) -> Array:
