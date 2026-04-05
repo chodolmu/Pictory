@@ -67,7 +67,7 @@ func _show_pre_dialogue() -> void:
 		_start_game()
 		return
 	var story_path = "res://resources/story/chapter_%02d/chapter_%02d_pre.json" % [chapter, chapter]
-	if not FileAccess.file_exists(story_path):
+	if FileAccess.open(story_path, FileAccess.READ) == null:
 		_start_game()
 		return
 	SceneManager.change_scene("res://scenes/story/story_screen.tscn", {
@@ -97,7 +97,7 @@ func _show_post_dialogue() -> void:
 		_show_result(_last_game_result)
 		return
 	var story_path = "res://resources/story/chapter_%02d/chapter_%02d_post.json" % [chapter, chapter]
-	if not FileAccess.file_exists(story_path):
+	if FileAccess.open(story_path, FileAccess.READ) == null:
 		_show_result(_last_game_result)
 		return
 	SceneManager.change_scene("res://scenes/story/story_screen.tscn", {

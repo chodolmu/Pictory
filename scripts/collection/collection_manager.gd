@@ -45,10 +45,10 @@ func _load_data() -> void:
 		_equipped_hunya["accessory"] = "acc_none"
 
 func _load_json(path: String) -> Dictionary:
-	if not FileAccess.file_exists(path):
+	var file = FileAccess.open(path, FileAccess.READ)
+	if file == null:
 		push_error("CollectionManager: 파일 없음: " + path)
 		return {}
-	var file = FileAccess.open(path, FileAccess.READ)
 	var parsed = JSON.parse_string(file.get_as_text())
 	file.close()
 	if parsed is Dictionary:

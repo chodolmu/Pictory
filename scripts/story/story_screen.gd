@@ -54,8 +54,6 @@ func _ready() -> void:
 # ─────────────────────────────────────────
 
 func _load_story(path: String) -> Array:
-	if not FileAccess.file_exists(path):
-		return []
 	var file = FileAccess.open(path, FileAccess.READ)
 	if file == null:
 		return []

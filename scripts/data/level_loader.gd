@@ -76,10 +76,8 @@ func apply_gimmicks_to_grid(config, grid: Grid) -> void:
 
 func load_chapter_stages(chapter: int):
 	var result: Array = []
-	for i in range(1, 100):
+	for i in range(1, 11):  # 스테이지는 1~10 고정
 		var path = "res://resources/levels/story/chapter_%02d/stage_%02d.json" % [chapter, i]
-		if not FileAccess.file_exists(path):
-			break
 		var config = _load_from_path(path)
 		if config != null:
 			result.append(config)
@@ -92,13 +90,9 @@ func load_chapter_stages(chapter: int):
 # ─────────────────────────────────────────
 
 func _load_from_path(path: String):
-	if not FileAccess.file_exists(path):
-		push_error("LevelLoader: file not found: " + path)
-		return null
-
 	var file = FileAccess.open(path, FileAccess.READ)
 	if file == null:
-		push_error("LevelLoader: cannot open file: " + path)
+		# Export 빌드에서 res:// 파일이 .pck 내부에 있으므로 file_exists 대신 open으로 확인
 		return null
 
 	var text = file.get_as_text()

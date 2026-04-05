@@ -17,10 +17,10 @@ func _ready() -> void:
 # ─────────────────────────────────────────
 
 func load_database() -> void:
-	if not FileAccess.file_exists(DB_PATH):
+	var file = FileAccess.open(DB_PATH, FileAccess.READ)
+	if file == null:
 		push_error("ImagenDatabase: 파일 없음: " + DB_PATH)
 		return
-	var file = FileAccess.open(DB_PATH, FileAccess.READ)
 	var json = JSON.parse_string(file.get_as_text())
 	file.close()
 	if json == null or not json is Dictionary:

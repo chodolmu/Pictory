@@ -34,10 +34,10 @@ func _ready() -> void:
 # ─────────────────────────────────────────
 
 func _load_achievements() -> void:
-	if not FileAccess.file_exists(ACHIEVEMENTS_PATH):
+	var file = FileAccess.open(ACHIEVEMENTS_PATH, FileAccess.READ)
+	if file == null:
 		push_error("AchievementManager: 파일 없음: " + ACHIEVEMENTS_PATH)
 		return
-	var file = FileAccess.open(ACHIEVEMENTS_PATH, FileAccess.READ)
 	var parsed = JSON.parse_string(file.get_as_text())
 	file.close()
 	if parsed is Dictionary:
