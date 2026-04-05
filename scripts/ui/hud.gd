@@ -6,7 +6,7 @@ extends Control
 @onready var stage_label: Label = $TopBar/StageLabel
 @onready var turn_label: Label = $TopBar/TurnLabel
 @onready var destroyed_label: Label = $StatusBar/InfoRow/DestroyedLabel
-var chain_label: Label = null
+@onready var chain_label: Label = $ChainLabel
 @onready var progress_bar: ProgressBar = $StatusBar/ProgressBar
 @onready var progress_label: Label = $StatusBar/ProgressBar/ProgressLabel
 @onready var _back_btn: Button = $TopBar/BackButton
@@ -26,11 +26,6 @@ func _ready() -> void:
 	_back_btn.pressed.connect(_on_back_pressed)
 
 func _get_chain_label() -> Label:
-	if chain_label == null:
-		var found = get_node_or_null("../ChainLabel")
-		if found != null:
-			chain_label = found
-		return found
 	return chain_label
 
 func setup(mode: String, stage: int = 1, goal: int = 100, max_turns: int = 30) -> void:

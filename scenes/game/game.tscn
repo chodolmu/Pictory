@@ -108,7 +108,8 @@ cell_gap = 2
 buffer_gap = 8
 buffer_alpha = 0.45
 
-[node name="ChainLabel" type="Label" parent="."]
+[node name="ChainLabel" type="Label" parent="HUD"]
+z_index = 10
 anchors_preset = 8
 anchor_left = 0.5
 anchor_top = 0.5
