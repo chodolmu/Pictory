@@ -246,7 +246,21 @@ func _on_cell_touched(x: int, y: int) -> void:
 
 	# 1. BFS Recolor (on_recolor 훅 포함 — 페인트통/무지개/퇴색 대응)
 	var group = FloodFill.flood_fill(_grid, x, y)
+	# 디버그: recolor 전 상태 기록
+	var _dbg_before: Array = []
+	for g in group:
+		_dbg_before.append("(%d,%d)c=%d" % [g.x, g.y, g.color])
 	FloodFill.recolor_group(_grid, group, active_color)
+	# 디버그: recolor 후 검증
+	var _dbg_mismatch = false
+	for g in group:
+		if g.color != active_color:
+			var handler = GimmickRegistry.get_handler(g.gimmick_type)
+			if handler.can_recolor(g, active_color):
+				_dbg_mismatch = true
+				print("COLOR MISMATCH! cell(%d,%d) expected=%d got=%d gimmick=%d" % [g.x, g.y, active_color, g.color, g.gimmick_type])
+	if not _dbg_mismatch:
+		print("Recolor OK: touch(%d,%d) active=%d group_size=%d queue=%s" % [x, y, active_color, group.size(), str(_color_queue.peek_all())])
 	_grid_view.refresh()
 
 	# 2. ColorQueue advance
