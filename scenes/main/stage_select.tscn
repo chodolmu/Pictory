@@ -13,7 +13,7 @@ script = ExtResource("1_ss")
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-color = Color(0.06, 0.06, 0.12, 1)
+color = Color(0.95, 0.95, 0.97, 1)
 
 [node name="MarginContainer" type="MarginContainer" parent="."]
 anchors_preset = 15

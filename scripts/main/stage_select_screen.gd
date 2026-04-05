@@ -43,16 +43,30 @@ var _result_stage: int = 1
 const NODE_RADIUS: float = 20.0
 const NODE_GAP_Y: float = 80.0
 const MAP_TOP_MARGIN: float = 50.0
-const LINE_COLOR: Color = Color(0.3, 0.3, 0.5, 0.6)
-const LINE_WIDTH: float = 2.0
+const LINE_COLOR: Color = Color(0.7, 0.7, 0.78, 0.8)
+const LINE_WIDTH: float = 2.5
 
 const NODE_COLORS = {
-	"locked": Color(0.25, 0.25, 0.3),
+	"locked": Color(0.7, 0.7, 0.75),
 	"available": Color(0.3, 0.55, 0.9),
-	"cleared_1": Color(0.6, 0.5, 0.2),
-	"cleared_2": Color(0.75, 0.65, 0.15),
-	"cleared_3": Color(0.95, 0.85, 0.1),
+	"cleared_1": Color(0.5, 0.75, 0.4),
+	"cleared_2": Color(0.4, 0.8, 0.35),
+	"cleared_3": Color(0.25, 0.85, 0.3),
 }
+
+# 챕터별 채움 색상 (부드러운 파스텔톤)
+const CHAPTER_FILL_COLORS: Array[Color] = [
+	Color(0.85, 0.93, 0.85, 0.5),  # 1: 연한 초록
+	Color(0.85, 0.88, 0.95, 0.5),  # 2: 연한 파랑
+	Color(0.95, 0.88, 0.85, 0.5),  # 3: 연한 살구
+	Color(0.90, 0.85, 0.95, 0.5),  # 4: 연한 보라
+	Color(0.95, 0.93, 0.82, 0.5),  # 5: 연한 노랑
+	Color(0.82, 0.93, 0.93, 0.5),  # 6: 연한 청록
+	Color(0.95, 0.85, 0.90, 0.5),  # 7: 연한 분홍
+	Color(0.88, 0.92, 0.85, 0.5),  # 8: 연한 올리브
+	Color(0.85, 0.88, 0.92, 0.5),  # 9: 연한 회청
+	Color(0.92, 0.88, 0.82, 0.5),  # 10: 연한 베이지
+]
 
 # 캐릭터 마커
 var _character_marker: Panel = null
@@ -203,6 +217,9 @@ func _build_node_map(chapter: int) -> void:
 		var py = MAP_TOP_MARGIN + i * NODE_GAP_Y
 		_node_positions.append(Vector2(px, py))
 
+	# 클리어 영역 채우기 (클리어한 마지막 노드부터 맨 아래까지 색 채움)
+	_draw_cleared_fill(last_cleared_idx, vp_width)
+
 	# 연결선
 	var line_drawer = Control.new()
 	line_drawer.name = "LineDrawer"
@@ -210,9 +227,10 @@ func _build_node_map(chapter: int) -> void:
 	line_drawer.custom_minimum_size = _node_map_container.custom_minimum_size
 	_node_map_container.add_child(line_drawer)
 	var lp = _node_positions.duplicate()
+	var line_col = LINE_COLOR if current_chapter % 2 == 1 else Color(0.4, 0.35, 0.55, 0.6)
 	line_drawer.draw.connect(func():
 		for i in range(lp.size() - 1):
-			line_drawer.draw_line(lp[i], lp[i + 1], LINE_COLOR, LINE_WIDTH, true)
+			line_drawer.draw_line(lp[i], lp[i + 1], line_col, LINE_WIDTH, true)
 	)
 
 	# 노드 버튼 생성
@@ -246,6 +264,31 @@ func _find_last_cleared_stage(stages: Array) -> int:
 		if not save.is_empty() and save.get("stars", 0) > 0:
 			highest_cleared = i
 	return highest_cleared
+
+func _draw_cleared_fill(last_cleared_idx: int, vp_width: float) -> void:
+	## 클리어한 마지막 노드의 y좌표부터 맵 하단까지 색을 채움.
+	if last_cleared_idx < 0:
+		return  # 아무것도 클리어 안 함
+
+	# 마지막 클리어 노드의 positions 인덱스
+	var cleared_pos_idx = _stage_count - 1 - last_cleared_idx
+	if cleared_pos_idx < 0 or cleared_pos_idx >= _node_positions.size():
+		return
+
+	var fill_top_y = _node_positions[cleared_pos_idx].y
+	var fill_bottom_y = _node_map_container.custom_minimum_size.y
+
+	# 챕터별 색상
+	var ch_idx = clampi(current_chapter - 1, 0, CHAPTER_FILL_COLORS.size() - 1)
+	var fill_color = CHAPTER_FILL_COLORS[ch_idx]
+
+	var fill_rect = ColorRect.new()
+	fill_rect.name = "ClearedFill"
+	fill_rect.position = Vector2(0, fill_top_y)
+	fill_rect.size = Vector2(vp_width, fill_bottom_y - fill_top_y)
+	fill_rect.color = fill_color
+	fill_rect.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_node_map_container.add_child(fill_rect)
 
 func _create_character_marker(pos: Vector2) -> void:
 	_character_marker = Panel.new()
