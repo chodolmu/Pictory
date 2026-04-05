@@ -368,11 +368,14 @@ func _on_turn_end() -> void:
 
 	for cell in _grid.get_all_main_cells():
 		if cell.has_gimmick():
-			# grid 참조 주입 (번짐/퇴색용)
-			cell.gimmick_data["_grid_ref"] = _grid
+			# 상태를 변경할 수 있는 기믹(번짐/퇴색)에만 grid 참조 주입 + on_turn 호출
 			var handler = GimmickRegistry.get_handler(cell.gimmick_type)
-			handler.on_turn(cell, turn_number)
-			state_changed = true
+			if handler.has_method("on_turn"):
+				cell.gimmick_data["_grid_ref"] = _grid
+				var old_color = cell.color
+				handler.on_turn(cell, turn_number)
+				if cell.color != old_color:
+					state_changed = true
 
 	if state_changed:
 		# 퇴색 색 복귀 등으로 라인이 완성될 수 있으므로 연쇄 재실행

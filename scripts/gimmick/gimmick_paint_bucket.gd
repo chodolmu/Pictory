@@ -42,8 +42,10 @@ func on_recolor(cell, old_color: int, new_color: int, source: String = "bfs") ->
 			target.color = new_color
 			t_handler.on_recolor(target, t_old, new_color, "paint")
 
+	# 항상 리셋 (에러 발생 시에도 영구 잠김 방지)
 	_is_propagating = false
-	cell.clear_gimmick()
+	if cell.has_gimmick():
+		cell.clear_gimmick()
 
 func can_bfs_traverse(cell, from_cell) -> bool:
 	return true
