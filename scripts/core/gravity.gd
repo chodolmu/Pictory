@@ -5,14 +5,23 @@ extends RefCounted
 ## S06: 기믹 on_gravity() 훅 통합. 돌/앵커 기준 세그먼트 분할.
 
 static func apply(grid: Grid) -> void:
-	for x in range(grid.grid_size):
-		_compact_column(grid, x)
-	_refill_buffer(grid)
-	# refill 후 buffer의 새 셀을 main area 빈칸으로 내리기 위해 재compact
-	for x in range(grid.grid_size):
-		var segments = _split_into_segments(grid, x)
-		for segment in segments:
-			_compact_segment(grid, x, segment)
+	# compact → refill → 재compact → 재refill 을 빈칸이 없을 때까지 반복
+	for _iteration in range(grid.grid_size + 1):
+		for x in range(grid.grid_size):
+			_compact_column(grid, x)
+		_refill_buffer(grid)
+		# main area에 빈칸이 남아있는지 확인
+		var has_empty = false
+		for y in range(grid.grid_size):
+			for x in range(grid.grid_size):
+				var cell = grid.get_cell(x, y)
+				if cell != null and cell.color == -1:
+					has_empty = true
+					break
+			if has_empty:
+				break
+		if not has_empty:
+			break
 
 ## 이동 목록을 계산하되 실제로 그리드를 변경하지 않는다.
 ## 반환: Array of {from_x, from_y, to_x, to_y, color, gimmick_type, gimmick_data, gimmick_durability}
