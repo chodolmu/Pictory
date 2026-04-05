@@ -83,13 +83,26 @@ static func _is_line_complete(cells: Array) -> bool:
 # 라인 파괴 대상 수집 (on_destroy 호출하지 않음)
 # ─────────────────────────────────────────
 
-static func _collect_line(_grid: Grid, line_cells: Array, destroy_set: Dictionary) -> void:
-	## 완성된 라인의 셀 중 파괴 가능한 셀만 destroy_set에 추가.
+static func _collect_line(grid: Grid, line_cells: Array, destroy_set: Dictionary) -> void:
+	## 완성된 라인의 셀 + 같은 색으로 연결된 인접 셀을 destroy_set에 추가.
 	## on_destroy는 호출하지 않음 — chain executor에서 1회만 호출.
 	for cell in line_cells:
 		var key = Vector2i(cell.x, cell.y)
 		if destroy_set.has(key):
 			continue
 		var handler = GimmickRegistry.get_handler(cell.gimmick_type)
-		if handler.can_destroy(cell):
-			destroy_set[key] = cell
+		if not handler.can_destroy(cell):
+			continue
+		destroy_set[key] = cell
+
+		# 같은 색으로 연결된 인접 셀도 파괴 대상에 추가
+		# (flood_fill은 can_recolor=false인 셀 너머로는 확장하지 않음)
+		if cell.color >= 0:
+			var connected = FloodFill.flood_fill(grid, cell.x, cell.y)
+			for c in connected:
+				var ckey = Vector2i(c.x, c.y)
+				if destroy_set.has(ckey):
+					continue
+				var c_handler = GimmickRegistry.get_handler(c.gimmick_type)
+				if c_handler.can_destroy(c):
+					destroy_set[ckey] = c
