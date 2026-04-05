@@ -299,12 +299,14 @@ func _center_on_viewport() -> void:
 func _input(event: InputEvent) -> void:
 	if _input_locked or not _grid:
 		return
-	if event is InputEventMouseButton:
-		if event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
-			_handle_touch(event.position)
-	elif event is InputEventScreenTouch:
-		# 첫 번째 손가락(index=0)의 press만 처리 — 멀티터치/중복 터치 방지
+	# Android에서 터치 시 InputEventScreenTouch와 InputEventMouseButton이
+	# 동시에 발생하므로, ScreenTouch를 우선 처리하고 MouseButton은 PC 전용으로 제한
+	if event is InputEventScreenTouch:
 		if event.pressed and event.index == 0:
+			_handle_touch(event.position)
+			get_viewport().set_input_as_handled()
+	elif event is InputEventMouseButton:
+		if event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
 			_handle_touch(event.position)
 
 func _handle_touch(screen_pos: Vector2) -> void:
