@@ -670,11 +670,6 @@ func _on_new_cell_refilled(cell) -> void:
 		cell.set_gimmick(gimmick["type"], 0, gimmick["data"].duplicate())
 		_refill_gimmick_count += 1
 
-	# 가중치 기반 기믹 타입 선택
-	var gimmick = _pick_weighted_gimmick()
-	target_cell.set_gimmick(gimmick["type"], 0, gimmick["data"].duplicate())
-	_grid_view.refresh()
-
 func _pick_weighted_gimmick() -> Dictionary:
 	var total_weight = 0
 	for g in INFINITY_GIMMICK_POOL:
