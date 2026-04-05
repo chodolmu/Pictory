@@ -23,13 +23,10 @@ func _ready() -> void:
 	_tab_stamina_btn.pressed.connect(func(): _show_tab("stamina"))
 	_tab_chapter_btn.pressed.connect(func(): _show_tab("chapter"))
 	_back_btn.pressed.connect(_on_back_pressed)
-	SaveManager.connect("tree_entered", _refresh_header)
+	# 재화 변경 시 헤더 갱신은 _enter_tree에서 _refresh()로 처리
 	StaminaManager.stamina_changed.connect(func(_c, _m): _refresh_header())
 	_products = ShopManager.get_products()
-
-func _notification(what: int) -> void:
-	if what == NOTIFICATION_VISIBILITY_CHANGED and visible:
-		_refresh()
+	_refresh()
 
 func _refresh() -> void:
 	_refresh_header()
