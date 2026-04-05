@@ -135,7 +135,33 @@ func _migrate_if_needed() -> void:
 	var file_version = _data.get("version", 0)
 	if file_version < SAVE_VERSION:
 		_data["version"] = SAVE_VERSION
-		_save()
+	# 클리어 기록 기반 챕터 자동 해금
+	_sync_chapters_from_clears()
+	_save()
+
+func _sync_chapters_from_clears() -> void:
+	## 스테이지 클리어 기록이 있으면 해당 챕터와 이전 챕터를 자동 해금.
+	var unlocked = get_unlocked_chapters()
+	var changed = false
+	var stages: Dictionary = _data.get("stages", {})
+	for stage_id in stages:
+		var save = stages[stage_id]
+		if save is Dictionary and save.get("stars", 0) > 0:
+			# stage_id 형식: "ch01_s01" → 챕터 번호 추출
+			var parts = str(stage_id).split("_")
+			if parts.size() >= 1 and parts[0].begins_with("ch"):
+				var ch_num = parts[0].substr(2).to_int()
+				if ch_num > 0 and ch_num not in unlocked:
+					unlocked.append(ch_num)
+					changed = true
+				# 이전 챕터들도 해금
+				for c in range(1, ch_num):
+					if c not in unlocked:
+						unlocked.append(c)
+						changed = true
+	if changed:
+		unlocked.sort()
+		_data["chapters_unlocked"] = unlocked
 
 func reset_all_data() -> void:
 	_data = _create_default_data()
